@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit the main website layout to inject the widget on all pages -->
+    <template id="elevenlabs_widget_inject" inherit_id="website.layout" name="ElevenLabs Widget Injection">
+        <xpath expr="//head[last()]" position="after">
+            <!-- Include ElevenLabs assets on all pages -->
+            <t t-call="elevenlabs_agent.elevenlabs_assets"/>
+
+            <!-- ElevenLabs Agent Container - Will be populated by JavaScript with settings from backend -->
+            <t t-if="request and request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enabled', 'False') == 'True'">
+                <t t-set="agent_id" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.agent_id', '')"/>
+                <t t-set="agent_enabled" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enabled', 'True') == 'True'"/>
+                <t t-set="widget_position" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.widget_position', 'bottom-right')"/>
+
+                <!-- Trigger Options -->
+                <t t-set="trigger_delay" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.trigger_delay', '0'))"/>
+                <t t-set="trigger_on_scroll" t-value="float(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.trigger_on_scroll', '0.0'))"/>
+                <t t-set="trigger_on_time" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.trigger_on_time', '0'))"/>
+                <t t-set="trigger_on_exit_intent" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.trigger_on_exit_intent', 'False') == 'True'"/>
+                <t t-set="show_first_time_visitors_only" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.show_first_time_visitors_only', 'False') == 'True'"/>
+
+                <!-- Widget Appearance -->
+                <t t-set="widget_size" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.widget_size', 'medium')"/>
+                <t t-set="color_scheme" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.color_scheme', '')"/>
+                <t t-set="custom_greeting" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.custom_greeting', '')"/>
+                <t t-set="default_state" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.default_state', 'expanded')"/>
+                <t t-set="z_index" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.z_index', '9999'))"/>
+
+                <!-- Integration Controls -->
+                <t t-set="enable_show_product_card" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_show_product_card', 'True') == 'True'"/>
+                <t t-set="enable_add_to_cart" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_add_to_cart', 'True') == 'True'"/>
+                <t t-set="enable_search_products" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_search_products', 'True') == 'True'"/>
+                <t t-set="cart_integration_method" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.cart_integration_method', 'direct_add')"/>
+
+                <!-- Targeting Controls -->
+                <t t-set="geographic_restrictions" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.geographic_restrictions', '')"/>
+                <t t-set="device_filtering" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.device_filtering', 'all')"/>
+                <t t-set="customer_segment_targeting" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.customer_segment_targeting', 'all')"/>
+                <t t-set="exclude_logged_in_users" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.exclude_logged_in_users', 'False') == 'True'"/>
+
+                <!-- Session Controls -->
+                <t t-set="max_messages_per_session" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.max_messages_per_session', '0'))"/>
+                <t t-set="conversation_history_retention" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.conversation_history_retention', '24'))"/>
+                <t t-set="auto_end_inactive_conversations" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.auto_end_inactive_conversations', 'True') == 'True'"/>
+                <t t-set="save_user_info" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.save_user_info', 'False') == 'True'"/>
+                <t t-set="enable_conversation_logging" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_conversation_logging', 'False') == 'True'"/>
+                <t t-set="daily_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.daily_usage_limit', '0'))"/>
+
+                <!-- Product Integration -->
+                <t t-set="product_categories_include" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.product_categories_include', '')"/>
+                <t t-set="product_categories_exclude" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.product_categories_exclude', '')"/>
+                <t t-set="featured_products_priority" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.featured_products_priority', '')"/>
+                <t t-set="out_of_stock_handling" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.out_of_stock_handling', 'hide')"/>
+
+                <!-- Page Visibility Controls -->
+                <t t-set="pages_to_show" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_show', '')"/>
+                <t t-set="pages_to_hide" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_hide', '')"/>
+
+                <div class="elevenlabs-agent-container"
+                     t-att-data-agent-id="agent_id"
+                     t-att-data-enabled="agent_enabled"
+                     t-att-data-widget-position="widget_position"
+                     t-att-data-trigger-delay="trigger_delay"
+                     t-att-data-trigger-on-scroll="trigger_on_scroll"
+                     t-att-data-trigger-on-time="trigger_on_time"
+                     t-att-data-trigger-on-exit-intent="trigger_on_exit_intent"
+                     t-att-data-show-first-time-visitors-only="show_first_time_visitors_only"
+                     t-att-data-widget-size="widget_size"
+                     t-att-data-color-scheme="color_scheme"
+                     t-att-data-custom-greeting="custom_greeting"
+                     t-att-data-default-state="default_state"
+                     t-att-data-z-index="z_index"
+                     t-att-data-enable-show-product-card="enable_show_product_card"
+                     t-att-data-enable-add-to-cart="enable_add_to_cart"
+                     t-att-data-enable-search-products="enable_search_products"
+                     t-att-data-cart-integration-method="cart_integration_method"
+                     t-att-data-geographic-restrictions="geographic_restrictions"
+                     t-att-data-device-filtering="device_filtering"
+                     t-att-data-customer-segment-targeting="customer_segment_targeting"
+                     t-att-data-exclude-logged-in-users="exclude_logged_in_users"
+                     t-att-data-max-messages-per-session="max_messages_per_session"
+                     t-att-data-conversation-history-retention="conversation_history_retention"
+                     t-att-data-auto-end-inactive-conversations="auto_end_inactive_conversations"
+                     t-att-data-save-user-info="save_user_info"
+                     t-att-data-enable-conversation-logging="enable_conversation_logging"
+                     t-att-data-daily-usage-limit="daily_usage_limit"
+                     t-att-data-product-categories-include="product_categories_include"
+                     t-att-data-product-categories-exclude="product_categories_exclude"
+                     t-att-data-featured-products-priority="featured_products_priority"
+                     t-att-data-out-of-stock-handling="out_of_stock_handling"
+                     t-att-data-pages-to-show="pages_to_show"
+                     t-att-data-pages-to-hide="pages_to_hide">
+                    <!-- Widget will be dynamically inserted by JavaScript -->
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

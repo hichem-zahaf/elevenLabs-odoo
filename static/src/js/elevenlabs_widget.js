@@ -34,14 +34,15 @@
             console.log('ElevenLabs container not found');
             return;
         }
-        
+
         // Check for debug mode first (always show debug panel if debug=1)
         var urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('debug') === '1') {
             console.log('Debug mode enabled');
+            logAllSettings(container);  // Log all settings when debug=1
             showDebugPanel();
         }
-        
+
         // Get configuration from data attributes
         var agentId = container.dataset.agentId;
         var enabled = container.dataset.enabled !== 'False';
@@ -109,11 +110,11 @@
             return;
         }
 
-        // Check customer segment targeting
-        if (!_passesCustomerSegmentTargeting(showFirstTimeVisitorsOnly, customerSegmentTargeting)) {
-            console.log('ElevenLabs agent is restricted by customer segment targeting');
-            return;
-        }
+        // // Check customer segment targeting
+        // if (!_passesCustomerSegmentTargeting(showFirstTimeVisitorsOnly, customerSegmentTargeting)) {
+        //     console.log('ElevenLabs agent is restricted by customer segment targeting');
+        //     return;
+        // }
 
         // Check if logged-in users should be excluded
         if (excludeLoggedInUsers && _isLoggedIn()) {
@@ -164,6 +165,56 @@
                 enableSearchProducts
             );
         }
+    }
+
+    // Function to log all settings when debug=1 is present in the URL
+    function logAllSettings(container) {
+        var settings = {
+            agentId: container.dataset.agentId || 'Not set',
+            enabled: container.dataset.enabled !== 'False',
+            widgetPosition: container.dataset.widgetPosition || 'bottom-right',
+            triggerDelay: parseInt(container.dataset.triggerDelay) || 0,
+            triggerOnScroll: parseFloat(container.dataset.triggerOnScroll) || 0,
+            triggerOnTime: parseInt(container.dataset.triggerOnTime) || 0,
+            triggerOnExitIntent: container.dataset.triggerOnExitIntent !== 'false',
+            showFirstTimeVisitorsOnly: container.dataset.showFirstTimeVisitorsOnly !== 'false',
+            widgetSize: container.dataset.widgetSize || 'medium',
+            colorScheme: container.dataset.colorScheme || null,
+            customGreeting: container.dataset.customGreeting || null,
+            defaultState: container.dataset.defaultState || 'expanded',
+            zIndex: parseInt(container.dataset.zIndex) || 9999,
+            enableShowProductCard: container.dataset.enableShowProductCard !== 'false',
+            enableAddToCart: container.dataset.enableAddToCart !== 'false',
+            enableSearchProducts: container.dataset.enableSearchProducts !== 'false',
+            cartIntegrationMethod: container.dataset.cartIntegrationMethod || 'direct_add',
+            geographicRestrictions: container.dataset.geographicRestrictions || null,
+            deviceFiltering: container.dataset.deviceFiltering || 'all',
+            customerSegmentTargeting: container.dataset.customerSegmentTargeting || 'all',
+            excludeLoggedInUsers: container.dataset.excludeLoggedInUsers !== 'false',
+            maxMessagesPerSession: parseInt(container.dataset.maxMessagesPerSession) || 0,
+            conversationHistoryRetention: parseInt(container.dataset.conversationHistoryRetention) || 24,
+            autoEndInactiveConversations: container.dataset.autoEndInactiveConversations !== 'false',
+            saveUserInfo: container.dataset.saveUserInfo !== 'false',
+            enableConversationLogging: container.dataset.enableConversationLogging !== 'false',
+            dailyUsageLimit: parseInt(container.dataset.dailyUsageLimit) || 0,
+            productCategoriesInclude: container.dataset.productCategoriesInclude || null,
+            productCategoriesExclude: container.dataset.productCategoriesExclude || null,
+            featuredProductsPriority: container.dataset.featuredProductsPriority || null,
+            outOfStockHandling: container.dataset.outOfStockHandling || 'hide',
+            pagesToShow: container.dataset.pagesToShow || null,
+            pagesToHide: container.dataset.pagesToHide || null,
+            currentPage: _getCurrentPageType(),
+            shouldShowOnCurrentPage: _shouldShowOnCurrentPage(
+                container.dataset.pagesToShow || null,
+                container.dataset.pagesToHide || null
+            ),
+            userAgent: navigator.userAgent,
+            url: window.location.href
+        };
+
+        console.log('=== ElevenLabs Module Settings ===');
+        console.table(settings);
+        console.log('==================================');
     }
 
     function createWidget(
@@ -343,31 +394,32 @@
             }
         });
 
-        console.log('✓ ElevenLabs client tools registered');
+        console.log('xx ElevenLabs client tools registered xx');
     }
 
     function _shouldShowOnCurrentPage(pagesToShow, pagesToHide) {
-        // Check if current page is in the allowed pages list
-        if (pagesToShow) {
-            var allowedPages = pagesToShow.split(',').map(page => page.trim());
-            var currentPage = _getCurrentPageType();
-
-            if (allowedPages.length > 0 && !allowedPages.includes(currentPage)) {
-                return false;
-            }
-        }
+        var currentPage = _getCurrentPageType();
 
         // Check if current page is in the excluded pages list
         if (pagesToHide) {
-            var excludedPages = pagesToHide.split(',').map(page => page.trim());
-            var currentPage = _getCurrentPageType();
-
-            if (excludedPages.includes(currentPage)) {
+            var excludedPages = pagesToHide.split(',').map(page => page.trim()).filter(page => page !== '');
+            if (excludedPages.length > 0 && excludedPages.includes(currentPage)) {
                 return false;
             }
         }
 
-        return true;
+        // If no pages to show are set, show on all pages except excluded ones
+        if (!pagesToShow || pagesToShow.trim() === '') {
+            return true;
+        }
+
+        // If pages to show are specified, only show on those pages (unless also in exclude list)
+        var allowedPages = pagesToShow.split(',').map(page => page.trim()).filter(page => page !== '');
+        if (allowedPages.length > 0 && allowedPages.includes(currentPage)) {
+            return true;
+        }
+
+        return false;
     }
 
     function _getCurrentPageType() {
@@ -429,6 +481,9 @@
 
         // Check customer segment targeting
         switch(customerSegmentTargeting) {
+            case 'none':
+                // No restriction - always allow
+                return true;
             case 'first_time':
                 return !localStorage.getItem('elevenlabs_returning_customer');
             case 'returning':

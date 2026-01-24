@@ -80,11 +80,11 @@ odoo.define('elevenlabs_agent.agent_widget', ['web.public.widget', 'web.core', '
                 return;
             }
 
-            // Check customer segment targeting
-            if (!this._passesCustomerSegmentTargeting()) {
-                console.log('ElevenLabs agent is restricted by customer segment targeting');
-                return;
-            }
+            // // Check customer segment targeting
+            // if (!this._passesCustomerSegmentTargeting()) {
+            //     console.log('ElevenLabs agent is restricted by customer segment targeting');
+            //     return;
+            // }
 
             // Check if logged-in users should be excluded
             if (this.excludeLoggedInUsers && this._isLoggedIn()) {
@@ -353,7 +353,7 @@ odoo.define('elevenlabs_agent.agent_widget', ['web.public.widget', 'web.core', '
                 }
             });
 
-            console.log('✓ ElevenLabs client tools registered');
+            console.log('oo ElevenLabs client tools registered oo');
         },
         
         _handleShowProductCard: function(params) {

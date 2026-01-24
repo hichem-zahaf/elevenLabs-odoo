@@ -167,6 +167,7 @@ class ResConfigSettings(models.TransientModel):
         ('first_time', 'First-Time Visitors'),
         ('returning', 'Returning Customers'),
         ('vip', 'VIP Customers Only'),
+        ('none', 'None (No Restriction)'),
     ], string='Customer Segment Targeting',
         config_parameter='elevenlabs_agent.customer_segment_targeting',
         default='all',

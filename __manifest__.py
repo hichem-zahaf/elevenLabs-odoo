@@ -60,6 +60,7 @@ Previous Fixes:
         'views/res_config_settings_views.xml',
         'views/assets.xml',
         'views/website_templates.xml',
+        'views/website_layout.xml',
     ],
     'images': [
         'static/description/icon.png',
