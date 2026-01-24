@@ -1,335 +1,665 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ElevenLabs AI Shopping Assistant for Odoo</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-gradient-start: #667eea;
+            --primary-gradient-end: #764ba2;
+            --secondary-gradient-start: #f093fb;
+            --secondary-gradient-end: #f5576c;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            color: white;
-        }
-        
-        .header h1 {
-            margin: 0 0 10px 0;
-            font-size: 36px;
-        }
-        
-        .header p {
-            margin: 0;
-            font-size: 18px;
-            opacity: 0.9;
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
-        }
-        
-        .feature {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .feature:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        }
-        
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        .feature h3 {
-            color: #333;
-            margin: 0 0 10px 0;
-        }
-        
-        .feature p {
-            color: #666;
-            margin: 0;
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-        }
-        
-        .screenshots {
-            margin: 40px 0;
-        }
-        
-        .screenshots h2 {
-            text-align: center;
             color: #333;
-            margin-bottom: 30px;
+            overflow-x: hidden;
         }
-        
-        .screenshot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-        }
-        
-        .screenshot {
-            border-radius: 12px;
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+            color: white;
+            padding: 5rem 0;
+            position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
-        .screenshot img {
-            width: 100%;
-            height: auto;
-            display: block;
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
-        
-        .benefits {
-            background: #f8f9fa;
-            padding: 40px;
-            border-radius: 12px;
-            margin: 40px 0;
+
+        .hero-section::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
-        
-        .benefits h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
+
+        .feature-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            height: 100%;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
-        
-        .benefit-list {
-            list-style: none;
-            padding: 0;
-            max-width: 800px;
-            margin: 0 auto;
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
-        
-        .benefit-list li {
-            padding: 15px 0;
-            border-bottom: 1px solid #dee2e6;
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+            color: white;
+            font-size: 2rem;
         }
-        
-        .benefit-list li:last-child {
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .benefit-item {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .benefit-item:last-child {
             border-bottom: none;
         }
-        
-        .benefit-list li:before {
-            content: "✓";
-            color: #22c55e;
-            font-size: 24px;
-            font-weight: bold;
-            margin-right: 15px;
+
+        .tech-spec-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-gradient-start);
         }
-        
-        .tech-specs {
-            margin: 40px 0;
+
+        .tech-spec-card:hover {
+            transform: translateX(5px);
         }
-        
-        .tech-specs h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        
-        .specs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .spec-item {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .spec-item strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .cta {
-            text-align: center;
-            margin: 60px 0;
-            padding: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .process-step {
+            position: relative;
+            padding: 2rem;
             border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .process-step:hover {
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+
+        .process-step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
             color: white;
-        }
-        
-        .cta h2 {
-            margin: 0 0 20px 0;
-        }
-        
-        .cta p {
-            margin: 0 0 30px 0;
-            font-size: 18px;
-            opacity: 0.9;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: white;
-            color: #667eea;
-            text-decoration: none;
-            border-radius: 8px;
+            border-radius: 50%;
             font-weight: bold;
-            transition: transform 0.2s;
+            font-size: 1.2rem;
         }
-        
-        .btn:hover {
-            transform: scale(1.05);
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
+            color: white;
+            padding: 5rem 0;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: var(--primary-gradient-start);
+            font-weight: 600;
+            padding: 12px 30px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: var(--primary-gradient-end);
+        }
+
+        .section-padding {
+            padding: 5rem 0;
+        }
+
+        .counter {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 3rem 0;
+            }
+
+            .section-padding {
+                padding: 3rem 0;
+            }
+
+            .process-step::before {
+                top: -10px;
+                left: -10px;
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🤖 ElevenLabs AI Shopping Assistant</h1>
-            <p>Transform your e-commerce experience with voice-enabled AI</p>
-        </div>
-        
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🎤</div>
-                <h3>Voice Interaction</h3>
-                <p>Natural conversation with your customers through advanced voice AI technology</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🛍️</div>
-                <h3>Smart Recommendations</h3>
-                <p>AI-powered product suggestions that understand customer preferences</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🛒</div>
-                <h3>Instant Cart Management</h3>
-                <p>Add products to cart with simple voice commands and beautiful animations</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">📱</div>
-                <h3>Responsive Design</h3>
-                <p>Works seamlessly on desktop, tablet, and mobile devices</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🔧</div>
-                <h3>Easy Integration</h3>
-                <p>Simple setup with Odoo's module system - no complex configuration required</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🎨</div>
-                <h3>Beautiful UI</h3>
-                <p>Modern, animated interface with gradient designs and smooth transitions</p>
-            </div>
-        </div>
-        
-        <div class="benefits">
-            <h2>Key Benefits</h2>
-            <ul class="benefit-list">
-                <li>Increase customer engagement with conversational shopping</li>
-                <li>Reduce cart abandonment with streamlined voice commands</li>
-                <li>Improve accessibility for all users</li>
-                <li>Stand out from competitors with cutting-edge AI technology</li>
-                <li>Gather valuable insights from voice interactions</li>
-                <li>Support multiple languages and accents</li>
-                <li>24/7 availability without human operators</li>
-                <li>Seamless integration with existing Odoo e-commerce</li>
-            </ul>
-        </div>
-        
-        <div class="tech-specs">
-            <h2>Technical Specifications</h2>
-            <div class="specs-grid">
-                <div class="spec-item">
-                    <strong>Odoo Version</strong>
-                    16.0 and above
-                </div>
-                <div class="spec-item">
-                    <strong>Dependencies</strong>
-                    website, website_sale, product
-                </div>
-                <div class="spec-item">
-                    <strong>AI Provider</strong>
-                    ElevenLabs Conversational AI
-                </div>
-                <div class="spec-item">
-                    <strong>Browser Support</strong>
-                    Chrome, Firefox, Safari, Edge
-                </div>
-                <div class="spec-item">
-                    <strong>Mobile Support</strong>
-                    iOS and Android compatible
-                </div>
-                <div class="spec-item">
-                    <strong>License</strong>
-                    LGPL-3
-                </div>
-            </div>
-        </div>
-        
-        <div class="screenshots">
-            <h2>How It Works</h2>
-            <div class="screenshot-grid">
-                <div class="screenshot">
-                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
-                        <h3>1. Customer Asks</h3>
-                        <p style="color: #666; margin-top: 10px;">
-                            "Show me wireless headphones under $400"
-                        </p>
+    <!-- Hero Section -->
+    <section class="hero-section pt-5 pb-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center">
+                    <div class="mb-4">
+                        <i class="fa fa-robot fa-3x mb-4 d-inline-block"></i>
                     </div>
-                </div>
-                <div class="screenshot">
-                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
-                        <h3>2. AI Responds</h3>
-                        <p style="color: #666; margin-top: 10px;">
-                            Displays product cards with images and prices
-                        </p>
-                    </div>
-                </div>
-                <div class="screenshot">
-                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
-                        <h3>3. Customer Selects</h3>
-                        <p style="color: #666; margin-top: 10px;">
-                            "Add the Sony headphones to my cart"
-                        </p>
-                    </div>
-                </div>
-                <div class="screenshot">
-                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
-                        <h3>4. Cart Updated</h3>
-                        <p style="color: #666; margin-top: 10px;">
-                            Beautiful animation confirms the addition
-                        </p>
+                    <h1 class="display-3 fw-bold mb-4">
+                        <span class="gradient-text">ElevenLabs AI Shopping Assistant</span>
+                    </h1>
+                    <p class="lead fs-4 mb-4 opacity-90">
+                        Transform your Odoo e-commerce experience with cutting-edge voice-enabled AI technology
+                    </p>
+                    <p class="mb-5 opacity-75">
+                        Seamlessly integrate conversational AI into your online store for enhanced customer engagement and sales
+                    </p>
+                    <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+                        <a href="#features" class="btn btn-gradient btn-lg px-5 py-3">
+                            <i class="fa fa-rocket me-2"></i>Explore Features
+                        </a>
+                        <a href="#installation" class="btn btn-secondary-light btn-lg px-5 py-3">
+                            <i class="fa fa-download me-2"></i>Get Started
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="cta">
-            <h2>Ready to Revolutionize Your E-commerce?</h2>
-            <p>Install the ElevenLabs AI Shopping Assistant today and give your customers an unforgettable shopping experience</p>
-            <a href="#" class="btn">Install Now</a>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-padding bg-light pt-5 pb-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="display-5 fw-bold mb-3 gradient-text">Powerful Features</h2>
+                    <p class="lead text-muted">
+                        Everything you need to revolutionize your e-commerce experience
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fa fa-microphone-alt"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Voice Interaction</h3>
+                        <p class="text-muted mb-0">
+                            Engage customers with natural conversation through advanced voice AI technology.
+                            Customers can speak naturally to find products and get recommendations.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fa fa-star"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Smart Recommendations</h3>
+                        <p class="text-muted mb-0">
+                            AI-powered product suggestions tailored to customer preferences and browsing behavior.
+                            Increase conversion rates with personalized recommendations.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fa fa-shopping-cart"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Instant Cart Management</h3>
+                        <p class="text-muted mb-0">
+                            Add products to cart with simple voice commands. Beautiful animations provide
+                            instant feedback for seamless shopping experiences.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fa fa-mobile-alt"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Fully Responsive</h3>
+                        <p class="text-muted mb-0">
+                            Works flawlessly on desktop, tablet, and mobile devices. Consistent experience
+                            across all platforms and screen sizes.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fa fa-plug"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Easy Integration</h3>
+                        <p class="text-muted mb-0">
+                            Simple setup with Odoo's module system. No complex configuration required.
+                            Just install and start enhancing your customer experience.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
+                        <div class="feature-icon">
+                            <i class="fa fa-paint-brush"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Beautiful UI</h3>
+                        <p class="text-muted mb-0">
+                            Modern, animated interface with gradient designs and smooth transitions.
+                            Create stunning visual experiences for your customers.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="section-padding pt-5 pb-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="display-5 fw-bold mb-3 gradient-text">Key Benefits</h2>
+                    <p class="lead text-muted">
+                        Transform your business with these powerful advantages
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-primary bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-chart-area"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Increase Engagement</h4>
+                                <p class="text-muted mb-0">
+                                    Boost customer engagement with conversational shopping experiences that feel natural and intuitive.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-white bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-shopping-bag"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Reduce Abandonment</h4>
+                                <p class="text-muted mb-0">
+                                    Streamline the shopping process with voice commands to significantly reduce cart abandonment rates.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-universal-access"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Enhanced Accessibility</h4>
+                                <p class="text-muted mb-0">
+                                    Improve accessibility for all users, including people with disabilities, by enabling natural, intuitive voice interaction that removes barriers and supports independent, confident use across diverse abilities.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-warning bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-rocket"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Competitive Edge</h4>
+                                <p class="text-muted mb-0">
+                                    Stand out from competitors with cutting-edge AI technology that creates memorable experiences.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-danger bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-chart-bar"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Valuable Insights</h4>
+                                <p class="text-muted mb-0">
+                                    Gather valuable data from voice interactions to better understand customer preferences and behavior.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-blue text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-language"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Multi-Language Support</h4>
+                                <p class="text-muted mb-0">
+                                    Support multiple languages and accents to effectively serve a global customer base, ensuring accurate, inclusive, and culturally adaptable communication across regions and speech patterns.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-teal text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-phone"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">24/7 Availability</h4>
+                                <p class="text-muted mb-0">
+                                    Provide round-the-clock assistance without requiring human operators to handle customer inquiries.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-indigo bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa fa-gear"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="h5">Seamless Integration</h4>
+                                <p class="text-muted mb-0">
+                                    Perfectly integrates with existing Odoo e-commerce functionality without disrupting operations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Specs Section -->
+    <section class="section-padding bg-light pt-5 pb-5" id="specs">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="display-5 fw-bold mb-3 gradient-text">Technical Specifications</h2>
+                    <p class="lead text-muted">
+                        Built for performance, scalability, and reliability
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-primary bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fa fa-circle"></i>
+                                </div>
+                            </div>
+                            <h3 class="h5 mb-0">Odoo Compatibility</h3>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Specifically designed for Odoo 18.0 with backward compatibility for previous versions.
+                            Fully integrated with Odoo's architecture and best practices.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-success bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fa fa-cogs"></i>
+                                </div>
+                            </div>
+                            <h3 class="h5 mb-0">Module Dependencies</h3>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Requires website, website_sale, and product modules. Lightweight footprint with minimal resource usage.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-info bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fa-solid fa-brain"></i>
+                                </div>
+                            </div>
+                            <h3 class="h5 mb-0">AI Provider</h3>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Powered by ElevenLabs Conversational AI with advanced natural language processing capabilities.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-warning bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fa fa-window-maximize"></i>
+                                </div>
+                            </div>
+                            <h3 class="h5 mb-0">Browser Support</h3>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Compatible with Chrome 90+, Firefox 88+, Safari 14+, and Edge 90+. Full functionality across modern browsers.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-danger bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fa fa-mobile"></i>
+                                </div>
+                            </div>
+                            <h3 class="h5 mb-0">Mobile Compatibility</h3>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Optimized for iOS Safari and Chrome Mobile with touch-friendly interfaces and responsive design.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-dark bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fa fa-certificate"></i>
+                                </div>
+                            </div>
+                            <h3 class="h5 mb-0">Open Source License</h3>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Released under LGPL-3 license allowing for flexible commercial and open source usage.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section-padding pt-5 pb-5" id="process">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="display-5 fw-bold mb-3 gradient-text">How It Works</h2>
+                    <p class="lead text-muted">
+                        A seamless four-step process to enhance your customer experience
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="process-step" data-step="1">
+                        <div class="text-center mb-4">
+                            <i class="fa fa-comments fa-3x text-primary mb-3"></i>
+                            <h3 class="h4 mb-3">Customer Inquiry</h3>
+                        </div>
+                        <p class="text-muted text-center">
+                            Customer speaks naturally to the AI assistant: "Show me wireless headphones under $400"
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="process-step" data-step="2">
+                        <div class="text-center mb-4">
+                            <i class="fa fa-search fa-3x text-success mb-3"></i>
+                            <h3 class="h4 mb-3">AI Processing</h3>
+                        </div>
+                        <p class="text-muted text-center">
+                            AI understands the request and searches your product catalog for matching items
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="process-step" data-step="3">
+                        <div class="text-center mb-4">
+                            <i class="fa fa-th-large fa-3x text-info mb-3"></i>
+                            <h3 class="h4 mb-3">Product Display</h3>
+                        </div>
+                        <p class="text-muted text-center">
+                            Beautiful product cards with images, prices, and descriptions appear instantly
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="process-step" data-step="4">
+                        <div class="text-center mb-4">
+                            <i class="fa fa-shopping-cart fa-3x text-warning mb-3"></i>
+                            <h3 class="h4 mb-3">Action Completion</h3>
+                        </div>
+                        <p class="text-muted text-center">
+                            Customer selects items with voice commands, and cart updates with smooth animations
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section pt-5 pb-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h2 class="display-4 fw-bold mb-4">
+                        Ready to Revolutionize Your E-commerce?
+                    </h2>
+                    <p class="lead mb-5 opacity-90">
+                        Install the ElevenLabs AI Shopping Assistant today and give your customers an unforgettable shopping experience
+                    </p>
+                    <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+                        <a href="#" class="btn btn-gradient btn-lg px-5 py-3">
+                            <i class="fa fa-download me-2"></i>Install Now
+                        </a>
+                        <a href="#" class="btn btn-secondary-light btn-lg px-5 py-3">
+                            <i class="fa fa-book me-2"></i>View Documentation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </body>
 </html>
