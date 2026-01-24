@@ -30,13 +30,7 @@
                                         <li>Navigate to Conversational AI → Agents</li>
                                         <li>Select your agent or create a new one</li>
                                         <li>Copy the Agent ID from the agent settings</li>
-                                        <li>Configure these tools in your agent:
-                                            <ul>
-                                                <li><code>showProductCard</code> - Display product recommendations</li>
-                                                <li><code>addToCart</code> - Add items to shopping cart</li>
-                                                <li><code>searchProducts</code> - Search for products</li>
-                                            </ul>
-                                        </li>
+                                        <li>Configure the tools in your agent as needed</li>
                                     </ol>
                                 </div>
                             </div>
