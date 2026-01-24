@@ -26,7 +26,7 @@
                             <li>Navigate to Conversational AI → Agents</li>
                             <li>Select your agent or create a new one</li>
                             <li>Copy the Agent ID from the agent settings</li>
-                            <li>Configure the tools in your agent as needed</li>
+                            <li>Configure the tools in your agent as needed for the functionality</li>
                         </ol>
                     </div>
                     </block>
