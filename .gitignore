@@ -1,0 +1,74 @@
+# Claude and Qwen related files
+.claude
+.qwen
+qwen.md
+claude.md
+
+# Odoo specific files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.pot
+*.po
+*.mo
+*~
+.DS_Store
+Thumbs.db
+
+# Odoo logs
+*.log
+odoo.log
+
+# Odoo filestore
+filestore/
+
+# Odoo sessions
+sessions/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Thumbs.db:encryptable
+
+# Environment files
+.env
+venv/
+env/
+ENV/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Coverage
+.coverage*
