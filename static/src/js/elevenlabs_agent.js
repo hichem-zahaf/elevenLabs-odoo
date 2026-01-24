@@ -12,46 +12,145 @@ odoo.define('elevenlabs_agent.agent_widget', ['web.public.widget', 'web.core', '
         start: function () {
             var self = this;
             this._super.apply(this, arguments);
-            
+
             // Initialize state
             this.agentId = this.$el.data('agent-id');
             this.widgetPosition = this.$el.data('widget-position') || 'bottom-right';
             this.enabled = this.$el.data('enabled') !== false;
-            
+
+            // Trigger options
+            this.triggerDelay = parseInt(this.$el.data('trigger-delay')) || 0;
+            this.triggerOnScroll = parseFloat(this.$el.data('trigger-on-scroll')) || 0;
+            this.triggerOnTime = parseInt(this.$el.data('trigger-on-time')) || 0;
+            this.triggerOnExitIntent = this.$el.data('trigger-on-exit-intent') !== false;
+            this.showFirstTimeVisitorsOnly = this.$el.data('show-first-time-visitors-only') !== false;
+
+            // Widget appearance
+            this.widgetSize = this.$el.data('widget-size') || 'medium';
+            this.colorScheme = this.$el.data('color-scheme') || null;
+            this.customGreeting = this.$el.data('custom-greeting') || null;
+            this.defaultState = this.$el.data('default-state') || 'expanded';
+            this.zIndex = parseInt(this.$el.data('z-index')) || 9999;
+
+            // Integration controls
+            this.enableShowProductCard = this.$el.data('enable-show-product-card') !== false;
+            this.enableAddToCart = this.$el.data('enable-add-to-cart') !== false;
+            this.enableSearchProducts = this.$el.data('enable-search-products') !== false;
+            this.cartIntegrationMethod = this.$el.data('cart-integration-method') || 'direct_add';
+
+            // Targeting controls
+            this.geographicRestrictions = this.$el.data('geographic-restrictions') || null;
+            this.deviceFiltering = this.$el.data('device-filtering') || 'all';
+            this.customerSegmentTargeting = this.$el.data('customer-segment-targeting') || 'all';
+            this.excludeLoggedInUsers = this.$el.data('exclude-logged-in-users') !== false;
+
+            // Session controls
+            this.maxMessagesPerSession = parseInt(this.$el.data('max-messages-per-session')) || 0;
+            this.conversationHistoryRetention = parseInt(this.$el.data('conversation-history-retention')) || 24;
+            this.autoEndInactiveConversations = this.$el.data('auto-end-inactive-conversations') !== false;
+            this.saveUserInfo = this.$el.data('save-user-info') !== false;
+            this.enableConversationLogging = this.$el.data('enable-conversation-logging') !== false;
+            this.dailyUsageLimit = parseInt(this.$el.data('daily-usage-limit')) || 0;
+
+            // Product integration
+            this.productCategoriesInclude = this.$el.data('product-categories-include') || null;
+            this.productCategoriesExclude = this.$el.data('product-categories-exclude') || null;
+            this.featuredProductsPriority = this.$el.data('featured-products-priority') || null;
+            this.outOfStockHandling = this.$el.data('out-of-stock-handling') || 'hide';
+
+            // Page visibility controls
+            this.pagesToShow = this.$el.data('pages-to-show') || null;
+            this.pagesToHide = this.$el.data('pages-to-hide') || null;
+
+            // Check if widget should be shown based on page visibility
+            if (!this._shouldShowOnCurrentPage()) {
+                console.log('ElevenLabs agent is not configured for this page');
+                return;
+            }
+
+            // Check geographic restrictions
+            if (!this._passesGeographicRestrictions()) {
+                console.log('ElevenLabs agent is restricted by geographic settings');
+                return;
+            }
+
+            // Check device filtering
+            if (!this._passesDeviceFiltering()) {
+                console.log('ElevenLabs agent is restricted by device filtering');
+                return;
+            }
+
+            // Check customer segment targeting
+            if (!this._passesCustomerSegmentTargeting()) {
+                console.log('ElevenLabs agent is restricted by customer segment targeting');
+                return;
+            }
+
+            // Check if logged-in users should be excluded
+            if (this.excludeLoggedInUsers && this._isLoggedIn()) {
+                console.log('ElevenLabs agent is excluded for logged-in users');
+                return;
+            }
+
             if (!this.enabled) {
                 console.log('ElevenLabs agent is disabled');
                 return;
             }
-            
+
             if (!this.agentId) {
                 console.error('ElevenLabs Agent ID not configured');
                 this.$el.html('<div class="alert alert-warning">ElevenLabs Agent ID not configured. Please configure it in Website Settings.</div>');
                 return;
             }
-            
-            // Initialize the widget
-            this._initializeWidget();
-            
+
+            // Apply trigger delay if set
+            if (this.triggerDelay > 0) {
+                setTimeout(function() {
+                    self._initializeWidget();
+                }, this.triggerDelay * 1000);
+            } else {
+                // Initialize the widget
+                this._initializeWidget();
+            }
+
             // Check for debug mode
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('debug') === '1') {
                 this._showDebugPanel();
             }
-            
+
             return this._super.apply(this, arguments);
         },
         
         _initializeWidget: function() {
             var self = this;
-            
+
             // Create the elevenlabs-convai element
             var widgetElement = document.createElement('elevenlabs-convai');
             widgetElement.setAttribute('agent-id', this.agentId);
-            
+
             // Apply positioning styles
             widgetElement.style.position = 'fixed';
-            widgetElement.style.zIndex = '9999';
-            
+            widgetElement.style.zIndex = this.zIndex.toString();
+
+            // Apply widget size
+            this._applyWidgetSize(widgetElement);
+
+            // Apply custom color scheme if set
+            if (this.colorScheme) {
+                widgetElement.style.setProperty('--primary-color', this.colorScheme);
+            }
+
+            // Apply custom greeting if set
+            if (this.customGreeting) {
+                widgetElement.setAttribute('greeting-message', this.customGreeting);
+            }
+
+            // Apply default state
+            if (this.defaultState === 'minimized') {
+                widgetElement.setAttribute('initial-state', 'minimized');
+            }
+
             switch(this.widgetPosition) {
                 case 'bottom-left':
                     widgetElement.style.bottom = '20px';
@@ -69,17 +168,17 @@ odoo.define('elevenlabs_agent.agent_widget', ['web.public.widget', 'web.core', '
                     widgetElement.style.bottom = '20px';
                     widgetElement.style.right = '20px';
             }
-            
+
             // Append to body
             document.body.appendChild(widgetElement);
-            
+
             // Load the ElevenLabs script if not already loaded
             if (!document.querySelector('script[src*="elevenlabs"]')) {
                 var script = document.createElement('script');
                 script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
                 script.async = true;
                 script.type = 'text/javascript';
-                
+
                 script.onload = function() {
                     console.log('ElevenLabs script loaded');
                     // Register client tools after script loads
@@ -87,49 +186,173 @@ odoo.define('elevenlabs_agent.agent_widget', ['web.public.widget', 'web.core', '
                         self._registerClientTools();
                     }, 500);
                 };
-                
+
                 document.head.appendChild(script);
             } else {
                 // Script already loaded, register tools
                 this._registerClientTools();
             }
         },
+
+        _applyWidgetSize: function(widgetElement) {
+            // Apply size based on settings
+            switch(this.widgetSize) {
+                case 'small':
+                    widgetElement.style.width = '300px';
+                    widgetElement.style.height = '400px';
+                    break;
+                case 'large':
+                    widgetElement.style.width = '450px';
+                    widgetElement.style.height = '600px';
+                    break;
+                case 'medium':
+                default:
+                    widgetElement.style.width = '380px';
+                    widgetElement.style.height = '500px';
+            }
+        },
+
+        _shouldShowOnCurrentPage: function() {
+            // Check if current page is in the allowed pages list
+            if (this.pagesToShow) {
+                var allowedPages = this.pagesToShow.split(',').map(page => page.trim());
+                var currentPage = this._getCurrentPageType();
+
+                if (allowedPages.length > 0 && !allowedPages.includes(currentPage)) {
+                    return false;
+                }
+            }
+
+            // Check if current page is in the excluded pages list
+            if (this.pagesToHide) {
+                var excludedPages = this.pagesToHide.split(',').map(page => page.trim());
+                var currentPage = this._getCurrentPageType();
+
+                if (excludedPages.includes(currentPage)) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        _getCurrentPageType: function() {
+            var pathname = window.location.pathname;
+
+            if (pathname === '/') {
+                return 'homepage';
+            } else if (pathname.includes('/shop') || pathname.includes('/product')) {
+                return 'product';
+            } else if (pathname.includes('/cart')) {
+                return 'cart';
+            } else if (pathname.includes('/checkout')) {
+                return 'checkout';
+            } else if (pathname.includes('/contactus') || pathname.includes('/contact')) {
+                return 'contact';
+            } else if (pathname.includes('/aboutus') || pathname.includes('/about')) {
+                return 'about';
+            } else {
+                return 'other';
+            }
+        },
+
+        _passesGeographicRestrictions: function() {
+            // If no geographic restrictions are set, allow everywhere
+            if (!this.geographicRestrictions) {
+                return true;
+            }
+
+            // Note: Actual IP geolocation would require a service
+            // For now, we'll return true and assume server-side checks
+            return true;
+        },
+
+        _passesDeviceFiltering: function() {
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            switch(this.deviceFiltering) {
+                case 'desktop':
+                    return !isMobile;
+                case 'mobile':
+                    return isMobile;
+                case 'all':
+                default:
+                    return true;
+            }
+        },
+
+        _passesCustomerSegmentTargeting: function() {
+            // Check if we should show only to first-time visitors
+            if (this.showFirstTimeVisitorsOnly) {
+                var hasVisitedBefore = localStorage.getItem('elevenlabs_has_visited');
+                if (hasVisitedBefore) {
+                    return false;
+                } else {
+                    // Mark as visited for future visits
+                    localStorage.setItem('elevenlabs_has_visited', 'true');
+                }
+            }
+
+            // Check customer segment targeting
+            switch(this.customerSegmentTargeting) {
+                case 'first_time':
+                    return !localStorage.getItem('elevenlabs_returning_customer');
+                case 'returning':
+                    return !!localStorage.getItem('elevenlabs_returning_customer');
+                case 'vip':
+                    // Would require checking user status from backend
+                    return true; // For now, assume all users are eligible
+                case 'all':
+                default:
+                    return true;
+            }
+        },
+
+        _isLoggedIn: function() {
+            // Check if user is logged in - this would typically check for Odoo session
+            // For now, we'll check for a common Odoo login indicator
+            return $('.o_logged').length > 0 || document.cookie.indexOf('session_id') !== -1;
+        },
         
         _registerClientTools: function() {
             var self = this;
             var widget = document.querySelector('elevenlabs-convai');
-            
+
             if (!widget) {
                 console.error('ElevenLabs widget element not found');
                 return;
             }
-            
+
             // Register the event listener for client tools
             widget.addEventListener('elevenlabs-convai:call', function(event) {
                 console.log('ElevenLabs tool call received:', event);
-                
+
                 // Register client tools in the event handler
-                event.detail.config.clientTools = {
-                    // Tool for showing product recommendations
-                    showProductCard: function(params) {
+                event.detail.config.clientTools = {};
+
+                // Conditionally register tools based on settings
+                if (self.enableShowProductCard) {
+                    event.detail.config.clientTools.showProductCard = function(params) {
                         console.log('showProductCard called with:', params);
                         self._handleShowProductCard(params);
-                    },
-                    
-                    // Tool for adding items to cart
-                    addToCart: function(params) {
+                    };
+                }
+
+                if (self.enableAddToCart) {
+                    event.detail.config.clientTools.addToCart = function(params) {
                         console.log('addToCart called with:', params);
                         self._handleAddToCart(params);
-                    },
-                    
-                    // Tool for searching products
-                    searchProducts: function(params) {
+                    };
+                }
+
+                if (self.enableSearchProducts) {
+                    event.detail.config.clientTools.searchProducts = function(params) {
                         console.log('searchProducts called with:', params);
                         self._handleSearchProducts(params);
-                    }
-                };
+                    };
+                }
             });
-            
+
             console.log('✓ ElevenLabs client tools registered');
         },
         

@@ -3,7 +3,7 @@
 .qwen
 qwen.md
 claude.md
-
+feature.md
 # Odoo specific files
 *.pyc
 *.pyo
