@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main AI Assistant Page Template -->
+    <template id="ai_assistant_page" name="AI Shopping Assistant">
+        <t t-call="website.layout">
+            <t t-set="title">AI Shopping Assistant</t>
+            <div id="wrap" class="oe_structure">
+                <section class="s_title pt48 pb24">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12 text-center">
+                                <h1 class="mb-3">
+                                    <span class="text-gradient">AI Shopping Assistant</span>
+                                </h1>
+                                <p class="lead text-muted">
+                                    Experience the future of shopping with our voice-enabled AI assistant
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="s_features pt24 pb48">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8">
+                                <!-- Features Cards -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="feature-card p-3 h-100">
+                                            <i class="fa fa-microphone fa-2x text-primary mb-2"/>
+                                            <h5>Voice Interaction</h5>
+                                            <p class="small text-muted">Talk naturally with our AI</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="feature-card p-3 h-100">
+                                            <i class="fa fa-magic fa-2x text-primary mb-2"/>
+                                            <h5>Smart Recommendations</h5>
+                                            <p class="small text-muted">Personalized product suggestions</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div class="feature-card p-3 h-100">
+                                            <i class="fa fa-shopping-cart fa-2x text-primary mb-2"/>
+                                            <h5>Quick Cart Add</h5>
+                                            <p class="small text-muted">Add items with voice commands</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Agent Container -->
+                                <t t-set="agent_id" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.agent_id', '')"/>
+                                <t t-set="agent_enabled" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enabled', 'True') == 'True'"/>
+                                <t t-set="widget_position" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.widget_position', 'bottom-right')"/>
+                                
+                                <div class="elevenlabs-agent-container" 
+                                     t-att-data-agent-id="agent_id" 
+                                     t-att-data-enabled="agent_enabled"
+                                     t-att-data-widget-position="widget_position">
+                                    <!-- Widget will be dynamically inserted by JavaScript -->
+                                </div>
+                                
+                                <!-- Test Buttons (controlled via JavaScript based on URL parameter) -->
+                                <div class="elevenlabs-test-buttons" style="display: none;">
+                                    <button id="test-recommendations" class="btn btn-secondary btn-sm">
+                                        <i class="fa fa-flask"/> Test Recommendations
+                                    </button>
+                                    <button id="test-cart" class="btn btn-primary btn-sm">
+                                        <i class="fa fa-shopping-cart"/> Test Cart
+                                    </button>
+                                </div>
+                                
+                                <!-- Instructions -->
+                                <div class="alert alert-info mt-4">
+                                    <h5 class="alert-heading">
+                                        <i class="fa fa-info-circle"/> How to use:
+                                    </h5>
+                                    <ul class="mb-0">
+                                        <li>Click the microphone icon to start talking</li>
+                                        <li>Ask for product recommendations: "Show me wireless headphones"</li>
+                                        <li>Add items to cart: "Add Sony headphones to my cart"</li>
+                                        <li>Get help: "What can you help me with?"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Custom styles for this page -->
+            <style>
+                .text-gradient {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+                
+                .feature-card {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    transition: transform 0.2s, box-shadow 0.2s;
+                }
+                
+                .feature-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+                }
+                
+                elevenlabs-convai {
+                    display: block;
+                    min-height: 400px;
+                }
+            </style>
+            
+            <!-- Include module assets (CSS and JS) -->
+            <t t-call="elevenlabs_agent.elevenlabs_assets"/>
+        </t>
+    </template>
+    
+    <!-- Menu Item -->
+    <record id="menu_ai_assistant" model="website.menu">
+        <field name="name">AI Assistant</field>
+        <field name="url">/ai-assistant</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence">50</field>
+    </record>
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Settings View -->
+    <record id="res_config_settings_view_form_elevenlabs" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.elevenlabs</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="ElevenLabs AI" string="ElevenLabs AI" name="elevenlabs_ai">
+                    <block title="ElevenLabs AI Assistant" name="elevenlabs_ai_settings">
+                        <setting help="Enable the AI shopping assistant powered by ElevenLabs on your website">
+                            <field name="elevenlabs_enabled"/>
+                            <div class="content-group" invisible="not elevenlabs_enabled">
+                                <div class="mt16">
+                                    <label for="elevenlabs_agent_id" string="Agent ID"/>
+                                    <field name="elevenlabs_agent_id" class="oe_inline" placeholder="agent_xxxxxxxxxxxxx"/>
+                                    <div class="text-muted">
+                                        Enter your ElevenLabs Agent ID from the dashboard
+                                    </div>
+                                </div>
+                                <div class="mt16">
+                                    <label for="elevenlabs_widget_position" string="Widget Position"/>
+                                    <field name="elevenlabs_widget_position" class="oe_inline"/>
+                                </div>
+                                <div class="alert alert-info mt16" role="alert">
+                                    <i class="fa fa-info-circle"/> To get your Agent ID:
+                                    <ol class="mb-0 mt-2">
+                                        <li>Go to <a href="https://elevenlabs.io" target="_blank">ElevenLabs Dashboard</a></li>
+                                        <li>Navigate to Conversational AI → Agents</li>
+                                        <li>Select your agent or create a new one</li>
+                                        <li>Copy the Agent ID from the agent settings</li>
+                                        <li>Configure these tools in your agent:
+                                            <ul>
+                                                <li><code>showProductCard</code> - Display product recommendations</li>
+                                                <li><code>addToCart</code> - Add items to shopping cart</li>
+                                                <li><code>searchProducts</code> - Search for products</li>
+                                            </ul>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

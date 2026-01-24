@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Define custom asset bundle for ElevenLabs -->
+    <template id="elevenlabs_assets" name="ElevenLabs Agent Assets">
+        <link rel="stylesheet" type="text/css" href="/elevenlabs_agent/static/src/css/elevenlabs_agent.css?v=2.0"/>
+        <script type="text/javascript" src="/elevenlabs_agent/static/src/js/elevenlabs_checkout_handlers.js?v=2.0"/>
+        <script type="text/javascript" src="/elevenlabs_agent/static/src/js/elevenlabs_widget.js?v=2.0"/>
+    </template>
+</odoo>

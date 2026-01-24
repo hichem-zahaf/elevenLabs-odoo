@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 36px;
+        }
+        
+        .header p {
+            margin: 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .feature {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+        
+        .feature p {
+            color: #666;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .screenshots {
+            margin: 40px 0;
+        }
+        
+        .screenshots h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .screenshot {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .benefits {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 40px 0;
+        }
+        
+        .benefits h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .benefit-list {
+            list-style: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .benefit-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+        }
+        
+        .benefit-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .benefit-list li:before {
+            content: "✓";
+            color: #22c55e;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .tech-specs {
+            margin: 40px 0;
+        }
+        
+        .tech-specs h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .spec-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .spec-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .cta {
+            text-align: center;
+            margin: 60px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .cta h2 {
+            margin: 0 0 20px 0;
+        }
+        
+        .cta p {
+            margin: 0 0 30px 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 ElevenLabs AI Shopping Assistant</h1>
+            <p>Transform your e-commerce experience with voice-enabled AI</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎤</div>
+                <h3>Voice Interaction</h3>
+                <p>Natural conversation with your customers through advanced voice AI technology</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🛍️</div>
+                <h3>Smart Recommendations</h3>
+                <p>AI-powered product suggestions that understand customer preferences</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🛒</div>
+                <h3>Instant Cart Management</h3>
+                <p>Add products to cart with simple voice commands and beautiful animations</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <h3>Responsive Design</h3>
+                <p>Works seamlessly on desktop, tablet, and mobile devices</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔧</div>
+                <h3>Easy Integration</h3>
+                <p>Simple setup with Odoo's module system - no complex configuration required</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <h3>Beautiful UI</h3>
+                <p>Modern, animated interface with gradient designs and smooth transitions</p>
+            </div>
+        </div>
+        
+        <div class="benefits">
+            <h2>Key Benefits</h2>
+            <ul class="benefit-list">
+                <li>Increase customer engagement with conversational shopping</li>
+                <li>Reduce cart abandonment with streamlined voice commands</li>
+                <li>Improve accessibility for all users</li>
+                <li>Stand out from competitors with cutting-edge AI technology</li>
+                <li>Gather valuable insights from voice interactions</li>
+                <li>Support multiple languages and accents</li>
+                <li>24/7 availability without human operators</li>
+                <li>Seamless integration with existing Odoo e-commerce</li>
+            </ul>
+        </div>
+        
+        <div class="tech-specs">
+            <h2>Technical Specifications</h2>
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <strong>Odoo Version</strong>
+                    16.0 and above
+                </div>
+                <div class="spec-item">
+                    <strong>Dependencies</strong>
+                    website, website_sale, product
+                </div>
+                <div class="spec-item">
+                    <strong>AI Provider</strong>
+                    ElevenLabs Conversational AI
+                </div>
+                <div class="spec-item">
+                    <strong>Browser Support</strong>
+                    Chrome, Firefox, Safari, Edge
+                </div>
+                <div class="spec-item">
+                    <strong>Mobile Support</strong>
+                    iOS and Android compatible
+                </div>
+                <div class="spec-item">
+                    <strong>License</strong>
+                    LGPL-3
+                </div>
+            </div>
+        </div>
+        
+        <div class="screenshots">
+            <h2>How It Works</h2>
+            <div class="screenshot-grid">
+                <div class="screenshot">
+                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
+                        <h3>1. Customer Asks</h3>
+                        <p style="color: #666; margin-top: 10px;">
+                            "Show me wireless headphones under $400"
+                        </p>
+                    </div>
+                </div>
+                <div class="screenshot">
+                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
+                        <h3>2. AI Responds</h3>
+                        <p style="color: #666; margin-top: 10px;">
+                            Displays product cards with images and prices
+                        </p>
+                    </div>
+                </div>
+                <div class="screenshot">
+                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
+                        <h3>3. Customer Selects</h3>
+                        <p style="color: #666; margin-top: 10px;">
+                            "Add the Sony headphones to my cart"
+                        </p>
+                    </div>
+                </div>
+                <div class="screenshot">
+                    <div style="padding: 40px; background: #f8f9fa; text-align: center;">
+                        <h3>4. Cart Updated</h3>
+                        <p style="color: #666; margin-top: 10px;">
+                            Beautiful animation confirms the addition
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <h2>Ready to Revolutionize Your E-commerce?</h2>
+            <p>Install the ElevenLabs AI Shopping Assistant today and give your customers an unforgettable shopping experience</p>
+            <a href="#" class="btn">Install Now</a>
+        </div>
+    </div>
+</body>
+</html>
