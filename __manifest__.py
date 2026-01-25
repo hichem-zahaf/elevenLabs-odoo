@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ElevenLabs AI Shopping Assistant',
-    'version': '18.0.2.3.4',
+    'version': '18.0.2.4.0',
     'category': 'Website/eCommerce',
     'summary': 'AI-powered shopping assistant with voice interaction - Complete rebuild with proper client tools',
     'description': """

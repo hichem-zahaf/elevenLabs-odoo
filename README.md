@@ -146,7 +146,7 @@ Edit `static/src/css/elevenlabs_agent.css` to customize:
 - Responsive breakpoints
 
 ### JavaScript Behavior
-Edit `static/src/js/elevenlabs_agent.js` to modify:
+Edit `static/src/js/elevenlabs_widget.js` to modify:
 - Tool handling logic
 - Animation sequences
 - API endpoints
