@@ -13,11 +13,7 @@
                             <field name="elevenlabs_enabled"/>
                         </setting>
                         <setting help="Enter your ElevenLabs Agent ID from the dashboard" invisible="not elevenlabs_enabled">
-                            <label for="elevenlabs_agent_id" string="Agent ID"/>
-                            <field name="elevenlabs_agent_id" class="oe_inline" placeholder="agent_xxxxxxxxxxxxx"/>
-                           <div class="text-muted">
-                                 You can find this in your ElevenLabs dashboard under Conversational AI → Agents
-                            </div>
+                            <field name="elevenlabs_agent_id" placeholder="agent_xxxxxxxxxxxxx"/>
                         </setting>
                         <div class="alert alert-info" role="alert" invisible="not elevenlabs_enabled">
                         <i class="fa fa-info-circle"/> To get your Agent ID:
@@ -34,161 +30,117 @@
 
                     <block title="Trigger Options" name="elevenlabs_trigger_settings" invisible="not elevenlabs_enabled">
                         <setting help="Number of seconds after page load before showing the widget">
-                            <label for="elevenlabs_trigger_delay" string="Trigger Delay (seconds)"/>
-                            <field name="elevenlabs_trigger_delay" class="oe_inline"/>
-                            <div class="text-muted">
-                                Adds a delay on widget creation, 
-                                Set to 0 for immediate display.
-                            </div>
+                            <field name="elevenlabs_trigger_delay"/>
                         </setting>
 
                         <setting help="Show widget when user scrolls to this percentage of the page">
-                            <label for="elevenlabs_trigger_on_scroll" string="Scroll Percentage (%)"/>
-                            <field name="elevenlabs_trigger_on_scroll" class="oe_inline"/>
-                            <div class="text-muted">
-                                Show widget when user scrolls to this percentage of the page.
-                                Set to 0 to disable scroll trigger.
-                            </div>
+                            <field name="elevenlabs_trigger_on_scroll"/>
                         </setting>
 
                         <setting help="Show widget after user spends this many seconds on the page">
-                            <label for="elevenlabs_trigger_on_time" string="Time on Page (seconds)"/>
-                            <field name="elevenlabs_trigger_on_time" class="oe_inline"/>
-                            <div class="text-muted">
-                                Show widget after user spends this many seconds on the page, add it to show the widget for customers that need assistance.
-                                Set to 0 to disable time trigger.
-                            </div>
+                            <field name="elevenlabs_trigger_on_time"/>
                         </setting>
 
-                        <setting>
-                            <label for="elevenlabs_trigger_on_exit_intent"/>
-                            <field name="elevenlabs_trigger_on_exit_intent" class="oe_inline"/>                           
-                            <div class="text-muted">
-                                Show widget when user shows exit intent (moving mouse to close tab or navigate away).
-                            </div>
+                        <setting help='Show widget when user shows exit intent (moving mouse to close tab or navigate away).'>
+                            <field name="elevenlabs_trigger_on_exit_intent"/>
                         </setting>
 
-                        <setting>
-                            <label for="elevenlabs_show_first_time_visitors_only"/>
-                            <field name="elevenlabs_show_first_time_visitors_only" class="oe_inline"/>
-                            <div class="text-muted">
-                                show widget only for first-time visitors.
-                            </div>
+                        <setting help='Show widget only for first-time visitors.'>
+                            <field name="elevenlabs_show_first_time_visitors_only"/>
                         </setting>
                     </block>
 
                     <block title="Page Visibility" name="elevenlabs_visibility_settings" invisible="not elevenlabs_enabled">
                         <setting help="Comma-separated list of page types to show widget on (e.g., homepage,product,cart,checkout)">
-                            <label for="elevenlabs_pages_to_show" string="Pages to Show Widget"/>
-                            <field name="elevenlabs_pages_to_show" class="oe_inline" placeholder="e.g., homepage,product,cart,checkout"/>
+                            <field name="elevenlabs_pages_to_show" placeholder="e.g., homepage,product,cart,checkout"/>
                         </setting>
 
-                        <setting help="Comma-separated list of page types to hide widget on">
-                            <label for="elevenlabs_pages_to_hide" string="Pages to Hide Widget"/>
-                            <field name="elevenlabs_pages_to_hide" class="oe_inline" placeholder="e.g., contact,about"/>
+                        <setting help="Comma-separated list of page types to hide widget on (e.g., homepage,product,cart,checkout)">
+                            <field name="elevenlabs_pages_to_hide" placeholder="e.g., contact,about"/>
                         </setting>
                     </block>
 
                     <block title="Integration Controls" name="elevenlabs_integration_settings" invisible="not elevenlabs_enabled">
                         <setting help="Enable the showProductCard tool in the agent">
-                            <label for="elevenlabs_enable_show_product_card" string="Enable Show Product Card Tool"/>
-                            <field name="elevenlabs_enable_show_product_card" class="oe_inline"/>
+                            <field name="elevenlabs_enable_show_product_card"/>
                         </setting>
 
                         <setting help="Enable the addToCart tool in the agent">
-                            <label for="elevenlabs_enable_add_to_cart"/>
-                            <field name="elevenlabs_enable_add_to_cart" class="oe_inline"/>
+                            <field name="elevenlabs_enable_add_to_cart"/>
                         </setting>
 
                         <setting help="Enable the searchProducts tool in the agent">
-                            <label for="elevenlabs_enable_search_products"/>
-                            <field name="elevenlabs_enable_search_products" class="oe_inline"/>
+                            <field name="elevenlabs_enable_search_products"/>
                         </setting>
 
                         <setting help="How the agent adds items to cart">
-                            <label for="elevenlabs_cart_integration_method" string="Cart Integration Method"/>
-                            <field name="elevenlabs_cart_integration_method" class="oe_inline"/>
+                            <field name="elevenlabs_cart_integration_method"/>
                         </setting>
                     </block>
 
                     <block title="Targeting Controls" name="elevenlabs_targeting_settings" invisible="not elevenlabs_enabled">
                         <setting help="Comma-separated list of country codes to restrict the widget (e.g., US,CA,UK)">
-                            <label for="elevenlabs_geographic_restrictions" string="Geographic Restrictions"/>
-                            <field name="elevenlabs_geographic_restrictions" class="oe_inline" placeholder="e.g., US,CA,UK"/>
+                            <field name="elevenlabs_geographic_restrictions" placeholder="e.g., US,CA,UK"/>
                         </setting>
 
                         <setting help="Which devices to show the widget on">
-                            <label for="elevenlabs_device_filtering" string="Device Type Filtering"/>
-                            <field name="elevenlabs_device_filtering" class="oe_inline"/>
+                            <field name="elevenlabs_device_filtering"/>
                         </setting>
 
                         <setting help="Which customer segments to target with the widget">
-                            <label for="elevenlabs_customer_segment_targeting" string="Customer Segment Targeting"/>
-                            <field name="elevenlabs_customer_segment_targeting" class="oe_inline"/>
+                            <field name="elevenlabs_customer_segment_targeting"/>
                         </setting>
 
                         <setting help="Hide widget for logged-in users">
-                            <label for="elevenlabs_exclude_logged_in_users" string="Exclude Logged-In Users"/>
-                            <field name="elevenlabs_exclude_logged_in_users" class="oe_inline"/>
+                            <field name="elevenlabs_exclude_logged_in_users"/>
                         </setting>
                     </block>
 
                     <block title="Session Controls" name="elevenlabs_session_settings" invisible="not elevenlabs_enabled">
                         <setting help="Maximum number of messages allowed per session (0 for unlimited)">
-                            <label for="elevenlabs_max_messages_per_session" string="Max Messages Per Session"/>
-                            <field name="elevenlabs_max_messages_per_session" class="oe_inline"/>
+                            <field name="elevenlabs_max_messages_per_session"/>
                         </setting>
 
                         <setting help="How long to retain conversation history in hours">
-                            <label for="elevenlabs_conversation_history_retention" string="Conversation History Retention (hours)"/>
-                            <field name="elevenlabs_conversation_history_retention" class="oe_inline"/>
+                            <field name="elevenlabs_conversation_history_retention"/>
                         </setting>
 
                         <setting help="Automatically end conversations after period of inactivity">
-                            <label for="elevenlabs_auto_end_inactive_conversations" string="Auto-End Inactive Conversations"/>
-                            <field name="elevenlabs_auto_end_inactive_conversations" class="oe_inline"/>
+                            <field name="elevenlabs_auto_end_inactive_conversations"/>
                         </setting>
 
                         <setting help="Save user information from conversations">
-                            <label for="elevenlabs_save_user_info" string="Save User Info"/>
-                            <field name="elevenlabs_save_user_info" class="oe_inline"/>
+                            <field name="elevenlabs_save_user_info"/>
                         </setting>
 
                         <setting help="Log all conversations for analytics">
-                            <label for="elevenlabs_enable_conversation_logging" string="Enable Conversation Logging"/>
-                            <field name="elevenlabs_enable_conversation_logging" class="oe_inline"/>
+                            <field name="elevenlabs_enable_conversation_logging"/>
                         </setting>
 
                         <setting help="Daily usage limit for the widget (0 for unlimited)">
-                            <label for="elevenlabs_daily_usage_limit" string="Daily Usage Limit"/>
-                            <field name="elevenlabs_daily_usage_limit" class="oe_inline"/>
+                            <field name="elevenlabs_daily_usage_limit"/>
                         </setting>
 
                         <setting help="Link to the performance metrics dashboard">
-                            <label for="elevenlabs_performance_metrics_dashboard" string="Performance Metrics Dashboard Link"/>
-                            <field name="elevenlabs_performance_metrics_dashboard" class="oe_inline" placeholder="https://your-analytics.com"/>
+                            <field name="elevenlabs_performance_metrics_dashboard" placeholder="https://your-analytics.com"/>
                         </setting>
                     </block>
 
                     <block title="Product Integration" name="elevenlabs_product_settings" invisible="not elevenlabs_enabled">
                         <setting help="Comma-separated list of product category IDs to include">
-                            <label for="elevenlabs_product_categories_include" string="Include Product Categories"/>
-                            <field name="elevenlabs_product_categories_include" class="oe_inline" placeholder="e.g., 1,2,3"/>
+                            <field name="elevenlabs_product_categories_include" placeholder="e.g., 1,2,3"/>
                         </setting>
 
                         <setting help="Comma-separated list of product category IDs to exclude">
-                            <label for="elevenlabs_product_categories_exclude" string="Exclude Product Categories"/>
-                            <field name="elevenlabs_product_categories_exclude" class="oe_inline" placeholder="e.g., 4,5,6"/>
+                            <field name="elevenlabs_product_categories_exclude" placeholder="e.g., 4,5,6"/>
                         </setting>
 
                         <setting help="Comma-separated list of product IDs to prioritize in recommendations">
-                            <label for="elevenlabs_featured_products_priority" string="Featured Products Priority"/>
-                            <field name="elevenlabs_featured_products_priority" class="oe_inline" placeholder="e.g., 10,15,20"/>
+                            <field name="elevenlabs_featured_products_priority" placeholder="e.g., 10,15,20"/>
                         </setting>
 
                         <setting help="How to handle out-of-stock items in recommendations">
-                            <label for="elevenlabs_out_of_stock_handling" string="Out-of-Stock Item Handling"/>
-                            <field name="elevenlabs_out_of_stock_handling" class="oe_inline"/>
+                            <field name="elevenlabs_out_of_stock_handling"/>
                         </setting>
                     </block>
                 </app>

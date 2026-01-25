@@ -38,35 +38,35 @@ class ResConfigSettings(models.TransientModel):
         string='Trigger Delay (seconds)',
         config_parameter='elevenlabs_agent.trigger_delay',
         default=0,
-        help='Number of seconds after page load before showing the widget.'
+        help='Adds a delay on widget creation, Set to 0 for immediate display.'
     )
 
     elevenlabs_trigger_on_scroll = fields.Float(
         string='Scroll Percentage (%)',
         config_parameter='elevenlabs_agent.trigger_on_scroll',
         default=0.0,
-        help='Show widget when user scrolls to this percentage of the page.'
+        help='Show widget when user scrolls to this percentage of the page. Set to 0 to disable scroll trigger.'
     )
 
     elevenlabs_trigger_on_time = fields.Integer(
         string='Time on Page (seconds)',
         config_parameter='elevenlabs_agent.trigger_on_time',
         default=0,
-        help='Show widget after user spends this many seconds on the page.'
+        help='Show widget after user spends this many seconds on the page, add it to show the widget for customers that need assistance. Set to 0 to disable time trigger.'
     )
 
     elevenlabs_trigger_on_exit_intent = fields.Boolean(
-        string='Trigger on Exit Intent',
+        string='Exit Intent detection',
         config_parameter='elevenlabs_agent.trigger_on_exit_intent',
         default=False,
-        help='Show widget when user moves cursor towards browser tab closing area.'
+        help='Show widget when user shows exit intent (moving mouse to close tab or navigate away).'
     )
 
     elevenlabs_show_first_time_visitors_only = fields.Boolean(
         string='Show Only for First-Time Visitors',
         config_parameter='elevenlabs_agent.show_first_time_visitors_only',
         default=False,
-        help='Show widget only for first-time visitors vs. returning customers.'
+        help='show widget only for first-time visitors.'
     )
 
 
@@ -231,5 +231,5 @@ class ResConfigSettings(models.TransientModel):
     elevenlabs_pages_to_hide = fields.Char(
         string='Pages to Hide Widget',
         config_parameter='elevenlabs_agent.pages_to_hide',
-        help='Comma-separated list of page types to hide widget on.'
+        help='Comma-separated list of page types to hide widget on (e.g., homepage,product,cart,checkout).'
     )
