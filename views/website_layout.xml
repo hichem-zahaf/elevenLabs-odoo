@@ -19,12 +19,6 @@
                 <t t-set="trigger_on_exit_intent" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.trigger_on_exit_intent', 'False') == 'True'"/>
                 <t t-set="show_first_time_visitors_only" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.show_first_time_visitors_only', 'False') == 'True'"/>
 
-                <!-- Widget Appearance -->
-                <t t-set="widget_size" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.widget_size', 'medium')"/>
-                <t t-set="color_scheme" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.color_scheme', '')"/>
-                <t t-set="custom_greeting" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.custom_greeting', '')"/>
-                <t t-set="default_state" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.default_state', 'expanded')"/>
-                <t t-set="z_index" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.z_index', '9999'))"/>
 
                 <!-- Integration Controls -->
                 <t t-set="enable_show_product_card" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_show_product_card', 'True') == 'True'"/>
@@ -66,11 +60,6 @@
                      t-att-data-trigger-on-time="trigger_on_time"
                      t-att-data-trigger-on-exit-intent="trigger_on_exit_intent"
                      t-att-data-show-first-time-visitors-only="show_first_time_visitors_only"
-                     t-att-data-widget-size="widget_size"
-                     t-att-data-color-scheme="color_scheme"
-                     t-att-data-custom-greeting="custom_greeting"
-                     t-att-data-default-state="default_state"
-                     t-att-data-z-index="z_index"
                      t-att-data-enable-show-product-card="enable_show_product_card"
                      t-att-data-enable-add-to-cart="enable_add_to_cart"
                      t-att-data-enable-search-products="enable_search_products"

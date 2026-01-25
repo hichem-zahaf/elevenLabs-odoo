@@ -46,7 +46,6 @@
         // Get configuration from data attributes
         var agentId = container.dataset.agentId;
         var enabled = container.dataset.enabled !== 'False';
-        var widgetPosition = container.dataset.widgetPosition || 'bottom-right';
 
         // Trigger options
         var triggerDelay = parseInt(container.dataset.triggerDelay) || 0;
@@ -54,13 +53,6 @@
         var triggerOnTime = parseInt(container.dataset.triggerOnTime) || 0;
         var triggerOnExitIntent = container.dataset.triggerOnExitIntent !== 'false';
         var showFirstTimeVisitorsOnly = container.dataset.showFirstTimeVisitorsOnly !== 'false';
-
-        // Widget appearance
-        var widgetSize = container.dataset.widgetSize || 'medium';
-        var colorScheme = container.dataset.colorScheme || null;
-        var customGreeting = container.dataset.customGreeting || null;
-        var defaultState = container.dataset.defaultState || 'expanded';
-        var zIndex = parseInt(container.dataset.zIndex) || 9999;
 
         // Integration controls
         var enableShowProductCard = container.dataset.enableShowProductCard !== 'false';
@@ -110,12 +102,6 @@
             return;
         }
 
-        // // Check customer segment targeting
-        // if (!_passesCustomerSegmentTargeting(showFirstTimeVisitorsOnly, customerSegmentTargeting)) {
-        //     console.log('ElevenLabs agent is restricted by customer segment targeting');
-        //     return;
-        // }
-
         // Check if logged-in users should be excluded
         if (excludeLoggedInUsers && _isLoggedIn()) {
             console.log('ElevenLabs agent is excluded for logged-in users');
@@ -139,12 +125,6 @@
             setTimeout(function() {
                 createWidget(
                     agentId,
-                    widgetPosition,
-                    widgetSize,
-                    colorScheme,
-                    customGreeting,
-                    defaultState,
-                    zIndex,
                     enableShowProductCard,
                     enableAddToCart,
                     enableSearchProducts
@@ -154,12 +134,6 @@
             // Create and insert the widget
             createWidget(
                 agentId,
-                widgetPosition,
-                widgetSize,
-                colorScheme,
-                customGreeting,
-                defaultState,
-                zIndex,
                 enableShowProductCard,
                 enableAddToCart,
                 enableSearchProducts
@@ -172,17 +146,11 @@
         var settings = {
             agentId: container.dataset.agentId || 'Not set',
             enabled: container.dataset.enabled !== 'False',
-            widgetPosition: container.dataset.widgetPosition || 'bottom-right',
             triggerDelay: parseInt(container.dataset.triggerDelay) || 0,
             triggerOnScroll: parseFloat(container.dataset.triggerOnScroll) || 0,
             triggerOnTime: parseInt(container.dataset.triggerOnTime) || 0,
             triggerOnExitIntent: container.dataset.triggerOnExitIntent !== 'false',
             showFirstTimeVisitorsOnly: container.dataset.showFirstTimeVisitorsOnly !== 'false',
-            widgetSize: container.dataset.widgetSize || 'medium',
-            colorScheme: container.dataset.colorScheme || null,
-            customGreeting: container.dataset.customGreeting || null,
-            defaultState: container.dataset.defaultState || 'expanded',
-            zIndex: parseInt(container.dataset.zIndex) || 9999,
             enableShowProductCard: container.dataset.enableShowProductCard !== 'false',
             enableAddToCart: container.dataset.enableAddToCart !== 'false',
             enableSearchProducts: container.dataset.enableSearchProducts !== 'false',
@@ -219,12 +187,6 @@
 
     function createWidget(
         agentId,
-        position,
-        widgetSize,
-        colorScheme,
-        customGreeting,
-        defaultState,
-        zIndex,
         enableShowProductCard,
         enableAddToCart,
         enableSearchProducts
@@ -232,46 +194,6 @@
         // Create the elevenlabs-convai element
         var widgetElement = document.createElement('elevenlabs-convai');
         widgetElement.setAttribute('agent-id', agentId);
-
-        // Apply positioning styles
-        widgetElement.style.position = 'fixed';
-        widgetElement.style.zIndex = zIndex.toString();
-
-        // Apply widget size
-        applyWidgetSize(widgetElement, widgetSize);
-
-        // Apply custom color scheme if set
-        if (colorScheme) {
-            widgetElement.style.setProperty('--primary-color', colorScheme);
-        }
-
-        // Apply custom greeting if set
-        if (customGreeting) {
-            widgetElement.setAttribute('greeting-message', customGreeting);
-        }
-
-        // Apply default state
-        if (defaultState === 'minimized') {
-            widgetElement.setAttribute('initial-state', 'minimized');
-        }
-
-        switch(position) {
-            case 'bottom-left':
-                widgetElement.style.bottom = '20px';
-                widgetElement.style.left = '20px';
-                break;
-            case 'top-right':
-                widgetElement.style.top = '20px';
-                widgetElement.style.right = '20px';
-                break;
-            case 'top-left':
-                widgetElement.style.top = '20px';
-                widgetElement.style.left = '20px';
-                break;
-            default: // bottom-right
-                widgetElement.style.bottom = '20px';
-                widgetElement.style.right = '20px';
-        }
 
         // Append to body
         document.body.appendChild(widgetElement);
@@ -295,24 +217,6 @@
         } else {
             // Script already loaded, register tools
             registerClientTools(enableShowProductCard, enableAddToCart, enableSearchProducts);
-        }
-    }
-
-    function applyWidgetSize(widgetElement, widgetSize) {
-        // Apply size based on settings
-        switch(widgetSize) {
-            case 'small':
-                widgetElement.style.width = '300px';
-                widgetElement.style.height = '400px';
-                break;
-            case 'large':
-                widgetElement.style.width = '450px';
-                widgetElement.style.height = '600px';
-                break;
-            case 'medium':
-            default:
-                widgetElement.style.width = '380px';
-                widgetElement.style.height = '500px';
         }
     }
     
@@ -454,36 +358,6 @@
                 return !isMobile;
             case 'mobile':
                 return isMobile;
-            case 'all':
-            default:
-                return true;
-        }
-    }
-
-    function _passesCustomerSegmentTargeting(showFirstTimeVisitorsOnly, customerSegmentTargeting) {
-        // Check if we should show only to first-time visitors
-        if (showFirstTimeVisitorsOnly) {
-            var hasVisitedBefore = localStorage.getItem('elevenlabs_has_visited');
-            if (hasVisitedBefore) {
-                return false;
-            } else {
-                // Mark as visited for future visits
-                localStorage.setItem('elevenlabs_has_visited', 'true');
-            }
-        }
-
-        // Check customer segment targeting
-        switch(customerSegmentTargeting) {
-            case 'none':
-                // No restriction - always allow
-                return true;
-            case 'first_time':
-                return !localStorage.getItem('elevenlabs_returning_customer');
-            case 'returning':
-                return !!localStorage.getItem('elevenlabs_returning_customer');
-            case 'vip':
-                // Would require checking user status from backend
-                return true; // For now, assume all users are eligible
             case 'all':
             default:
                 return true;

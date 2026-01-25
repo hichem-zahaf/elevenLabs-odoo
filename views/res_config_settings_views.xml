@@ -31,37 +31,6 @@
                     </div>
                     </block>
 
-                    <block title="Widget Appearance" name="elevenlabs_appearance_settings" invisible="not elevenlabs_enabled">
-                        <setting help="Position of the ElevenLabs widget on the page">
-                            <label for="elevenlabs_widget_position" string="Widget Position"/>
-                            <field name="elevenlabs_widget_position" class="oe_inline"/>
-                        </setting>
-
-                        <setting help="Size of the ElevenLabs widget">
-                            <label for="elevenlabs_widget_size" string="Widget Size"/>
-                            <field name="elevenlabs_widget_size" class="oe_inline"/>
-                        </setting>
-
-                        <setting help="Default state of the widget when loaded">
-                            <label for="elevenlabs_default_state" string="Default State"/>
-                            <field name="elevenlabs_default_state" class="oe_inline"/>
-                        </setting>
-
-                        <setting help="Custom color scheme for the widget (hex codes)">
-                            <label for="elevenlabs_color_scheme" string="Color Scheme"/>
-                            <field name="elevenlabs_color_scheme" class="oe_inline" placeholder="#667eea"/>
-                        </setting>
-
-                        <setting help="Z-index value for widget layering">
-                            <label for="elevenlabs_z_index" string="Z-Index Control"/>
-                            <field name="elevenlabs_z_index" class="oe_inline"/>
-                        </setting>
-
-                        <setting help="Custom greeting message displayed when widget opens">
-                            <label for="elevenlabs_custom_greeting" string="Custom Greeting Message"/>
-                            <field name="elevenlabs_custom_greeting" class="oe_inline" placeholder="Hello! How can I assist you today?"/>
-                        </setting>
-                    </block>
 
                     <block title="Trigger Options" name="elevenlabs_trigger_settings" invisible="not elevenlabs_enabled">
                         <setting help="Number of seconds after page load before showing the widget">

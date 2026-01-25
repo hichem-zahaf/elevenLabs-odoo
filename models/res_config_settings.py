@@ -69,46 +69,6 @@ class ResConfigSettings(models.TransientModel):
         help='Show widget only for first-time visitors vs. returning customers.'
     )
 
-    # Widget Appearance
-    elevenlabs_widget_size = fields.Selection([
-        ('small', 'Small'),
-        ('medium', 'Medium'),
-        ('large', 'Large'),
-    ], string='Widget Size',
-        config_parameter='elevenlabs_agent.widget_size',
-        default='medium',
-        required=True,
-        help='Size of the ElevenLabs widget.'
-    )
-
-    elevenlabs_color_scheme = fields.Char(
-        string='Color Scheme',
-        config_parameter='elevenlabs_agent.color_scheme',
-        help='Custom color scheme for the widget (hex codes).'
-    )
-
-    elevenlabs_custom_greeting = fields.Char(
-        string='Custom Greeting Message',
-        config_parameter='elevenlabs_agent.custom_greeting',
-        help='Custom greeting message displayed when widget opens.'
-    )
-
-    elevenlabs_default_state = fields.Selection([
-        ('minimized', 'Minimized'),
-        ('expanded', 'Expanded'),
-    ], string='Default State',
-        config_parameter='elevenlabs_agent.default_state',
-        default='expanded',
-        required=True,
-        help='Default state of the widget when loaded.'
-    )
-
-    elevenlabs_z_index = fields.Integer(
-        string='Z-Index Control',
-        config_parameter='elevenlabs_agent.z_index',
-        default=9999,
-        help='Z-index value for widget layering.'
-    )
 
     # Integration Controls
     elevenlabs_enable_show_product_card = fields.Boolean(
