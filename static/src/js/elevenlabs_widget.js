@@ -157,33 +157,33 @@
 
         // Get configuration from data attributes
         var agentId = container.dataset.agentId;
-        var enabled = container.dataset.enabled !== 'False';
+        var enabled = container.dataset.enabled === 'true';
 
         // Trigger options
         var triggerDelay = parseInt(container.dataset.triggerDelay) || 0;
         var triggerOnScroll = parseFloat(container.dataset.triggerOnScroll) || 0;
         var triggerOnTime = parseInt(container.dataset.triggerOnTime) || 0;
-        var triggerOnExitIntent = container.dataset.triggerOnExitIntent !== 'false';
-        var showFirstTimeVisitorsOnly = container.dataset.showFirstTimeVisitorsOnly !== 'false';
+        var triggerOnExitIntent = container.dataset.triggerOnExitIntent === 'true';
+        var showFirstTimeVisitorsOnly = container.dataset.showFirstTimeVisitorsOnly === 'true';
 
         // Integration controls
-        var enableShowProductCard = container.dataset.enableShowProductCard !== 'false';
-        var enableAddToCart = container.dataset.enableAddToCart !== 'false';
-        var enableSearchProducts = container.dataset.enableSearchProducts !== 'false';
+        var enableShowProductCard = container.dataset.enableShowProductCard === 'true';
+        var enableAddToCart = container.dataset.enableAddToCart === 'true';
+        var enableSearchProducts = container.dataset.enableSearchProducts === 'true';
         var cartIntegrationMethod = container.dataset.cartIntegrationMethod || 'direct_add';
 
         // Targeting controls
         var geographicRestrictions = container.dataset.geographicRestrictions || null;
         var deviceFiltering = container.dataset.deviceFiltering || 'all';
         var customerSegmentTargeting = container.dataset.customerSegmentTargeting || 'all';
-        var excludeLoggedInUsers = container.dataset.excludeLoggedInUsers !== 'false';
+        var excludeLoggedInUsers = container.dataset.excludeLoggedInUsers === 'true';
 
         // Session controls
         var maxMessagesPerSession = parseInt(container.dataset.maxMessagesPerSession) || 0;
         var conversationHistoryRetention = parseInt(container.dataset.conversationHistoryRetention) || 24;
-        var autoEndInactiveConversations = container.dataset.autoEndInactiveConversations !== 'false';
-        var saveUserInfo = container.dataset.saveUserInfo !== 'false';
-        var enableConversationLogging = container.dataset.enableConversationLogging !== 'false';
+        var autoEndInactiveConversations = container.dataset.autoEndInactiveConversations === 'true';
+        var saveUserInfo = container.dataset.saveUserInfo === 'true';
+        var enableConversationLogging = container.dataset.enableConversationLogging === 'true';
         var dailyUsageLimit = parseInt(container.dataset.dailyUsageLimit) || 0;
 
         // Product integration
@@ -195,6 +195,59 @@
         // Page visibility controls
         var pagesToShow = container.dataset.pagesToShow || null;
         var pagesToHide = container.dataset.pagesToHide || null;
+
+        // Try to get user information from the container data attributes first
+        var userId = container.dataset.userId || undefined;
+        var userName = container.dataset.userName || undefined;
+        var userLogin = container.dataset.userLogin || undefined;
+        var userEmail = container.dataset.userEmail || undefined;
+        var userIsPublicStr = container.dataset.userIsPublic;
+        var userIsAdminStr = container.dataset.userIsAdmin;
+
+        // If user data is not available from the template, try to get it from Odoo session
+        if (!userId || userId === '0' || userId === 'undefined') {
+            // Check if we can access Odoo session information
+            if (typeof odoo !== 'undefined' && odoo.session_info) {
+                userId = odoo.session_info.uid || '0';
+                userName = odoo.session_info.name || undefined;
+                userLogin = odoo.session_info.username || undefined;
+
+                // For email, we might need to make an RPC call to get user details
+                userEmail = odoo.session_info.user_email || undefined;
+            } else if (window.sessionStorage && sessionStorage.getItem('uid')) {
+                // Fallback to session storage if available
+                userId = sessionStorage.getItem('uid');
+                userName = sessionStorage.getItem('name') || undefined;
+                userLogin = sessionStorage.getItem('username') || undefined;
+                userEmail = sessionStorage.getItem('user_email') || undefined;
+            } else if (window.localStorage && localStorage.getItem('uid')) {
+                // Fallback to local storage if available
+                userId = localStorage.getItem('uid');
+                userName = localStorage.getItem('name') || undefined;
+                userLogin = localStorage.getItem('username') || undefined;
+                userEmail = localStorage.getItem('user_email') || undefined;
+            }
+        }
+
+        // Determine if user is public based on user ID or explicit flag
+        var userIsPublic = (userIsPublicStr ? userIsPublicStr === 'True' : userId == '0' || userId == 'public' || !userId);
+        var userIsAdmin = userIsAdminStr ? userIsAdminStr === 'True' : false;
+
+        // Log user details separately if user is logged in (not public)
+        if (!userIsPublic && userId && userId !== '0' && userId !== 'undefined' && userId != null) {
+            console.log('=== Logged User Details ===');
+            console.log('User ID:', userId);
+            console.log('User Name:', userName);
+            console.log('User Login:', userLogin);
+            console.log('User Email:', userEmail);
+            console.log('Is Admin:', userIsAdmin);
+            console.log('=========================');
+        } else {
+            console.log('User is a public visitor');
+            console.log('Raw userIsPublic value:', userIsPublicStr);
+            console.log('Raw userId value:', userId);
+            console.log('Odoo session info available:', typeof odoo !== 'undefined' && odoo.session_info);
+        }
 
         // Check if widget should be shown based on page visibility
         if (!_shouldShowOnCurrentPage(pagesToShow, pagesToHide)) {
@@ -215,7 +268,7 @@
         }
 
         // Check if logged-in users should be excluded
-        if (excludeLoggedInUsers && _isLoggedIn()) {
+        if (excludeLoggedInUsers && !userIsPublic && userId && userId !== '0' && userId !== 'undefined' && userId != null) {
             console.log('ElevenLabs agent is excluded for logged-in users');
             return;
         }
@@ -249,25 +302,25 @@
     function logAllSettings(container) {
         var settings = {
             agentId: container.dataset.agentId || 'Not set',
-            enabled: container.dataset.enabled !== 'False',
+            enabled: container.dataset.enabled === 'true',
             triggerDelay: parseInt(container.dataset.triggerDelay) || 0,
             triggerOnScroll: parseFloat(container.dataset.triggerOnScroll) || 0,
             triggerOnTime: parseInt(container.dataset.triggerOnTime) || 0,
-            triggerOnExitIntent: container.dataset.triggerOnExitIntent !== 'false',
-            showFirstTimeVisitorsOnly: container.dataset.showFirstTimeVisitorsOnly !== 'false',
-            enableShowProductCard: container.dataset.enableShowProductCard !== 'false',
-            enableAddToCart: container.dataset.enableAddToCart !== 'false',
-            enableSearchProducts: container.dataset.enableSearchProducts !== 'false',
+            triggerOnExitIntent: container.dataset.triggerOnExitIntent === 'true',
+            showFirstTimeVisitorsOnly: container.dataset.showFirstTimeVisitorsOnly === 'true',
+            enableShowProductCard: container.dataset.enableShowProductCard === 'true',
+            enableAddToCart: container.dataset.enableAddToCart === 'true',
+            enableSearchProducts: container.dataset.enableSearchProducts === 'true',
             cartIntegrationMethod: container.dataset.cartIntegrationMethod || 'direct_add',
             geographicRestrictions: container.dataset.geographicRestrictions || null,
             deviceFiltering: container.dataset.deviceFiltering || 'all',
             customerSegmentTargeting: container.dataset.customerSegmentTargeting || 'all',
-            excludeLoggedInUsers: container.dataset.excludeLoggedInUsers !== 'false',
+            excludeLoggedInUsers: container.dataset.excludeLoggedInUsers === 'true',
             maxMessagesPerSession: parseInt(container.dataset.maxMessagesPerSession) || 0,
             conversationHistoryRetention: parseInt(container.dataset.conversationHistoryRetention) || 24,
-            autoEndInactiveConversations: container.dataset.autoEndInactiveConversations !== 'false',
-            saveUserInfo: container.dataset.saveUserInfo !== 'false',
-            enableConversationLogging: container.dataset.enableConversationLogging !== 'false',
+            autoEndInactiveConversations: container.dataset.autoEndInactiveConversations === 'true',
+            saveUserInfo: container.dataset.saveUserInfo === 'true',
+            enableConversationLogging: container.dataset.enableConversationLogging === 'true',
             dailyUsageLimit: parseInt(container.dataset.dailyUsageLimit) || 0,
             productCategoriesInclude: container.dataset.productCategoriesInclude || null,
             productCategoriesExclude: container.dataset.productCategoriesExclude || null,
@@ -281,7 +334,18 @@
                 container.dataset.pagesToHide || null
             ),
             userAgent: navigator.userAgent,
-            url: window.location.href
+            url: window.location.href,
+            // User information
+            userId: container.dataset.userId || 'Not set',
+            userName: container.dataset.userName || 'Not set',
+            userLogin: container.dataset.userLogin || 'Not set',
+            userEmail: container.dataset.userEmail || 'Not set',
+            userIsPublic: container.dataset.userIsPublic === 'true',
+            userIsAdmin: container.dataset.userIsAdmin === 'true',
+            rawUserIsPublic: container.dataset.userIsPublic,  // For debugging
+            rawUserIsPublicType: typeof container.dataset.userIsPublic,  // For debugging
+            rawUserIsAdmin: container.dataset.userIsAdmin,     // For debugging
+            rawUserIsAdminType: typeof container.dataset.userIsAdmin     // For debugging
         };
 
         console.log('=== ElevenLabs Module Settings ===');

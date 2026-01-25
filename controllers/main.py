@@ -9,11 +9,15 @@ class ElevenLabsController(http.Controller):
     @http.route('/ai-assistant', type='http', auth='public', website=True, sitemap=True)
     def ai_assistant_page(self, **kwargs):
         """Render the AI Assistant page"""
+        # Get the current user
+        current_user = request.env.user
+
         return request.render('elevenlabs_agent.ai_assistant_page', {
             'agent_id': request.env['ir.config_parameter'].sudo().get_param(
-                'elevenlabs_agent.agent_id', 
+                'elevenlabs_agent.agent_id',
                 'agent_3901k2gz2sq2fg9ag068xjp0xc2t'  # Default agent ID
-            )
+            ),
+            'current_user': current_user
         })
     
     @http.route('/api/elevenlabs/product/sku/<string:sku>', type='json', auth='public', methods=['POST'])

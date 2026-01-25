@@ -46,6 +46,15 @@
                 <t t-set="featured_products_priority" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.featured_products_priority', '')"/>
                 <t t-set="out_of_stock_handling" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.out_of_stock_handling', 'hide')"/>
 
+                <!-- User Information -->
+                <t t-set="user" t-value="request.env.user"/>
+                <t t-set="user_id" t-value="user.id if not user._is_public() else 0"/>
+                <t t-set="user_name" t-value="user.name if not user._is_public() else 'Public User'"/>
+                <t t-set="user_login" t-value="user.login if not user._is_public() else ''"/>
+                <t t-set="user_email" t-value="user.email if not user._is_public() else ''"/>
+                <t t-set="user_is_public" t-value="user._is_public()"/>
+                <t t-set="user_is_admin" t-value="user.has_group('base.group_system')"/>
+
                 <!-- Page Visibility Controls -->
                 <t t-set="pages_to_show" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_show', '')"/>
                 <t t-set="pages_to_hide" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_hide', '')"/>
@@ -53,33 +62,39 @@
                 <div class="elevenlabs-agent-container"
                      t-att-style="'display: none;' if not agent_enabled else ''"
                      t-att-data-agent-id="agent_id"
-                     t-att-data-enabled="agent_enabled"
+                     t-att-data-enabled="str(agent_enabled).lower()"
                      t-att-data-widget-position="widget_position"
-                     t-att-data-trigger-delay="trigger_delay"
-                     t-att-data-trigger-on-scroll="trigger_on_scroll"
-                     t-att-data-trigger-on-time="trigger_on_time"
-                     t-att-data-trigger-on-exit-intent="trigger_on_exit_intent"
-                     t-att-data-show-first-time-visitors-only="show_first_time_visitors_only"
-                     t-att-data-enable-show-product-card="enable_show_product_card"
-                     t-att-data-enable-add-to-cart="enable_add_to_cart"
-                     t-att-data-enable-search-products="enable_search_products"
+                     t-att-data-trigger-delay="str(trigger_delay)"
+                     t-att-data-trigger-on-scroll="str(trigger_on_scroll)"
+                     t-att-data-trigger-on-time="str(trigger_on_time)"
+                     t-att-data-trigger-on-exit-intent="str(trigger_on_exit_intent).lower()"
+                     t-att-data-show-first-time-visitors-only="str(show_first_time_visitors_only).lower()"
+                     t-att-data-enable-show-product-card="str(enable_show_product_card).lower()"
+                     t-att-data-enable-add-to-cart="str(enable_add_to_cart).lower()"
+                     t-att-data-enable-search-products="str(enable_search_products).lower()"
                      t-att-data-cart-integration-method="cart_integration_method"
                      t-att-data-geographic-restrictions="geographic_restrictions"
                      t-att-data-device-filtering="device_filtering"
                      t-att-data-customer-segment-targeting="customer_segment_targeting"
-                     t-att-data-exclude-logged-in-users="exclude_logged_in_users"
-                     t-att-data-max-messages-per-session="max_messages_per_session"
-                     t-att-data-conversation-history-retention="conversation_history_retention"
-                     t-att-data-auto-end-inactive-conversations="auto_end_inactive_conversations"
-                     t-att-data-save-user-info="save_user_info"
-                     t-att-data-enable-conversation-logging="enable_conversation_logging"
-                     t-att-data-daily-usage-limit="daily_usage_limit"
+                     t-att-data-exclude-logged-in-users="str(exclude_logged_in_users).lower()"
+                     t-att-data-max-messages-per-session="str(max_messages_per_session)"
+                     t-att-data-conversation-history-retention="str(conversation_history_retention)"
+                     t-att-data-auto-end-inactive-conversations="str(auto_end_inactive_conversations).lower()"
+                     t-att-data-save-user-info="str(save_user_info).lower()"
+                     t-att-data-enable-conversation-logging="str(enable_conversation_logging).lower()"
+                     t-att-data-daily-usage-limit="str(daily_usage_limit)"
                      t-att-data-product-categories-include="product_categories_include"
                      t-att-data-product-categories-exclude="product_categories_exclude"
                      t-att-data-featured-products-priority="featured_products_priority"
                      t-att-data-out-of-stock-handling="out_of_stock_handling"
                      t-att-data-pages-to-show="pages_to_show"
-                     t-att-data-pages-to-hide="pages_to_hide">
+                     t-att-data-pages-to-hide="pages_to_hide"
+                     t-att-data-user-id="str(user_id)"
+                     t-att-data-user-name="str(user_name)"
+                     t-att-data-user-login="str(user_login)"
+                     t-att-data-user-email="str(user_email)"
+                     t-att-data-user-is-public="str(user_is_public).lower()"
+                     t-att-data-user-is-admin="str(user_is_admin).lower()">
                     <!-- Widget will be dynamically inserted by JavaScript -->
                 </div>
             </t>
