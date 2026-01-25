@@ -427,18 +427,11 @@
 
         if (pathname === '/') {
             return 'homepage';
-        } else if (pathname.includes('/shop') || pathname.includes('/product')) {
-            return 'product';
-        } else if (pathname.includes('/cart')) {
-            return 'cart';
-        } else if (pathname.includes('/checkout')) {
-            return 'checkout';
-        } else if (pathname.includes('/contactus') || pathname.includes('/contact')) {
-            return 'contact';
-        } else if (pathname.includes('/aboutus') || pathname.includes('/about')) {
-            return 'about';
         } else {
-            return 'other';
+            // Extract the first path segment after the domain
+            // For example: /shop?debug=1 -> shop, /settings/app/1 -> settings
+            var pathSegments = pathname.split('/').filter(segment => segment !== '');
+            return pathSegments.length > 0 ? pathSegments[0] : 'other';
         }
     }
 

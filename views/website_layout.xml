@@ -2,7 +2,7 @@
 <odoo>
     <!-- Inherit the main website layout to inject the widget on all pages -->
     <template id="elevenlabs_widget_inject" inherit_id="website.layout" name="ElevenLabs Widget Injection">
-        <xpath expr="//head[last()]" position="after">
+        <xpath expr="//main" position="inside">
             <!-- Include ElevenLabs assets on all pages -->
             <t t-call="elevenlabs_agent.elevenlabs_assets"/>
 
@@ -57,6 +57,7 @@
                 <t t-set="pages_to_hide" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_hide', '')"/>
 
                 <div class="elevenlabs-agent-container"
+                     t-att-style="'display: none;' if not agent_enabled else ''"
                      t-att-data-agent-id="agent_id"
                      t-att-data-enabled="agent_enabled"
                      t-att-data-widget-position="widget_position"
