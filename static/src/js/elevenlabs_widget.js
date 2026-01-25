@@ -19,12 +19,118 @@
                     el.style.setProperty('position', 'fixed', 'important');
                 }
             });
-            
+
             checks++;
             if (checks >= 5) {
                 clearInterval(interval);
             }
         }, 1000);
+    }
+
+    function initializeTriggerSystem(
+        agentId,
+        triggerDelay,
+        triggerOnScroll,
+        triggerOnTime,
+        triggerOnExitIntent,
+        enableShowProductCard,
+        enableAddToCart,
+        enableSearchProducts
+    ) {
+        var widgetCreated = false;
+
+        // Function to create the widget and prevent further triggers
+        function createWidgetOnce() {
+            if (!widgetCreated) {
+                widgetCreated = true;
+                createWidget(
+                    agentId,
+                    enableShowProductCard,
+                    enableAddToCart,
+                    enableSearchProducts
+                );
+
+                // Clean up event listeners after widget is created
+                window.removeEventListener('scroll', handleScroll);
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('mouseout', handleMouseOut);
+            }
+        }
+
+        // Trigger on delay
+        if (triggerDelay > 0) {
+            console.log('Starting ElevenLabs agent with delay of ' + triggerDelay + ' seconds');
+            setTimeout(createWidgetOnce, triggerDelay * 1000);
+        }
+
+        // Trigger on scroll
+        if (triggerOnScroll > 0) {
+            var handleScroll = function() {
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                var scrollPercent = (scrollTop / docHeight) * 100;
+
+                if (scrollPercent >= triggerOnScroll) {
+                    console.log('Triggering widget on scroll: ' + scrollPercent.toFixed(2) + '%');
+                    createWidgetOnce();
+                }
+            };
+
+            window.addEventListener('scroll', handleScroll);
+        }
+
+        // Trigger on time
+        if (triggerOnTime > 0) {
+            var timeSpent = 0;
+            var timerInterval = setInterval(function() {
+                timeSpent += 1;
+                if (timeSpent >= triggerOnTime) {
+                    console.log('Triggering widget after ' + triggerOnTime + ' seconds on page');
+                    clearInterval(timerInterval);
+                    createWidgetOnce();
+                }
+            }, 1000);
+
+        }
+
+        // Trigger on exit intent
+        if (triggerOnExitIntent) {
+            var exitIntentTriggered = false;
+            var handleMouseOut = function(e) {
+                if (exitIntentTriggered) return; // Prevent multiple triggers
+
+                e = e ? e : window.event;
+                var from = e.relatedTarget || e.toElement;
+
+                // Check if mouse is leaving the browser window
+                if (!from || from.nodeName === "HTML") {
+                    console.log('Exit intent detected - mouse leaving window');
+                    exitIntentTriggered = true;
+                    createWidgetOnce();
+                }
+            };
+
+            var handleMouseMove = function(e) {
+                // Check if mouse is moving toward the top of the screen (possible tab closing)
+                if (exitIntentTriggered) return;
+
+                if (e.clientY < 50) {  // Within top 50 pixels
+                    console.log('Exit intent detected - mouse near top of screen');
+                    exitIntentTriggered = true;
+                    createWidgetOnce();
+                }
+            };
+
+            // Add event listeners for exit intent
+            document.addEventListener('mouseout', handleMouseOut, true);
+            document.addEventListener('mousemove', handleMouseMove, true);
+        }
+
+        // If no triggers are configured, create widget immediately
+        if (triggerDelay === 0 && triggerOnScroll === 0 && triggerOnTime === 0 && !triggerOnExitIntent) {
+            console.log('No triggers configured, creating widget immediately');
+            createWidgetOnce();
+        }
     }
     
     function initializeElevenLabsWidget() {
@@ -120,25 +226,17 @@
             return;
         }
 
-        // Apply trigger delay if set
-        if (triggerDelay > 0) {
-            setTimeout(function() {
-                createWidget(
-                    agentId,
-                    enableShowProductCard,
-                    enableAddToCart,
-                    enableSearchProducts
-                );
-            }, triggerDelay * 1000);
-        } else {
-            // Create and insert the widget
-            createWidget(
-                agentId,
-                enableShowProductCard,
-                enableAddToCart,
-                enableSearchProducts
-            );
-        }
+        // Initialize trigger system
+        initializeTriggerSystem(
+            agentId,
+            triggerDelay,
+            triggerOnScroll,
+            triggerOnTime,
+            triggerOnExitIntent,
+            enableShowProductCard,
+            enableAddToCart,
+            enableSearchProducts
+        );
     }
 
     // Function to log all settings when debug=1 is present in the URL
