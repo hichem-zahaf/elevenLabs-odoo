@@ -1212,7 +1212,6 @@
         // Bind debug events - Test with the exact format the agent sends (array directly)
         document.getElementById('debug-show-products').addEventListener('click', function() {
             console.log('Test Product Cards clicked');
-            // Simulate the exact format from the agent (array directly)
             handleShowProductCard([
                 {
                     Name: 'Conference Chair',
@@ -1227,12 +1226,12 @@
                 {
                     Name: 'Samsung Galaxy S24 Ultra',
                     Price: '1299.99',
-                    Image: 'https://images.samsung.com/is/image/samsung/assets/us/smartphones/07172025/Galaxy_A_Series_Hub-FT12-1-A56_5g-pc.jpg'
+                    Image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3n6eQDN5Oier0k7awpW0P_LlK6-h5zkV2pA&s'
                 },
                 {
                     Name: "Nike Air Force 1 '07",
                     Price: '110.00',
-                    Image: 'https://static.nike.com/a/images/t_default/cd7b9860-0e91-4a4a-a3cf-e3b3d22f4988/air-force-1-07-shoes-WrLlWX.png'
+                    Image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlwZOIC0KtctPULH2EA8G6dg-qFqw8YhQH0Q&s'
                 }
             ]);
         });
@@ -1319,7 +1318,7 @@
         dialog.innerHTML += '<input type="text" id="dialog-input" value="' + (defaultValue || '') + '" style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">';
         dialog.innerHTML += '<div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">';
         dialog.innerHTML += '<button onclick="this.closest(\'div\').parentElement.parentElement.remove()" style="padding: 8px 16px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>';
-        dialog.innerHTML += '<button id="dialog-confirm" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">OK</button>';
+        dialog.innerHTML += '<button id="dialog-confirm" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 8px;">OK</button>';
         dialog.innerHTML += '</div>';
         
         modal.appendChild(dialog);
@@ -1365,7 +1364,7 @@
         dialog.innerHTML += '<p style="margin: 0 0 20px 0; color: #4b5563; line-height: 1.5;">' + message + '</p>';
         dialog.innerHTML += '<div style="display: flex; gap: 10px; justify-content: flex-end;">';
         dialog.innerHTML += '<button id="dialog-cancel" style="padding: 8px 20px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Cancel</button>';
-        dialog.innerHTML += '<button id="dialog-confirm" style="padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Confirm</button>';
+        dialog.innerHTML += '<button id="dialog-confirm" style="padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; margin-left: 8px;">Confirm</button>';
         dialog.innerHTML += '</div>';
         
         modal.appendChild(dialog);
