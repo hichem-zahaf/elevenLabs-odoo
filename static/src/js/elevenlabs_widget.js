@@ -50,10 +50,16 @@
                     enableSearchProducts
                 );
 
-                // Clean up event listeners after widget is created
-                window.removeEventListener('scroll', handleScroll);
-                window.removeEventListener('mousemove', handleMouseMove);
-                window.removeEventListener('mouseout', handleMouseOut);
+                // Clean up all event listeners after widget is created
+                if (typeof handleScroll === 'function') {
+                    window.removeEventListener('scroll', handleScroll);
+                }
+                if (typeof handleMouseMove === 'function') {
+                    document.removeEventListener('mousemove', handleMouseMove, true);
+                }
+                if (typeof handleMouseOut === 'function') {
+                    document.removeEventListener('mouseout', handleMouseOut, true);
+                }
             }
         }
 
@@ -97,7 +103,7 @@
         if (triggerOnExitIntent) {
             var exitIntentTriggered = false;
             var handleMouseOut = function(e) {
-                if (exitIntentTriggered) return; // Prevent multiple triggers
+                if (exitIntentTriggered || widgetCreated) return;
 
                 e = e ? e : window.event;
                 var from = e.relatedTarget || e.toElement;
@@ -112,7 +118,7 @@
 
             var handleMouseMove = function(e) {
                 // Check if mouse is moving toward the top of the screen (possible tab closing)
-                if (exitIntentTriggered) return;
+                if (exitIntentTriggered || widgetCreated) return;
 
                 if (e.clientY < 50) {  // Within top 50 pixels
                     console.log('Exit intent detected - mouse near top of screen');
