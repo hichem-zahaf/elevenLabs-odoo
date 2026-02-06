@@ -72,7 +72,7 @@
                                 <t t-set="geographic_restrictions" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.geographic_restrictions', '')"/>
                                 <t t-set="device_filtering" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.device_filtering', 'all')"/>
                                 <t t-set="customer_segment_targeting" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.customer_segment_targeting', 'all')"/>
-                                <t t-set="exclude_logged_in_users" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.exclude_logged_in_users', 'False') == 'True'"/>
+                                <t t-set="exclude_public_users" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.exclude_public_users', 'False') == 'True'"/>
 
                                 <!-- Session Controls -->
                                 <t t-set="max_messages_per_session" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.max_messages_per_session', '0'))"/>
@@ -105,6 +105,7 @@
                                 <t t-set="user_email" t-value="user.email if not user._is_public() else ''"/>
                                 <t t-set="user_is_public" t-value="user._is_public()"/>
                                 <t t-set="user_is_admin" t-value="user.has_group('base.group_system')"/>
+                                <t t-set="user_is_vip" t-value="not user._is_public() and (user.sudo().is_elevenlabs_vip or user.has_group('elevenlabs_agent.group_elevenlabs_vip_manager'))"/>
 
                                 <div class="elevenlabs-agent-container"
                                      t-att-data-agent-id="agent_id"
@@ -122,7 +123,7 @@
                                      t-att-data-geographic-restrictions="geographic_restrictions"
                                      t-att-data-device-filtering="device_filtering"
                                      t-att-data-customer-segment-targeting="customer_segment_targeting"
-                                     t-att-data-exclude-logged-in-users="str(exclude_logged_in_users).lower()"
+                                     t-att-data-exclude-public-users="str(exclude_public_users).lower()"
                                      t-att-data-max-messages-per-session="str(max_messages_per_session)"
                                      t-att-data-conversation-history-retention="str(conversation_history_retention)"
                                      t-att-data-auto-end-inactive-conversations="str(auto_end_inactive_conversations).lower()"
@@ -143,7 +144,8 @@
                                      t-att-data-user-login="str(user_login)"
                                      t-att-data-user-email="str(user_email)"
                                      t-att-data-user-is-public="str(user_is_public).lower()"
-                                     t-att-data-user-is-admin="str(user_is_admin).lower()">
+                                     t-att-data-user-is-admin="str(user_is_admin).lower()"
+                                     t-att-data-user-is-vip="str(user_is_vip).lower()">
                                     <!-- Widget will be dynamically inserted by JavaScript -->
                                 </div>
                                 

@@ -95,8 +95,8 @@
                             <field name="elevenlabs_customer_segment_targeting"/>
                         </setting>
 
-                        <setting help="Hide widget for logged-in users">
-                            <field name="elevenlabs_exclude_logged_in_users"/>
+                        <setting help="Hide widget for public/non-logged-in users. Only logged-in users will see the widget.">
+                            <field name="elevenlabs_exclude_public_users"/>
                         </setting>
                     </block>
 

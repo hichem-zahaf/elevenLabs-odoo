@@ -57,6 +57,7 @@ Previous Fixes:
     'website': 'https://www.llmarifa.co',
     'depends': ['website', 'website_sale', 'product'],
     'data': [
+        'security/elevenlabs_agent_security.xml',
         'views/res_config_settings_views.xml',
         'views/assets.xml',
         'views/website_templates.xml',

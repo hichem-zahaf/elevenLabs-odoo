@@ -237,7 +237,7 @@
         var geographicRestrictions = container.dataset.geographicRestrictions || null;
         var deviceFiltering = container.dataset.deviceFiltering || 'all';
         var customerSegmentTargeting = container.dataset.customerSegmentTargeting || 'all';
-        var excludeLoggedInUsers = container.dataset.excludeLoggedInUsers === 'true';
+        var excludePublicUsers = container.dataset.excludePublicUsers === 'true';
 
         // Session controls
         var maxMessagesPerSession = parseInt(container.dataset.maxMessagesPerSession) || 0;
@@ -281,6 +281,7 @@
         var userEmail = container.dataset.userEmail || undefined;
         var userIsPublicStr = container.dataset.userIsPublic;
         var userIsAdminStr = container.dataset.userIsAdmin;
+        var userIsVipStr = container.dataset.userIsVip;
 
         // If user data is not available from the template, try to get it from Odoo session
         if (!userId || userId === '0' || userId === 'undefined') {
@@ -308,8 +309,9 @@
         }
 
         // Determine if user is public based on user ID or explicit flag
-        var userIsPublic = (userIsPublicStr ? userIsPublicStr === 'True' : userId == '0' || userId == 'public' || !userId);
-        var userIsAdmin = userIsAdminStr ? userIsAdminStr === 'True' : false;
+        var userIsPublic = (userIsPublicStr ? userIsPublicStr === 'true' : userId == '0' || userId == 'public' || !userId);
+        var userIsAdmin = userIsAdminStr ? userIsAdminStr === 'true' : false;
+        var userIsVip = userIsVipStr ? userIsVipStr === 'true' : false;
 
         // Log user details separately if user is logged in (not public)
         if (!userIsPublic && userId && userId !== '0' && userId !== 'undefined' && userId != null) {
@@ -319,6 +321,7 @@
             console.log('User Login:', userLogin);
             console.log('User Email:', userEmail);
             console.log('Is Admin:', userIsAdmin);
+            console.log('Is VIP:', userIsVip);
             console.log('=========================');
         } else {
             console.log('User is a public visitor');
@@ -345,9 +348,20 @@
             return;
         }
 
-        // Check if logged-in users should be excluded
-        if (excludeLoggedInUsers && !userIsPublic && userId && userId !== '0' && userId !== 'undefined' && userId != null) {
-            console.log('ElevenLabs agent is excluded for logged-in users');
+        // Check customer segment targeting - VIP only
+        if (customerSegmentTargeting === 'vip') {
+            console.log('VIP-only targeting enabled');
+            // User must be logged in AND have VIP status
+            if (userIsPublic || !userIsVip) {
+                console.log('ElevenLabs agent is restricted to VIP users only. User is VIP:', userIsVip, ', User is public:', userIsPublic);
+                return;
+            }
+            console.log('User is VIP, allowing widget display');
+        }
+
+        // Check if public/non-logged-in users should be excluded
+        if (excludePublicUsers && userIsPublic) {
+            console.log('ElevenLabs agent is excluded for public/non-logged-in users');
             return;
         }
 
@@ -391,7 +405,7 @@
             geographicRestrictions: container.dataset.geographicRestrictions || null,
             deviceFiltering: container.dataset.deviceFiltering || 'all',
             customerSegmentTargeting: container.dataset.customerSegmentTargeting || 'all',
-            excludeLoggedInUsers: container.dataset.excludeLoggedInUsers === 'true',
+            excludePublicUsers: container.dataset.excludePublicUsers === 'true',
             maxMessagesPerSession: parseInt(container.dataset.maxMessagesPerSession) || 0,
             conversationHistoryRetention: parseInt(container.dataset.conversationHistoryRetention) || 24,
             autoEndInactiveConversations: container.dataset.autoEndInactiveConversations === 'true',
@@ -422,10 +436,13 @@
             userEmail: container.dataset.userEmail || 'Not set',
             userIsPublic: container.dataset.userIsPublic === 'true',
             userIsAdmin: container.dataset.userIsAdmin === 'true',
+            userIsVip: container.dataset.userIsVip === 'true',
             rawUserIsPublic: container.dataset.userIsPublic,  // For debugging
             rawUserIsPublicType: typeof container.dataset.userIsPublic,  // For debugging
             rawUserIsAdmin: container.dataset.userIsAdmin,     // For debugging
-            rawUserIsAdminType: typeof container.dataset.userIsAdmin     // For debugging
+            rawUserIsAdminType: typeof container.dataset.userIsAdmin,    // For debugging
+            rawUserIsVip: container.dataset.userIsVip,         // For debugging
+            rawUserIsVipType: typeof container.dataset.userIsVip         // For debugging
         };
 
         console.log('=== ElevenLabs Module Settings ===');

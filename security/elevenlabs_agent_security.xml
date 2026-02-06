@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ElevenLabs Agent Access Rights -->
+        <record id="group_elevenlabs_vip_manager" model="res.groups">
+            <field name="name">ElevenLabs VIP Manager</field>
+            <field name="category_id" ref="base.module_category_website"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Users can manage VIP status for ElevenLabs AI Assistant targeting.</field>
+        </record>
+
+        <!-- Record Rules for VIP Field -->
+        <record id="elevenlabs_vip_field_access_rule" model="ir.rule">
+            <field name="name">ElevenLabs VIP Field: Read for All, Write for Managers</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_public')), (4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Full access for VIP managers -->
+        <record id="elevenlabs_vip_manager_rule" model="ir.rule">
+            <field name="name">ElevenLabs VIP: Full Access for Managers</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_elevenlabs_vip_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

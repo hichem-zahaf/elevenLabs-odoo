@@ -135,11 +135,11 @@ class ResConfigSettings(models.TransientModel):
         help='Which customer segments to target with the widget.'
     )
 
-    elevenlabs_exclude_logged_in_users = fields.Boolean(
-        string='Exclude Logged-In Users',
-        config_parameter='elevenlabs_agent.exclude_logged_in_users',
+    elevenlabs_exclude_public_users = fields.Boolean(
+        string='Require Login (Exclude Public Users)',
+        config_parameter='elevenlabs_agent.exclude_public_users',
         default=False,
-        help='Hide widget for logged-in users.'
+        help='Hide widget for public/non-logged-in users. Only logged-in users will see the widget.'
     )
 
     # Session Controls
