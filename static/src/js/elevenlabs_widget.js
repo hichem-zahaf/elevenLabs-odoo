@@ -34,7 +34,6 @@
         triggerOnTime,
         triggerOnExitIntent,
         enableShowProductCard,
-        enableAddToCart,
         enableSearchProducts
     ) {
         var widgetCreated = false;
@@ -46,7 +45,6 @@
                 createWidget(
                     agentId,
                     enableShowProductCard,
-                    enableAddToCart,
                     enableSearchProducts
                 );
 
@@ -233,9 +231,7 @@
 
         // Integration controls
         var enableShowProductCard = container.dataset.enableShowProductCard === 'true';
-        var enableAddToCart = container.dataset.enableAddToCart === 'true';
         var enableSearchProducts = container.dataset.enableSearchProducts === 'true';
-        var cartIntegrationMethod = container.dataset.cartIntegrationMethod || 'direct_add';
 
         // Targeting controls
         var geographicRestrictions = container.dataset.geographicRestrictions || null;
@@ -375,7 +371,6 @@
             triggerOnTime,
             triggerOnExitIntent,
             enableShowProductCard,
-            enableAddToCart,
             enableSearchProducts
         );
     }
@@ -391,7 +386,6 @@
             triggerOnExitIntent: container.dataset.triggerOnExitIntent === 'true',
             showFirstTimeVisitorsOnly: container.dataset.showFirstTimeVisitorsOnly === 'true',
             enableShowProductCard: container.dataset.enableShowProductCard === 'true',
-            enableAddToCart: container.dataset.enableAddToCart === 'true',
             enableSearchProducts: container.dataset.enableSearchProducts === 'true',
             cartIntegrationMethod: container.dataset.cartIntegrationMethod || 'direct_add',
             geographicRestrictions: container.dataset.geographicRestrictions || null,
@@ -442,7 +436,6 @@
     function createWidget(
         agentId,
         enableShowProductCard,
-        enableAddToCart,
         enableSearchProducts
     ) {
         // Create the elevenlabs-convai element
@@ -463,18 +456,18 @@
                 console.log('ElevenLabs script loaded');
                 // Register client tools after script loads
                 setTimeout(function() {
-                    registerClientTools(enableShowProductCard, enableAddToCart, enableSearchProducts);
+                    registerClientTools(enableShowProductCard, enableSearchProducts);
                 }, 500);
             };
 
             document.head.appendChild(script);
         } else {
             // Script already loaded, register tools
-            registerClientTools(enableShowProductCard, enableAddToCart, enableSearchProducts);
+            registerClientTools(enableShowProductCard, enableSearchProducts);
         }
     }
-    
-    function registerClientTools(enableShowProductCard, enableAddToCart, enableSearchProducts) {
+
+    function registerClientTools(enableShowProductCard, enableSearchProducts) {
         var widget = document.querySelector('elevenlabs-convai');
 
         if (!widget) {
@@ -497,10 +490,21 @@
                         handleShowProductCard(params);
                     };
                 }
+
+                if (enableSearchProducts) {
+                    event.detail.config.clientTools.searchProducts = function(params) {
+                        console.log('searchProducts called with:', params);
+                        handleSearchProducts(params);
+                    };
+                }
             }
         });
 
         console.log('xx ElevenLabs client tools registered xx');
+        console.log('Enabled tools:', {
+            showProductCard: enableShowProductCard,
+            searchProducts: enableSearchProducts
+        });
     }
 
     function _shouldShowOnCurrentPage(pagesToShow, pagesToHide) {
@@ -654,12 +658,6 @@
                 name.style.color = textColor;
             });
 
-            // Apply to all add to cart buttons
-            var buttons = modal.querySelectorAll('.btn-add-to-cart');
-            buttons.forEach(function(btn) {
-                btn.style.background = primaryColor;
-            });
-
             console.log('Colors applied directly to modal elements');
         }
 
@@ -748,12 +746,6 @@
             // Price
             html += '<div class="product-price" style="font-size: 14px; font-weight: bold; color: var(--el-primary-color, #667eea); margin-bottom: 8px;">$' + productPrice + '</div>';
 
-            // Add to cart button
-            html += '<button class="btn-add-to-cart" data-sku="' + productSku + '" style="background: var(--el-primary-color, #667eea); color: white; border: none; padding: 8px; width: 100%; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: auto; transition: background 0.2s;">';
-            html += '<i class="fa fa-plus" style="font-size: 10px;"></i>';
-            html += '<span>Add to Cart</span>';
-            html += '</button>';
-
             html += '</div>'; // product-info
             html += '</div>'; // product-card
             html += '</div>'; // swiper-slide
@@ -818,59 +810,43 @@
                 }
             });
         }
-
-        // Add to cart buttons
-        var addToCartBtns = document.querySelectorAll('.elevenlabs-product-modal .btn-add-to-cart');
-        addToCartBtns.forEach(function(button) {
-            button.addEventListener('click', function() {
-                var sku = this.dataset.sku;
-                var btn = this;
-                var originalContent = btn.innerHTML;
-                var originalBg = btn.style.background;
-
-                // Show loading state
-                btn.disabled = true;
-                btn.classList.add('loading');
-                btn.style.background = '#9ca3af';
-                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i><span>Adding...</span>';
-
-                // Get product card to extract more info
-                var productCard = btn.closest('.product-card');
-                var productName = productCard ? productCard.querySelector('.product-name').textContent : '';
-                var productId = productCard ? productCard.dataset.productId : null;
-
-                // Add to cart via API
-                addSingleItemToCart(sku, productName, productId, 1, function(success) {
-                    btn.classList.remove('loading');
-                    if (success) {
-                        btn.classList.add('success');
-                        btn.style.background = '#10b981';
-                        btn.innerHTML = '<i class="fa fa-check"></i><span>Added!</span>';
-                    } else {
-                        btn.classList.add('error');
-                        btn.style.background = '#ef4444';
-                        btn.innerHTML = '<i class="fa fa-times"></i><span>Failed</span>';
-                    }
-
-                    setTimeout(function() {
-                        btn.disabled = false;
-                        btn.innerHTML = originalContent;
-                        btn.style.background = originalBg;
-                        btn.classList.remove('success', 'error');
-                    }, 2000);
-                });
-            });
-        });
     }
-    
+
     function handleSearchProducts(params) {
+        // Extract search parameters with flexible naming
         var query = params.query || params.Query || params.search || '';
-        
+        var category = params.category || params.Category || null;
+        var minPrice = params.minPrice || params.min_price || null;
+        var maxPrice = params.maxPrice || params.max_price || null;
+        var inStockOnly = params.inStockOnly || params.in_stock_only || false;
+        var limit = params.limit || 6;
+
         if (!query) {
             console.error('No search query provided');
             return;
         }
-        
+
+        console.log('=== Search Products ===');
+        console.log('Query:', query);
+        console.log('Filters:', {
+            category: category,
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            inStockOnly: inStockOnly,
+            limit: limit
+        });
+
+        // Build request params
+        var requestParams = {
+            query: query,
+            limit: limit
+        };
+
+        if (category) requestParams.category = category;
+        if (minPrice) requestParams.min_price = minPrice;
+        if (maxPrice) requestParams.max_price = maxPrice;
+        if (inStockOnly) requestParams.in_stock_only = true;
+
         // Call search API
         fetch('/api/elevenlabs/products/search', {
             method: 'POST',
@@ -880,10 +856,7 @@
             body: JSON.stringify({
                 jsonrpc: '2.0',
                 method: 'call',
-                params: {
-                    query: query,
-                    limit: 6
-                },
+                params: requestParams,
                 id: Math.floor(Math.random() * 1000000)
             })
         })
@@ -891,37 +864,58 @@
             return response.json();
         })
         .then(function(data) {
-            if (data.result && data.result.success && data.result.products) {
-                handleShowProductCard({products: data.result.products});
+            console.log('Search response:', data);
+
+            if (data.result && data.result.success) {
+                var products = data.result.products;
+                var totalCount = data.result.total_count || products.length;
+                var filtersApplied = data.result.filters_applied || {};
+
+                console.log('Found ' + totalCount + ' products');
+
+                if (products.length === 0) {
+                    console.log('No products found for query:', query);
+                    // Could trigger "did you mean?" suggestions here
+                    return;
+                }
+
+                // Display results with summary
+                handleShowProductCard({
+                    products: products,
+                    summary: 'Found ' + totalCount + ' product' + (totalCount !== 1 ? 's' : '') + ' for "' + query + '"'
+                });
+            } else {
+                console.error('Search failed:', data.result?.error || 'Unknown error');
             }
         })
         .catch(function(error) {
-            console.error('Search failed:', error);
+            console.error('Search request failed:', error);
         });
     }
     
     function showDebugPanel() {
         console.log('Creating debug panel...');
-        
+
         // Check if panel already exists
         if (document.querySelector('.elevenlabs-debug-panel')) {
             console.log('Debug panel already exists');
             return;
         }
-        
+
         var html = '<div class="elevenlabs-debug-panel" style="position: fixed !important; width: 150px;bottom: 20px !important; right: 20px !important; z-index: 999998 !important; background: white !important; border: 1px solid #e5e7eb !important; border-radius: 12px !important; padding: 12px !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important; max-height: 80vh; overflow-y: auto;">';
         html += '<h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #1f2937;">🔧 Debug</h4>';
-        
+
         // Shopping tools
         html += '<div style="margin-bottom: 10px;">';
         html += '<h5 style="margin: 0 0 5px 0; font-size: 11px; color: #6b7280;">Shopping</h5>';
         html += '<button id="debug-show-products" class="btn btn-sm btn-secondary" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;">Products</button>';
+        html += '<button id="debug-search" class="btn btn-sm btn-secondary" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>';
         html += '</div>';
         html += '</div>';
-        
+
         document.body.insertAdjacentHTML('beforeend', html);
         console.log('Debug panel created');
-        
+
         // Force positioning
         var debugPanel = document.querySelector('.elevenlabs-debug-panel');
         if (debugPanel) {
@@ -930,50 +924,47 @@
             debugPanel.style.right = '20px';
             debugPanel.style.zIndex = '999998';
         }
-        
+
         // Bind debug events - Test with the exact format the agent sends (array directly)
-        document.getElementById('debug-show-products').addEventListener('click', function() {
-            console.log('Test Product Cards clicked');
-            handleShowProductCard([
-                {
-                    Name: 'Conference Chair',
-                    Price: '33.00',
-                    Image: 'https://odoo.local/web/image/product.template/19/image_128'
-                },
-                {
-                    Name: 'Apple MacBook Air 13-inch M2 (2024)',
-                    Price: '1099.00',
-                    Image: 'https://istorm.com.cy/cdn/shop/files/IMG-12445963_8be2ff74-e27d-4dd4-86ee-b760eea37f4a.jpg?v=1739301624'
-                },
-                {
-                    Name: 'Samsung Galaxy S24 Ultra',
-                    Price: '1299.99',
-                    Image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3n6eQDN5Oier0k7awpW0P_LlK6-h5zkV2pA&s'
-                },
-                {
-                    Name: "Nike Air Force 1 '07",
-                    Price: '110.00',
-                    Image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlwZOIC0KtctPULH2EA8G6dg-qFqw8YhQH0Q&s'
-                }
-            ]);
-        });
-        
-        document.getElementById('debug-search').addEventListener('click', function() {
-            showInputDialog('Enter search query:', '', function(query) {
-                if (query) {
-                    handleSearchProducts({query: query});
-                }
+        var showProductsBtn = document.getElementById('debug-show-products');
+        if (showProductsBtn) {
+            showProductsBtn.addEventListener('click', function() {
+                console.log('Test Product Cards clicked');
+                handleShowProductCard([
+                    {
+                        Name: 'Conference Chair',
+                        Price: '33.00',
+                        Image: 'https://odoo.local/web/image/product.template/19/image_128'
+                    },
+                    {
+                        Name: 'Apple MacBook Air 13-inch M2 (2024)',
+                        Price: '1099.00',
+                        Image: 'https://istorm.com.cy/cdn/shop/files/IMG-12445963_8be2ff74-e27d-4dd4-86ee-b760eea37f4a.jpg?v=1739301624'
+                    },
+                    {
+                        Name: 'Samsung Galaxy S24 Ultra',
+                        Price: '1299.99',
+                        Image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3n6eQDN5Oier0k7awpW0P_LlK6-h5zkV2pA&s'
+                    },
+                    {
+                        Name: "Nike Air Force 1 '07",
+                        Price: '110.00',
+                        Image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlwZOIC0KtctPULH2EA8G6dg-qFqw8YhQH0Q&s'
+                    }
+                ]);
             });
-        });
-        
-        document.getElementById('debug-product-details').addEventListener('click', function() {
-            console.log('Test Product Details clicked');
-            showInputDialog('Enter product ID:', '1', function(productId) {
-                if (productId) {
-                    handleDisplayProductDetails({product_id: parseInt(productId)});
-                }
+        }
+
+        var searchBtn = document.getElementById('debug-search');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function() {
+                showInputDialog('Enter search query:', '', function(query) {
+                    if (query) {
+                        handleSearchProducts({query: query});
+                    }
+                });
             });
-        });
+        }
     }
     
     // HTML Dialog Helper Functions
