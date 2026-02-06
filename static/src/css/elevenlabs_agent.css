@@ -1,26 +1,6 @@
 /* ElevenLabs Agent Widget Styles */
 
-/* Theme CSS Variables - set by JavaScript */
-:root {
-    --el-primary-color: #667eea;
-    --el-secondary-color: #764ba2;
-    --el-bg-color: #ffffff;
-    --el-card-bg: #ffffff;
-    --el-text-color: #2c3e50;
-    --el-text-muted: #7f8c8d;
-    --el-border-color: #e5e7eb;
-    --el-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-/* Dark Theme Override */
-body.elevenlabs-dark-theme {
-    --el-bg-color: #1a1a1a;
-    --el-card-bg: #2a2a2a;
-    --el-text-color: #f0f0f0;
-    --el-text-muted: #a0a0a0;
-    --el-border-color: #333;
-    --el-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
+/* Theme CSS Variables - defaults will be set by JavaScript, no defaults in CSS to allow JavaScript to control them completely */
 
 /* Agent Container */
 .elevenlabs-agent-container {
@@ -1110,62 +1090,62 @@ body.elevenlabs-dark-theme .product-info {
 
 /* Product Modal Theme Support */
 .elevenlabs-product-modal .product-modal-container {
-    background: var(--el-card-bg, white) !important;
+    background: var(--el-card-bg) !important;
 }
 
 .elevenlabs-product-modal .product-modal-header h3 {
-    color: var(--el-text-color, #2c3e50) !important;
+    color: var(--el-text-color) !important;
 }
 
 .elevenlabs-product-modal .product-modal-header i {
-    color: var(--el-primary-color, #667eea) !important;
+    color: var(--el-primary-color) !important;
 }
 
 .elevenlabs-product-modal .close-modal-btn {
-    color: var(--el-text-muted, #666) !important;
+    color: var(--el-text-muted) !important;
 }
 
 .elevenlabs-product-modal .product-card {
-    background: var(--el-card-bg, white) !important;
+    background: var(--el-card-bg) !important;
 }
 
 .elevenlabs-product-modal .product-name {
-    color: var(--el-text-color, #2c3e50) !important;
+    color: var(--el-text-color) !important;
 }
 
 .elevenlabs-product-modal .product-price {
-    color: var(--el-primary-color, #667eea) !important;
+    color: var(--el-primary-color) !important;
 }
 
 .elevenlabs-product-modal .btn-add-to-cart {
-    background: var(--el-primary-color, #667eea) !important;
+    background: var(--el-primary-color) !important;
 }
 
-/* Dark theme overrides */
+/* Dark theme overrides - no fallbacks to ensure CSS variables are used */
 body.elevenlabs-dark-theme .elevenlabs-product-modal .product-modal-container {
-    background: var(--el-card-bg, #2a2a2a) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    background: var(--el-card-bg) !important;
+    box-shadow: var(--el-shadow) !important;
 }
 
 body.elevenlabs-dark-theme .elevenlabs-product-modal .product-modal-header h3 {
-    color: var(--el-text-color, #f0f0f0) !important;
+    color: var(--el-text-color) !important;
 }
 
 body.elevenlabs-dark-theme .elevenlabs-product-modal .close-modal-btn {
-    color: var(--el-text-muted, #a0a0a0) !important;
+    color: var(--el-text-muted) !important;
 }
 
 body.elevenlabs-dark-theme .elevenlabs-product-modal .product-card {
-    background: var(--el-card-bg, #2a2a2a) !important;
-    border: 1px solid var(--el-border-color, #333) !important;
+    background: var(--el-card-bg) !important;
+    border: 1px solid var(--el-border-color) !important;
 }
 
 body.elevenlabs-dark-theme .elevenlabs-product-modal .product-name {
-    color: var(--el-text-color, #f0f0f0) !important;
+    color: var(--el-text-color) !important;
 }
 
 body.elevenlabs-dark-theme .elevenlabs-product-modal .product-info {
-    background: var(--el-card-bg, #2a2a2a) !important;
+    background: var(--el-card-bg) !important;
 }
 
 /* ElevenLabs Swiper Styles */

@@ -156,10 +156,11 @@
         if (!themeStyle) {
             themeStyle = document.createElement('style');
             themeStyle.id = themeStyleId;
+            // Append to end of head to ensure it loads AFTER all other CSS
             document.head.appendChild(themeStyle);
         }
 
-        // Define theme CSS variables
+        // Define theme CSS variables (no defaults in CSS file, so these will always take effect)
         var cssVars = ':root {\n';
         cssVars += '--el-primary-color: ' + primaryColor + ';\n';
         cssVars += '--el-secondary-color: ' + secondaryColor + ';\n';
@@ -195,10 +196,12 @@
             console.log('Dark theme class removed from body');
         }
 
-        // Verify CSS variables are set
-        console.log('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
-        console.log('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
-        console.log('====================================');
+        // Wait a tick for CSS to apply, then verify
+        setTimeout(function() {
+            console.log('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
+            console.log('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
+            console.log('====================================');
+        }, 10);
     }
 
     function initializeElevenLabsWidget() {
@@ -637,6 +640,49 @@
         // Append directly to body with high-level container
         document.body.insertAdjacentHTML('beforeend', modalHtml);
 
+        // Apply theme colors directly to modal elements (to override inline styles)
+        var modal = document.querySelector('.elevenlabs-product-modal');
+        if (modal) {
+            var primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color').trim();
+            var textColor = getComputedStyle(document.documentElement).getPropertyValue('--el-text-color').trim();
+            var textMuted = getComputedStyle(document.documentElement).getPropertyValue('--el-text-muted').trim();
+            var cardBg = getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg').trim();
+
+            console.log('Directly applying colors to modal:', { primaryColor, textColor, textMuted, cardBg });
+
+            // Apply to header icon
+            var headerIcon = modal.querySelector('.product-modal-header i');
+            if (headerIcon) headerIcon.style.color = primaryColor;
+
+            // Apply to header title
+            var headerTitle = modal.querySelector('.product-modal-header h3');
+            if (headerTitle) headerTitle.style.color = textColor;
+
+            // Apply to close button
+            var closeBtn = modal.querySelector('.close-modal-btn');
+            if (closeBtn) closeBtn.style.color = textMuted;
+
+            // Apply to all product prices
+            var prices = modal.querySelectorAll('.product-price');
+            prices.forEach(function(price) {
+                price.style.color = primaryColor;
+            });
+
+            // Apply to all product names
+            var names = modal.querySelectorAll('.product-name');
+            names.forEach(function(name) {
+                name.style.color = textColor;
+            });
+
+            // Apply to all add to cart buttons
+            var buttons = modal.querySelectorAll('.btn-add-to-cart');
+            buttons.forEach(function(btn) {
+                btn.style.background = primaryColor;
+            });
+
+            console.log('Colors applied directly to modal elements');
+        }
+
         // Force positioning and visibility
         var modal = document.querySelector('.elevenlabs-product-modal');
         if (modal) {
@@ -663,11 +709,12 @@
     
     function createProductCardsHTML(products) {
         console.log('=== createProductCardsHTML called ===');
+        console.log('Body has dark theme class:', document.body.classList.contains('elevenlabs-dark-theme'));
         console.log('Current CSS vars:', {
-            primary: getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'),
-            cardBg: getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'),
-            textColor: getComputedStyle(document.documentElement).getPropertyValue('--el-text-color'),
-            shadow: getComputedStyle(document.documentElement).getPropertyValue('--el-shadow')
+            primary: getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color').trim(),
+            cardBg: getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg').trim(),
+            textColor: getComputedStyle(document.documentElement).getPropertyValue('--el-text-color').trim(),
+            shadow: getComputedStyle(document.documentElement).getPropertyValue('--el-shadow').trim()
         });
 
         var html = '<div class="elevenlabs-product-modal" style="position: fixed !important; bottom: 100px !important; left: 20px !important; z-index: 999999 !important; opacity: 1 !important; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">';
