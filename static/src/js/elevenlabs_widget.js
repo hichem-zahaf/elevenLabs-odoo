@@ -138,7 +138,55 @@
             createWidgetOnce();
         }
     }
-    
+
+    function applyTheme(themeType, primaryColor, secondaryColor) {
+        // Use colors directly, fall back to defaults if not provided
+        primaryColor = primaryColor || '#667eea';
+        secondaryColor = secondaryColor || '#764ba2';
+
+        // Create or update style element for theme variables
+        var themeStyleId = 'elevenlabs-theme-vars';
+        var themeStyle = document.getElementById(themeStyleId);
+
+        if (!themeStyle) {
+            themeStyle = document.createElement('style');
+            themeStyle.id = themeStyleId;
+            document.head.appendChild(themeStyle);
+        }
+
+        // Define theme CSS variables
+        var cssVars = ':root {\n';
+        cssVars += '--el-primary-color: ' + primaryColor + ';\n';
+        cssVars += '--el-secondary-color: ' + secondaryColor + ';\n';
+
+        if (themeType === 'dark') {
+            cssVars += '--el-bg-color: #1a1a1a;\n';
+            cssVars += '--el-card-bg: #2a2a2a;\n';
+            cssVars += '--el-text-color: #f0f0f0;\n';
+            cssVars += '--el-text-muted: #a0a0a0;\n';
+            cssVars += '--el-border-color: #333;\n';
+            cssVars += '--el-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);\n';
+        } else {
+            cssVars += '--el-bg-color: #ffffff;\n';
+            cssVars += '--el-card-bg: #ffffff;\n';
+            cssVars += '--el-text-color: #2c3e50;\n';
+            cssVars += '--el-text-muted: #7f8c8d;\n';
+            cssVars += '--el-border-color: #e5e7eb;\n';
+            cssVars += '--el-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);\n';
+        }
+
+        cssVars += '}';
+
+        themeStyle.textContent = cssVars;
+
+        // Apply theme class to body for dark mode
+        if (themeType === 'dark') {
+            document.body.classList.add('elevenlabs-dark-theme');
+        } else {
+            document.body.classList.remove('elevenlabs-dark-theme');
+        }
+    }
+
     function initializeElevenLabsWidget() {
         // Find the container element
         var container = document.querySelector('.elevenlabs-agent-container');
@@ -195,6 +243,14 @@
         // Page visibility controls
         var pagesToShow = container.dataset.pagesToShow || null;
         var pagesToHide = container.dataset.pagesToHide || null;
+
+        // Theme settings
+        var themeType = container.dataset.themeType || 'light';
+        var primaryColor = container.dataset.primaryColor || '#667eea';
+        var secondaryColor = container.dataset.secondaryColor || '#764ba2';
+
+        // Apply theme settings
+        applyTheme(themeType, primaryColor, secondaryColor);
 
         // Try to get user information from the container data attributes first
         var userId = container.dataset.userId || undefined;
@@ -328,6 +384,10 @@
             outOfStockHandling: container.dataset.outOfStockHandling || 'hide',
             pagesToShow: container.dataset.pagesToShow || null,
             pagesToHide: container.dataset.pagesToHide || null,
+            // Theme settings
+            themeType: container.dataset.themeType || 'light',
+            primaryColor: container.dataset.primaryColor || '#667eea',
+            secondaryColor: container.dataset.secondaryColor || '#764ba2',
             currentPage: _getCurrentPageType(),
             shouldShowOnCurrentPage: _shouldShowOnCurrentPage(
                 container.dataset.pagesToShow || null,
@@ -570,15 +630,15 @@
     
     function createProductCardsHTML(products) {
         var html = '<div class="elevenlabs-product-modal" style="position: fixed !important; bottom: 100px !important; left: 20px !important; z-index: 999999 !important; opacity: 1 !important; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">';
-        html += '<div class="product-modal-container" style="background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); padding: 12px; width: 420px; max-width: calc(100vw - 40px);">';
+        html += '<div class="product-modal-container" style="background: var(--el-card-bg, white); border-radius: 12px; box-shadow: var(--el-shadow, 0 8px 24px rgba(0, 0, 0, 0.12)); padding: 12px; width: 420px; max-width: calc(100vw - 40px);">';
 
         // Header with title and close button
         html += '<div class="product-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">';
         html += '<div style="display: flex; align-items: center; gap: 8px;">';
-        html += '<i class="fa fa-shopping-bag" style="font-size: 14px; color: #667eea;"></i>';
-        html += '<h3 style="margin: 0; font-size: 14px; font-weight: 600; color: #2c3e50;">Recommended Products</h3>';
+        html += '<i class="fa fa-shopping-bag" style="font-size: 14px; color: var(--el-primary-color, #667eea);"></i>';
+        html += '<h3 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--el-text-color, #2c3e50);">Recommended Products</h3>';
         html += '</div>';
-        html += '<button class="close-modal-btn" style="background: rgba(0, 0, 0, 0.05); border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #666; transition: all 0.2s;">&times;</button>';
+        html += '<button class="close-modal-btn" style="background: rgba(0, 0, 0, 0.05); border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--el-text-muted, #666); transition: all 0.2s;">&times;</button>';
         html += '</div>';
 
         // Swiper container (using proper Swiper classes)
@@ -598,7 +658,7 @@
             html += '<div class="swiper-slide" style="width: auto;">';
 
             // Product card
-            html += '<div class="product-card" data-sku="' + productSku + '" data-product-id="' + productId + '" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); transition: all 0.3s; display: flex; flex-direction: column; width: 120px;">';
+            html += '<div class="product-card" data-sku="' + productSku + '" data-product-id="' + productId + '" style="background: var(--el-card-bg, white); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); transition: all 0.3s; display: flex; flex-direction: column; width: 120px;">';
 
             // Product image
             html += '<div class="product-image" style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; overflow: hidden; flex-shrink: 0;">';
@@ -615,13 +675,13 @@
             html += '<div class="product-info" style="padding: 10px 8px; display: flex; flex-direction: column; flex: 1;">';
 
             // Product name
-            html += '<h4 class="product-name" title="' + productName + '" style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #2c3e50; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">' + productName + '</h4>';
+            html += '<h4 class="product-name" title="' + productName + '" style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: var(--el-text-color, #2c3e50); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">' + productName + '</h4>';
 
             // Price
-            html += '<div class="product-price" style="font-size: 14px; font-weight: bold; color: #667eea; margin-bottom: 8px;">$' + productPrice + '</div>';
+            html += '<div class="product-price" style="font-size: 14px; font-weight: bold; color: var(--el-primary-color, #667eea); margin-bottom: 8px;">$' + productPrice + '</div>';
 
             // Add to cart button
-            html += '<button class="btn-add-to-cart" data-sku="' + productSku + '" style="background: #667eea; color: white; border: none; padding: 8px; width: 100%; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: auto; transition: background 0.2s;">';
+            html += '<button class="btn-add-to-cart" data-sku="' + productSku + '" style="background: var(--el-primary-color, #667eea); color: white; border: none; padding: 8px; width: 100%; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: auto; transition: background 0.2s;">';
             html += '<i class="fa fa-plus" style="font-size: 10px;"></i>';
             html += '<span>Add to Cart</span>';
             html += '</button>';

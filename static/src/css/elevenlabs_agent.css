@@ -1,5 +1,27 @@
 /* ElevenLabs Agent Widget Styles */
 
+/* Theme CSS Variables - set by JavaScript */
+:root {
+    --el-primary-color: #667eea;
+    --el-secondary-color: #764ba2;
+    --el-bg-color: #ffffff;
+    --el-card-bg: #ffffff;
+    --el-text-color: #2c3e50;
+    --el-text-muted: #7f8c8d;
+    --el-border-color: #e5e7eb;
+    --el-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Dark Theme Override */
+body.elevenlabs-dark-theme {
+    --el-bg-color: #1a1a1a;
+    --el-card-bg: #2a2a2a;
+    --el-text-color: #f0f0f0;
+    --el-text-muted: #a0a0a0;
+    --el-border-color: #333;
+    --el-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
 /* Agent Container */
 .elevenlabs-agent-container {
     position: relative;
@@ -15,6 +37,20 @@
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-modal-container {
+    background: var(--el-card-bg);
+    border-radius: 20px;
+    box-shadow: var(--el-shadow);
+    padding: 20px;
+    max-width: 600px;
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+body.elevenlabs-dark-theme .product-modal-container {
+    background-color: rgba(42, 42, 42, 0.95);
 }
 
 .elevenlabs-product-modal.show {
@@ -56,10 +92,7 @@
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--el-text-color);
 }
 
 @keyframes sparkle {
@@ -311,7 +344,7 @@
 .product-name {
     font-size: 11px;
     margin: 0 0 4px 0;
-    color: #333;
+    color: var(--el-text-color, #333);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -323,10 +356,7 @@
 .product-price {
     font-size: 14px;
     font-weight: bold;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--el-primary-color, #667eea);
     margin: 0;
 }
 
@@ -842,7 +872,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--el-border-color, rgba(0, 0, 0, 0.2));
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -850,7 +880,7 @@
 .page-indicators .indicator.active {
     width: 24px;
     border-radius: 4px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--el-primary-color, #667eea);
 }
 
 /* Responsive */
@@ -1019,44 +1049,63 @@
 
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
-    .recommendations-container,
-    .cart-container {
+    /* Only apply if no custom theme is set */
+    body:not(.elevenlabs-dark-theme) .recommendations-container,
+    body:not(.elevenlabs-dark-theme) .cart-container {
         background: #1a1a1a;
         border-color: #333;
     }
-    
-    .recommendations-header {
+
+    body:not(.elevenlabs-dark-theme) .recommendations-header {
         border-bottom-color: #333;
     }
-    
-    .product-card,
-    .cart-item {
+
+    body:not(.elevenlabs-dark-theme) .product-card,
+    body:not(.elevenlabs-dark-theme) .cart-item {
         background: #2a2a2a;
         border-color: #333;
     }
-    
-    .product-card:hover {
-        border-color: #764ba2;
+
+    body:not(.elevenlabs-dark-theme) .product-card:hover {
+        border-color: var(--el-secondary-color, #764ba2);
     }
-    
-    .product-name,
-    .cart-title,
-    .item-info h4 {
+
+    body:not(.elevenlabs-dark-theme) .product-name,
+    body:not(.elevenlabs-dark-theme) .cart-title,
+    body:not(.elevenlabs-dark-theme) .item-info h4 {
         color: #f0f0f0;
     }
-    
-    .cart-subtitle,
-    .item-info p {
+
+    body:not(.elevenlabs-dark-theme) .cart-subtitle,
+    body:not(.elevenlabs-dark-theme) .item-info p {
         color: #aaa;
     }
-    
-    .cart-footer {
+
+    body:not(.elevenlabs-dark-theme) .cart-footer {
         border-top-color: #333;
     }
-    
-    .cart-progress {
+
+    body:not(.elevenlabs-dark-theme) .cart-progress {
         background: #333;
     }
+}
+
+/* ElevenLabs Dark Theme */
+body.elevenlabs-dark-theme .product-modal-container {
+    background: var(--el-card-bg, #2a2a2a);
+}
+
+body.elevenlabs-dark-theme .product-card {
+    background: var(--el-card-bg, #2a2a2a);
+    border-color: var(--el-border-color, #333);
+}
+
+body.elevenlabs-dark-theme .product-name {
+    color: var(--el-text-color, #f0f0f0);
+}
+
+body.elevenlabs-dark-theme .product-info {
+    background: var(--el-card-bg, #2a2a2a);
 }
 
 /* ElevenLabs Swiper Styles */
@@ -1076,11 +1125,11 @@
     width: 8px;
     height: 8px;
     border-radius: 4px;
-    background: #e2e8f0;
+    background: var(--el-border-color, #e2e8f0);
     transition: all 0.3s;
     opacity: 1;
 }
 
 .eleventlabs-swiper .swiper-pagination-bullet-active {
-    background: #667eea !important;
+    background: var(--el-primary-color, #667eea) !important;
 }

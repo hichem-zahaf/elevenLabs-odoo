@@ -27,6 +27,20 @@
                     </div>
                     </block>
 
+                    <block title="Theme Settings" name="elevenlabs_theme_settings" invisible="not elevenlabs_enabled">
+                        <setting help="Choose the theme type for the widget">
+                            <field name="elevenlabs_theme_type"/>
+                        </setting>
+
+                        <setting help="Primary color for the widget">
+                            <field name="elevenlabs_primary_color" widget="color" placeholder="#667eea"/>
+                        </setting>
+
+                        <setting help="Secondary/accent color for the widget">
+                            <field name="elevenlabs_secondary_color" widget="color" placeholder="#764ba2"/>
+                        </setting>
+                    </block>
+
 
                     <block title="Trigger Options" name="elevenlabs_trigger_settings" invisible="not elevenlabs_enabled">
                         <setting help="Number of seconds after page load before showing the widget">

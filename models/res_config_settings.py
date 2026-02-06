@@ -233,3 +233,28 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='elevenlabs_agent.pages_to_hide',
         help='Comma-separated list of page types to hide widget on (e.g., homepage,product,cart,checkout).'
     )
+
+    # Theme Settings
+    elevenlabs_theme_type = fields.Selection([
+        ('light', 'Light Theme'),
+        ('dark', 'Dark Theme'),
+    ], string='Theme Type',
+        config_parameter='elevenlabs_agent.theme_type',
+        default='light',
+        required=True,
+        help='Choose the theme type for the widget.'
+    )
+
+    elevenlabs_primary_color = fields.Char(
+        string='Primary Color',
+        config_parameter='elevenlabs_agent.primary_color',
+        default='#667eea',
+        help='Primary color for the widget (hex color, e.g., #667eea).'
+    )
+
+    elevenlabs_secondary_color = fields.Char(
+        string='Secondary Color',
+        config_parameter='elevenlabs_agent.secondary_color',
+        default='#764ba2',
+        help='Secondary/accent color for the widget (hex color, e.g., #764ba2).'
+    )
