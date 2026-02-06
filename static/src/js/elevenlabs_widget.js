@@ -144,6 +144,11 @@
         primaryColor = primaryColor || '#667eea';
         secondaryColor = secondaryColor || '#764ba2';
 
+        console.log('=== ElevenLabs Theme Application ===');
+        console.log('Theme Type:', themeType);
+        console.log('Primary Color:', primaryColor);
+        console.log('Secondary Color:', secondaryColor);
+
         // Create or update style element for theme variables
         var themeStyleId = 'elevenlabs-theme-vars';
         var themeStyle = document.getElementById(themeStyleId);
@@ -179,12 +184,21 @@
 
         themeStyle.textContent = cssVars;
 
+        console.log('CSS Variables set:', cssVars);
+
         // Apply theme class to body for dark mode
         if (themeType === 'dark') {
             document.body.classList.add('elevenlabs-dark-theme');
+            console.log('Dark theme class added to body');
         } else {
             document.body.classList.remove('elevenlabs-dark-theme');
+            console.log('Dark theme class removed from body');
         }
+
+        // Verify CSS variables are set
+        console.log('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
+        console.log('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
+        console.log('====================================');
     }
 
     function initializeElevenLabsWidget() {
@@ -244,10 +258,19 @@
         var pagesToShow = container.dataset.pagesToShow || null;
         var pagesToHide = container.dataset.pagesToHide || null;
 
+        // Theme settings - Debug dataset
+        console.log('=== Container Dataset Debug ===');
+        console.log('Raw dataset.themeType:', container.dataset.themeType);
+        console.log('Raw dataset.primaryColor:', container.dataset.primaryColor);
+        console.log('Raw dataset.secondaryColor:', container.dataset.secondaryColor);
+        console.log('Full dataset:', JSON.parse(JSON.stringify(container.dataset)));
+
         // Theme settings
         var themeType = container.dataset.themeType || 'light';
         var primaryColor = container.dataset.primaryColor || '#667eea';
         var secondaryColor = container.dataset.secondaryColor || '#764ba2';
+
+        console.log('Final theme values:', { themeType, primaryColor, secondaryColor });
 
         // Apply theme settings
         applyTheme(themeType, primaryColor, secondaryColor);
@@ -597,13 +620,23 @@
         if (existingModal) {
             existingModal.remove();
         }
-        
-        // Create product cards HTML with swiper
+
+        // Re-apply theme FIRST to ensure CSS variables are up to date
+        var container = document.querySelector('.elevenlabs-agent-container');
+        if (container) {
+            var themeType = container.dataset.themeType || 'light';
+            var primaryColor = container.dataset.primaryColor || '#667eea';
+            var secondaryColor = container.dataset.secondaryColor || '#764ba2';
+            applyTheme(themeType, primaryColor, secondaryColor);
+            console.log('Theme re-applied BEFORE modal creation:', { themeType, primaryColor, secondaryColor });
+        }
+
+        // Create product cards HTML with swiper (AFTER theme is applied)
         var modalHtml = createProductCardsHTML(products);
-        
+
         // Append directly to body with high-level container
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-        
+
         // Force positioning and visibility
         var modal = document.querySelector('.elevenlabs-product-modal');
         if (modal) {
@@ -629,6 +662,14 @@
     }
     
     function createProductCardsHTML(products) {
+        console.log('=== createProductCardsHTML called ===');
+        console.log('Current CSS vars:', {
+            primary: getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'),
+            cardBg: getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'),
+            textColor: getComputedStyle(document.documentElement).getPropertyValue('--el-text-color'),
+            shadow: getComputedStyle(document.documentElement).getPropertyValue('--el-shadow')
+        });
+
         var html = '<div class="elevenlabs-product-modal" style="position: fixed !important; bottom: 100px !important; left: 20px !important; z-index: 999999 !important; opacity: 1 !important; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">';
         html += '<div class="product-modal-container" style="background: var(--el-card-bg, white); border-radius: 12px; box-shadow: var(--el-shadow, 0 8px 24px rgba(0, 0, 0, 0.12)); padding: 12px; width: 420px; max-width: calc(100vw - 40px);">';
 

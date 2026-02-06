@@ -59,6 +59,11 @@
                 <t t-set="pages_to_show" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_show', '')"/>
                 <t t-set="pages_to_hide" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.pages_to_hide', '')"/>
 
+                <!-- Theme Settings -->
+                <t t-set="theme_type" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.theme_type', 'light')"/>
+                <t t-set="primary_color" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.primary_color', '#667eea')"/>
+                <t t-set="secondary_color" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.secondary_color', '#764ba2')"/>
+
                 <div class="elevenlabs-agent-container"
                      t-att-style="'display: none;' if not agent_enabled else ''"
                      t-att-data-agent-id="agent_id"
@@ -89,6 +94,9 @@
                      t-att-data-out-of-stock-handling="out_of_stock_handling"
                      t-att-data-pages-to-show="pages_to_show"
                      t-att-data-pages-to-hide="pages_to_hide"
+                     t-att-data-theme-type="theme_type"
+                     t-att-data-primary-color="primary_color"
+                     t-att-data-secondary-color="secondary_color"
                      t-att-data-user-id="str(user_id)"
                      t-att-data-user-name="str(user_name)"
                      t-att-data-user-login="str(user_login)"
