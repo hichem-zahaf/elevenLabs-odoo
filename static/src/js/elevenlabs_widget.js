@@ -569,46 +569,35 @@
     }
     
     function createProductCardsHTML(products) {
-        var currentIndex = 0;
-        var maxDisplay = 3; // Maximum products to display at once
-        
         var html = '<div class="elevenlabs-product-modal" style="position: fixed !important; bottom: 100px !important; left: 20px !important; z-index: 999999 !important; opacity: 1 !important; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">';
         html += '<div class="product-modal-container" style="background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); padding: 12px; width: 420px; max-width: calc(100vw - 40px);">';
-        
+
         // Minimal header with just close button
         html += '<div class="product-modal-header" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">';
         html += '<button class="close-modal-btn" style="background: rgba(0, 0, 0, 0.05); border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #666;">&times;</button>';
         html += '</div>';
-        
-        // Products wrapper with swiper
-        html += '<div class="products-wrapper" style="position: relative;">';
-        
-        // Navigation buttons (if more than 3 products)
-        if (products.length > maxDisplay) {
-            html += '<button class="swiper-btn swiper-prev" data-direction="prev" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: white; border: none; width: 28px; height: 28px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;">';
-            html += '<i class="fa fa-chevron-left" style="font-size: 12px; color: #666;"></i>';
-            html += '</button>';
-        }
-        
-        // Products grid
-        html += '<div class="products-grid" data-current-index="0" style="display: flex; gap: 8px; padding: 0 15px; overflow: hidden; position: relative;">';
-        
+
+        // Swiper container (using proper Swiper classes)
+        html += '<div class="swiper eleventlabs-swiper" style="overflow: hidden; padding: 0 4px;">';
+
+        // Swiper wrapper
+        html += '<div class="swiper-wrapper">';
+
         products.forEach(function(product, index) {
             var productName = product.name || product.Name || 'Product';
             var productPrice = product.price || product.Price || '0.00';
             var productImage = product.image || product.Image || null;
-            var productDescription = product.description || product.Description || '';
             var productSku = product.sku || product.SKU || product.default_code || 'SKU-' + index;
             var productId = product.id || product.product_id || null;
-            
-            // Only show first 3 products initially
-            var isVisible = index < maxDisplay;
-            
-            html += '<div class="product-card" data-index="' + index + '" data-sku="' + productSku + '" data-product-id="' + productId + '"';
-            html += ' style="' + (isVisible ? '' : 'display: none;') + ' flex: 0 0 calc(33.333% - 6px); background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); transition: all 0.3s;">';
-            
+
+            // Swiper slide
+            html += '<div class="swiper-slide" style="width: auto;">';
+
+            // Product card
+            html += '<div class="product-card" data-sku="' + productSku + '" data-product-id="' + productId + '" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); transition: all 0.3s; display: flex; flex-direction: column; width: 120px;">';
+
             // Product image
-            html += '<div class="product-image" style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; overflow: hidden;">';
+            html += '<div class="product-image" style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; overflow: hidden; flex-shrink: 0;">';
             if (productImage) {
                 html += '<img src="' + productImage + '" alt="' + productName + '" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />';
             } else {
@@ -617,50 +606,36 @@
                 html += '</div>';
             }
             html += '</div>';
-            
+
             // Product info
-            html += '<div class="product-info" style="padding: 8px; display: flex; flex-direction: column; gap: 6px;">';
-            html += '<h4 class="product-name" title="' + productName + '" style="margin: 0; font-size: 11px; font-weight: 600; color: #2c3e50; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 24px;">' + productName + '</h4>';
-            if (productDescription) {
-                html += '<p class="product-description">' + productDescription + '</p>';
-            }
-            html += '<div class="product-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">';
-            html += '<div class="product-price" style="font-size: 13px; font-weight: bold; color: #667eea;">$' + productPrice + '</div>';
-            html += '<button class="btn-add-to-cart" data-sku="' + productSku + '" style="background: #667eea; color: white; border: none; padding: 5px 10px; border-radius: 14px; font-size: 10px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 3px;">';
-            html += '<i class="fa fa-plus" style="font-size: 9px;"></i>';
-            html += '<span>Add</span>';
+            html += '<div class="product-info" style="padding: 10px 8px; display: flex; flex-direction: column; flex: 1;">';
+
+            // Product name
+            html += '<h4 class="product-name" title="' + productName + '" style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #2c3e50; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">' + productName + '</h4>';
+
+            // Price
+            html += '<div class="product-price" style="font-size: 14px; font-weight: bold; color: #667eea; margin-bottom: 8px;">$' + productPrice + '</div>';
+
+            // Add to cart button
+            html += '<button class="btn-add-to-cart" data-sku="' + productSku + '" style="background: #667eea; color: white; border: none; padding: 8px; width: 100%; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: auto; transition: background 0.2s;">';
+            html += '<i class="fa fa-plus" style="font-size: 10px;"></i>';
+            html += '<span>Add to Cart</span>';
             html += '</button>';
-            html += '</div>';
-            html += '</div>';
-            
-            html += '</div>';
+
+            html += '</div>'; // product-info
+            html += '</div>'; // product-card
+            html += '</div>'; // swiper-slide
         });
-        
-        html += '</div>'; // products-grid
-        
-        // Navigation buttons (if more than 3 products)
-        if (products.length > maxDisplay) {
-            html += '<button class="swiper-btn swiper-next" data-direction="next" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: white; border: none; width: 28px; height: 28px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center;">';
-            html += '<i class="fa fa-chevron-right" style="font-size: 12px; color: #666;"></i>';
-            html += '</button>';
-        }
-        
-        html += '</div>'; // products-wrapper
-        
-        // Page indicators
-        if (products.length > maxDisplay) {
-            var totalPages = Math.ceil(products.length / maxDisplay);
-            html += '<div class="page-indicators" style="display: flex; justify-content: center; gap: 4px; margin-top: 10px;">';
-            for (var i = 0; i < totalPages; i++) {
-                var isActive = i === 0;
-                html += '<span class="indicator' + (isActive ? ' active' : '') + '" data-page="' + i + '" style="width: ' + (isActive ? '16px' : '6px') + '; height: 6px; border-radius: 3px; background: ' + (isActive ? '#667eea' : '#e2e8f0') + '; cursor: pointer; transition: all 0.3s;"></span>';
-            }
-            html += '</div>';
-        }
-        
+
+        html += '</div>'; // swiper-wrapper
+
+        // Pagination dots
+        html += '<div class="swiper-pagination" style="margin-top: 12px;"></div>';
+
+        html += '</div>'; // swiper
         html += '</div>'; // product-modal-container
         html += '</div>'; // elevenlabs-product-modal
-        
+
         return html;
     }
     
@@ -675,79 +650,43 @@
     }
     
     function bindProductCardEvents(products) {
-        var maxDisplay = 3;
-        var currentIndex = 0;
-        
         // Close button
         var closeBtn = document.querySelector('.elevenlabs-product-modal .close-modal-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', closeProductModal);
         }
-        
-        // Swiper navigation
-        var prevBtn = document.querySelector('.swiper-prev');
-        var nextBtn = document.querySelector('.swiper-next');
-        var indicators = document.querySelectorAll('.page-indicators .indicator');
-        
-        function updateDisplay() {
-            var cards = document.querySelectorAll('.elevenlabs-product-modal .product-card');
-            
-            // Hide all cards
-            cards.forEach(function(card) {
-                card.style.display = 'none';
-                card.classList.remove('slide-in-left', 'slide-in-right');
-            });
-            
-            // Show current set of cards
-            for (var i = currentIndex; i < Math.min(currentIndex + maxDisplay, products.length); i++) {
-                var card = cards[i];
-                if (card) {
-                    card.style.display = '';
-                    card.classList.add('slide-in-right');
-                }
-            }
-            
-            // Update indicators
-            var currentPage = Math.floor(currentIndex / maxDisplay);
-            indicators.forEach(function(indicator, idx) {
-                var isActive = idx === currentPage;
-                indicator.classList.toggle('active', isActive);
-                indicator.style.width = isActive ? '16px' : '6px';
-                indicator.style.background = isActive ? '#667eea' : '#e2e8f0';
-            });
-            
-            // Update button states
-            if (prevBtn) prevBtn.disabled = currentIndex === 0;
-            if (nextBtn) nextBtn.disabled = currentIndex + maxDisplay >= products.length;
-        }
-        
-        if (prevBtn) {
-            prevBtn.addEventListener('click', function() {
-                if (currentIndex > 0) {
-                    currentIndex = Math.max(0, currentIndex - maxDisplay);
-                    updateDisplay();
+
+        // Initialize Swiper
+        var swiperContainer = document.querySelector('.eleventlabs-swiper');
+        if (swiperContainer && typeof Swiper !== 'undefined') {
+            var swiper = new Swiper('.eleventlabs-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 8,
+                resistanceRatio: 0,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    renderBullet: function(index, className) {
+                        return '<span class="' + className + '" style="width: 8px; height: 8px; border-radius: 4px; background: #e2e8f0; transition: all 0.3s;"></span>';
+                    }
+                },
+                on: {
+                    paginationUpdate: function(swiper) {
+                        var bullets = swiper.pagination.bullets;
+                        bullets.forEach(function(bullet, idx) {
+                            if (idx === swiper.activeIndex) {
+                                bullet.style.width = '20px';
+                                bullet.style.background = '#667eea';
+                            } else {
+                                bullet.style.width = '8px';
+                                bullet.style.background = '#e2e8f0';
+                            }
+                        });
+                    }
                 }
             });
         }
-        
-        if (nextBtn) {
-            nextBtn.addEventListener('click', function() {
-                if (currentIndex + maxDisplay < products.length) {
-                    currentIndex = Math.min(products.length - maxDisplay, currentIndex + maxDisplay);
-                    updateDisplay();
-                }
-            });
-        }
-        
-        // Page indicators click
-        indicators.forEach(function(indicator) {
-            indicator.addEventListener('click', function() {
-                var page = parseInt(this.dataset.page);
-                currentIndex = page * maxDisplay;
-                updateDisplay();
-            });
-        });
-        
+
         // Add to cart buttons
         var addToCartBtns = document.querySelectorAll('.elevenlabs-product-modal .btn-add-to-cart');
         addToCartBtns.forEach(function(button) {
@@ -755,31 +694,36 @@
                 var sku = this.dataset.sku;
                 var btn = this;
                 var originalContent = btn.innerHTML;
-                
+                var originalBg = btn.style.background;
+
                 // Show loading state
                 btn.disabled = true;
                 btn.classList.add('loading');
-                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-                
+                btn.style.background = '#9ca3af';
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i><span>Adding...</span>';
+
                 // Get product card to extract more info
                 var productCard = btn.closest('.product-card');
                 var productName = productCard ? productCard.querySelector('.product-name').textContent : '';
                 var productId = productCard ? productCard.dataset.productId : null;
-                
+
                 // Add to cart via API
                 addSingleItemToCart(sku, productName, productId, 1, function(success) {
                     btn.classList.remove('loading');
                     if (success) {
                         btn.classList.add('success');
-                        btn.innerHTML = '<i class="fa fa-check"></i>';
+                        btn.style.background = '#10b981';
+                        btn.innerHTML = '<i class="fa fa-check"></i><span>Added!</span>';
                     } else {
                         btn.classList.add('error');
-                        btn.innerHTML = '<i class="fa fa-times"></i>';
+                        btn.style.background = '#ef4444';
+                        btn.innerHTML = '<i class="fa fa-times"></i><span>Failed</span>';
                     }
-                    
+
                     setTimeout(function() {
                         btn.disabled = false;
                         btn.innerHTML = originalContent;
+                        btn.style.background = originalBg;
                         btn.classList.remove('success', 'error');
                     }, 2000);
                 });
