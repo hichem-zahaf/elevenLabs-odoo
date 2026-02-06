@@ -572,9 +572,13 @@
         var html = '<div class="elevenlabs-product-modal" style="position: fixed !important; bottom: 100px !important; left: 20px !important; z-index: 999999 !important; opacity: 1 !important; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">';
         html += '<div class="product-modal-container" style="background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); padding: 12px; width: 420px; max-width: calc(100vw - 40px);">';
 
-        // Minimal header with just close button
-        html += '<div class="product-modal-header" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">';
-        html += '<button class="close-modal-btn" style="background: rgba(0, 0, 0, 0.05); border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #666;">&times;</button>';
+        // Header with title and close button
+        html += '<div class="product-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">';
+        html += '<div style="display: flex; align-items: center; gap: 8px;">';
+        html += '<i class="fa fa-shopping-bag" style="font-size: 14px; color: #667eea;"></i>';
+        html += '<h3 style="margin: 0; font-size: 14px; font-weight: 600; color: #2c3e50;">Recommended Products</h3>';
+        html += '</div>';
+        html += '<button class="close-modal-btn" style="background: rgba(0, 0, 0, 0.05); border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: #666; transition: all 0.2s;">&times;</button>';
         html += '</div>';
 
         // Swiper container (using proper Swiper classes)
