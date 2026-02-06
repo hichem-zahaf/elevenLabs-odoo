@@ -80,7 +80,9 @@
                                 <t t-set="auto_end_inactive_conversations" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.auto_end_inactive_conversations', 'True') == 'True'"/>
                                 <t t-set="save_user_info" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.save_user_info', 'False') == 'True'"/>
                                 <t t-set="enable_conversation_logging" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_conversation_logging', 'False') == 'True'"/>
-                                <t t-set="daily_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.daily_usage_limit', '0'))"/>
+                                <t t-set="daily_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.daily_usage_limit', '50'))"/>
+                                <t t-set="global_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.global_usage_limit', '1000'))"/>
+                                <t t-set="session_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.session_usage_limit', '20'))"/>
 
                                 <!-- Product Integration -->
                                 <t t-set="product_categories_include" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.product_categories_include', '')"/>
@@ -130,6 +132,8 @@
                                      t-att-data-save-user-info="str(save_user_info).lower()"
                                      t-att-data-enable-conversation-logging="str(enable_conversation_logging).lower()"
                                      t-att-data-daily-usage-limit="str(daily_usage_limit)"
+                                     t-att-data-global-usage-limit="str(global_usage_limit)"
+                                     t-att-data-session-usage-limit="str(session_usage_limit)"
                                      t-att-data-product-categories-include="product_categories_include"
                                      t-att-data-product-categories-exclude="product_categories_exclude"
                                      t-att-data-featured-products-priority="featured_products_priority"

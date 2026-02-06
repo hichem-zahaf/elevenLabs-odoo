@@ -27,6 +27,47 @@
         }, 1000);
     }
 
+    // ============================================================================
+    // Usage Tracking Functions
+    // ============================================================================
+
+    var elevenlabsSessionData = {
+        sessionId: null,
+        userId: null,
+        userIdentifier: null,
+        isLoggedIn: false,
+        messageCount: 0,
+        sessionLimit: 0,
+        dailyLimit: 0,
+        globalLimit: 0
+    };
+
+    function removeWidgetDueToLimit(reason) {
+        console.log('Removing widget due to limit:', reason);
+
+        // Find and remove the widget element
+        var widget = document.querySelector('elevenlabs-convai');
+        if (widget) {
+            widget.remove();
+            console.log('Widget removed from DOM');
+        }
+
+        // Optionally show a message to the user
+        var container = document.querySelector('.elevenlabs-agent-container');
+        if (container) {
+            var message = document.createElement('div');
+            message.className = 'elevenlabs-limit-message';
+            message.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 999999; max-width: 300px;';
+            message.innerHTML = '<strong>Session limit reached</strong><br>You have reached the maximum number of messages for this session. Please start a new session to continue.';
+            document.body.appendChild(message);
+
+            // Auto-remove message after 5 seconds
+            setTimeout(function() {
+                message.remove();
+            }, 5000);
+        }
+    }
+
     function initializeTriggerSystem(
         agentId,
         triggerDelay,
@@ -34,18 +75,30 @@
         triggerOnTime,
         triggerOnExitIntent,
         enableShowProductCard,
-        enableSearchProducts
+        enableSearchProducts,
+        usageDailyLimit,
+        usageGlobalLimit,
+        usageMaxPerSession
     ) {
         var widgetCreated = false;
+        var sessionData = null;  // Store session data for usage tracking
 
         // Function to create the widget and prevent further triggers
         function createWidgetOnce() {
             if (!widgetCreated) {
                 widgetCreated = true;
+
+                // Store limits in session data for later use by AI agent tools
+                elevenlabsSessionData.dailyLimit = usageDailyLimit;
+                elevenlabsSessionData.globalLimit = usageGlobalLimit;
+                elevenlabsSessionData.sessionLimit = usageMaxPerSession;
+
+                // Create widget - AI agent will handle session initialization via tools
                 createWidget(
                     agentId,
                     enableShowProductCard,
-                    enableSearchProducts
+                    enableSearchProducts,
+                    usageMaxPerSession
                 );
 
                 // Clean up all event listeners after widget is created
@@ -247,6 +300,10 @@
         var enableConversationLogging = container.dataset.enableConversationLogging === 'true';
         var dailyUsageLimit = parseInt(container.dataset.dailyUsageLimit) || 0;
 
+        // Usage tracking limits
+        var globalUsageLimit = parseInt(container.dataset.globalUsageLimit) || 0;
+        var sessionUsageLimit = parseInt(container.dataset.sessionUsageLimit) || 0;
+
         // Product integration
         var productCategoriesInclude = container.dataset.productCategoriesInclude || null;
         var productCategoriesExclude = container.dataset.productCategoriesExclude || null;
@@ -385,7 +442,10 @@
             triggerOnTime,
             triggerOnExitIntent,
             enableShowProductCard,
-            enableSearchProducts
+            enableSearchProducts,
+            dailyUsageLimit,
+            globalUsageLimit,
+            sessionUsageLimit
         );
     }
 
@@ -412,6 +472,8 @@
             saveUserInfo: container.dataset.saveUserInfo === 'true',
             enableConversationLogging: container.dataset.enableConversationLogging === 'true',
             dailyUsageLimit: parseInt(container.dataset.dailyUsageLimit) || 0,
+            globalUsageLimit: parseInt(container.dataset.globalUsageLimit) || 0,
+            sessionUsageLimit: parseInt(container.dataset.sessionUsageLimit) || 0,
             productCategoriesInclude: container.dataset.productCategoriesInclude || null,
             productCategoriesExclude: container.dataset.productCategoriesExclude || null,
             featuredProductsPriority: container.dataset.featuredProductsPriority || null,
@@ -453,7 +515,8 @@
     function createWidget(
         agentId,
         enableShowProductCard,
-        enableSearchProducts
+        enableSearchProducts,
+        usageMaxPerSession
     ) {
         // Create the elevenlabs-convai element
         var widgetElement = document.createElement('elevenlabs-convai');
@@ -473,24 +536,26 @@
                 console.log('ElevenLabs script loaded');
                 // Register client tools after script loads
                 setTimeout(function() {
-                    registerClientTools(enableShowProductCard, enableSearchProducts);
+                    registerClientTools(enableShowProductCard, enableSearchProducts, usageMaxPerSession);
                 }, 500);
             };
 
             document.head.appendChild(script);
         } else {
             // Script already loaded, register tools
-            registerClientTools(enableShowProductCard, enableSearchProducts);
+            registerClientTools(enableShowProductCard, enableSearchProducts, usageMaxPerSession);
         }
     }
 
-    function registerClientTools(enableShowProductCard, enableSearchProducts) {
+    function registerClientTools(enableShowProductCard, enableSearchProducts, usageMaxPerSession) {
         var widget = document.querySelector('elevenlabs-convai');
 
         if (!widget) {
             console.error('ElevenLabs widget element not found');
             return;
         }
+
+        var hasRecordedInitialUsage = false;
 
         // Register the event listener for client tools
         widget.addEventListener('elevenlabs-convai:call', function(event) {
@@ -499,6 +564,104 @@
             // Register client tools in the event handler
             if (event.detail && event.detail.config) {
                 event.detail.config.clientTools = {};
+
+                // Session Management Tools - Always registered
+                event.detail.config.clientTools.initializeSession = function(params) {
+                    console.log('initializeSession called by AI agent');
+                    return fetch('/api/elevenlabs/session/init', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: '2.0',
+                            method: 'call',
+                            params: {},
+                            id: Math.floor(Math.random() * 1000000)
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('initializeSession response:', data);
+                        if (data.result && data.result.success) {
+                            // Store session data for future calls
+                            elevenlabsSessionData.sessionId = data.result.sessionId;
+                            elevenlabsSessionData.userId = data.result.userId;
+                            elevenlabsSessionData.userIdentifier = data.result.userIdentifier;
+                            elevenlabsSessionData.isLoggedIn = data.result.isLoggedIn;
+
+                            console.log('Session stored:', elevenlabsSessionData);
+
+                            return {
+                                success: true,
+                                sessionId: data.result.sessionId,
+                                userId: data.result.userId,
+                                userIdentifier: data.result.userIdentifier,
+                                isLoggedIn: data.result.isLoggedIn
+                            };
+                        }
+                        return { success: false, error: 'Failed to initialize session' };
+                    })
+                    .catch(error => {
+                        console.error('initializeSession error:', error);
+                        return { success: false, error: String(error) };
+                    });
+                };
+
+                event.detail.config.clientTools.recordUsage = function(params) {
+                    console.log('recordUsage called by AI agent with params:', params);
+
+                    // Use stored session data if not provided in params
+                    var sessionId = params.sessionId || elevenlabsSessionData.sessionId;
+                    var userId = params.userId || elevenlabsSessionData.userId;
+                    var userIdentifier = params.userIdentifier || elevenlabsSessionData.userIdentifier;
+
+                    if (!sessionId) {
+                        console.warn('No sessionId available for recordUsage');
+                        return Promise.resolve({ success: false, error: 'No session initialized' });
+                    }
+
+                    return fetch('/api/elevenlabs/session/record', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: '2.0',
+                            method: 'call',
+                            params: {
+                                sessionId: sessionId,
+                                userId: userId,
+                                userIdentifier: userIdentifier
+                            },
+                            id: Math.floor(Math.random() * 1000000)
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('recordUsage response:', data);
+                        if (data.result && data.result.success) {
+                            elevenlabsSessionData.messageCount = data.result.messageCount;
+
+                            // Check if session limit exceeded
+                            if (elevenlabsSessionData.sessionLimit > 0 &&
+                                data.result.messageCount >= elevenlabsSessionData.sessionLimit) {
+                                console.log('Session limit exceeded, removing widget');
+                                removeWidgetDueToLimit('session_limit_exceeded');
+                            }
+
+                            return {
+                                success: true,
+                                messageCount: data.result.messageCount,
+                                isNewRecord: data.result.isNewRecord,
+                                remainingMessages: elevenlabsSessionData.sessionLimit > 0
+                                    ? elevenlabsSessionData.sessionLimit - data.result.messageCount
+                                    : -1
+                            };
+                        }
+                        return { success: false, error: 'Failed to record usage' };
+                    })
+                    .catch(error => {
+                        console.error('recordUsage error:', error);
+                        return { success: false, error: String(error) };
+                    });
+                };
 
                 // Conditionally register tools based on settings
                 if (enableShowProductCard) {
@@ -518,10 +681,13 @@
         });
 
         console.log('xx ElevenLabs client tools registered xx');
-        console.log('Enabled tools:', {
+        console.log('All registered tools:', {
+            initializeSession: true,
+            recordUsage: true,
             showProductCard: enableShowProductCard,
             searchProducts: enableSearchProducts
         });
+        console.log('Usage tracking enabled with session limit:', usageMaxPerSession);
     }
 
     function _shouldShowOnCurrentPage(pagesToShow, pagesToHide) {

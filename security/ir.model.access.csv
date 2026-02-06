@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_elevenlabs_usage_public,elevenlabs.usage public,elevenlabs_agent.model_elevenlabs_usage,base.group_public,1,0,0,0
+access_elevenlabs_usage_portal,elevenlabs.usage portal,elevenlabs_agent.model_elevenlabs_usage,base.group_portal,1,0,0,0
+access_elevenlabs_usage_user,elevenlabs.usage user,elevenlabs_agent.model_elevenlabs_usage,base.group_user,1,0,0,0
+access_elevenlabs_usage_manager,elevenlabs.usage manager,elevenlabs_agent.model_elevenlabs_usage,elevenlabs_agent.group_elevenlabs_vip_manager,1,1,1,1

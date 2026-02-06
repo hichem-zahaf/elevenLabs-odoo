@@ -3,6 +3,7 @@
 from odoo import http
 from odoo.http import request
 import json
+import uuid
 
 class ElevenLabsController(http.Controller):
     
@@ -401,3 +402,162 @@ class ElevenLabsController(http.Controller):
                 'in_stock': True
             }
         }
+
+    # ============================================================================
+    # Usage Tracking Endpoints
+    # ============================================================================
+
+    @http.route('/api/elevenlabs/session/init', type='json', auth='public', methods=['GET', 'POST'])
+    def session_init(self, **kwargs):
+        """
+        Initialize a new session or retrieve existing session info.
+
+        Returns:
+            - sessionId: Unique session identifier (UUID)
+            - userId: User ID if logged in, null for public users
+            - userIdentifier: UUID for tracking public users based on IP
+            - isNewSession: Boolean indicating if this is a new session
+        """
+        try:
+            # Get current user
+            current_user = request.env.user
+
+            # Get IP address
+            ip_address = request.httprequest.remote_addr or '0.0.0.0'
+
+            # Get user agent
+            user_agent = request.httprequest.user_agent.string if request.httprequest.user_agent else ''
+
+            # Check if user is logged in
+            if not current_user._is_public():
+                # Logged-in user
+                user_id = current_user.id
+                user_identifier = None
+
+                # Generate session ID (could also retrieve from session if you want to persist sessions)
+                session_id = str(uuid.uuid4())
+
+                return {
+                    'success': True,
+                    'sessionId': session_id,
+                    'userId': user_id,
+                    'userIdentifier': user_identifier,
+                    'isNewSession': True,
+                    'isLoggedIn': True
+                }
+            else:
+                # Public user - generate identifier from IP
+                user_id = None
+                user_identifier = request.env['elevenlabs.usage'].generate_user_identifier_from_ip(ip_address)
+                session_id = str(uuid.uuid4())
+
+                return {
+                    'success': True,
+                    'sessionId': session_id,
+                    'userId': user_id,
+                    'userIdentifier': user_identifier,
+                    'isNewSession': True,
+                    'isLoggedIn': False
+                }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @http.route('/api/elevenlabs/session/record', type='json', auth='public', methods=['POST'])
+    def session_record(self, sessionId=None, userId=None, userIdentifier=None, **kwargs):
+        """
+        Record usage for a session.
+
+        Args:
+            - sessionId: Unique session identifier
+            - userId: User ID (null for public users)
+            - userIdentifier: UUID for public users
+
+        Returns:
+            - success: Boolean
+            - messageCount: Current message count for this session
+            - isNewRecord: Boolean indicating if a new record was created
+        """
+        try:
+            if not sessionId:
+                return {
+                    'success': False,
+                    'error': 'sessionId is required'
+                }
+
+            # Get IP address
+            ip_address = request.httprequest.remote_addr or '0.0.0.0'
+
+            # Get user agent
+            user_agent = request.httprequest.user_agent.string if request.httprequest.user_agent else ''
+
+            # Get or create usage record
+            usage_record, is_new = request.env['elevenlabs.usage'].get_or_create_usage_record(
+                session_id=sessionId,
+                user_id=userId,
+                user_identifier=userIdentifier,
+                ip_address=ip_address,
+                user_agent=user_agent
+            )
+
+            return {
+                'success': True,
+                'messageCount': usage_record.message_count,
+                'isNewRecord': is_new,
+                'sessionId': sessionId
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @http.route('/api/elevenlabs/session/check', type='json', auth='public', methods=['GET', 'POST'])
+    def session_check(self, userId=None, userIdentifier=None, sessionId=None, **kwargs):
+        """
+        Check if user has exceeded any usage limits.
+
+        Args:
+            - userId: User ID (null for public users)
+            - userIdentifier: UUID for public users
+            - sessionId: Optional session ID to check session limits
+
+        Returns:
+            - canShowWidget: Boolean indicating if widget should be shown
+            - dailyUsage: Current daily message count
+            - globalUsage: Current all-time message count
+            - sessionUsage: Current session message count
+            - dailyLimit: Daily limit setting
+            - globalLimit: Global limit setting
+            - sessionLimit: Session limit setting
+            - reason: Reason if limit exceeded (null if OK)
+        """
+        try:
+            # Get limit settings
+            daily_limit = int(request.env['ir.config_parameter'].sudo().get_param(
+                'elevenlabs_agent.daily_usage_limit', '50'))
+            global_limit = int(request.env['ir.config_parameter'].sudo().get_param(
+                'elevenlabs_agent.global_usage_limit', '1000'))
+            session_limit = int(request.env['ir.config_parameter'].sudo().get_param(
+                'elevenlabs_agent.session_usage_limit', '20'))
+
+            # Check limits
+            result = request.env['elevenlabs.usage'].check_user_limits(
+                user_id=userId,
+                user_identifier=userIdentifier,
+                daily_limit=daily_limit,
+                global_limit=global_limit,
+                session_limit=session_limit,
+                session_id=sessionId
+            )
+
+            result['success'] = True
+            return result
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e),
+                'canShowWidget': False  # Fail safe - don't show widget on error
+            }

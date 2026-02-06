@@ -181,8 +181,22 @@ class ResConfigSettings(models.TransientModel):
     elevenlabs_daily_usage_limit = fields.Integer(
         string='Daily Usage Limit',
         config_parameter='elevenlabs_agent.daily_usage_limit',
-        default=0,
-        help='Daily usage limit for the widget (0 for unlimited).'
+        default=50,
+        help='Maximum number of messages per user per 24-hour period (0 for unlimited).'
+    )
+
+    elevenlabs_global_usage_limit = fields.Integer(
+        string='Global Usage Limit',
+        config_parameter='elevenlabs_agent.global_usage_limit',
+        default=1000,
+        help='Maximum number of messages per user of all time (0 for unlimited).'
+    )
+
+    elevenlabs_session_usage_limit = fields.Integer(
+        string='Session Usage Limit',
+        config_parameter='elevenlabs_agent.session_usage_limit',
+        default=20,
+        help='Maximum number of messages per conversation session (0 for unlimited).'
     )
 
     elevenlabs_performance_metrics_dashboard = fields.Char(
