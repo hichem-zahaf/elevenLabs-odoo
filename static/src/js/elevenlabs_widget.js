@@ -426,38 +426,6 @@
                     };
                 }
 
-                // Always register these core tools as they are essential
-                event.detail.config.clientTools.cartCheckout = function(params) {
-                    console.log('cartCheckout called');
-                    handleCartCheckout();
-                };
-
-                // Conversational checkout tools
-                event.detail.config.clientTools.collectShippingInfo = function(params) {
-                    console.log('collectShippingInfo called with:', params);
-                    handleCollectShippingInfo(params);
-                };
-
-                event.detail.config.clientTools.collectBillingInfo = function(params) {
-                    console.log('collectBillingInfo called with:', params);
-                    handleCollectBillingInfo(params);
-                };
-
-                event.detail.config.clientTools.selectShippingMethod = function(params) {
-                    console.log('selectShippingMethod called with:', params);
-                    handleSelectShippingMethod(params);
-                };
-
-                event.detail.config.clientTools.reviewOrder = function(params) {
-                    console.log('reviewOrder called');
-                    handleReviewOrder();
-                };
-
-                event.detail.config.clientTools.placeOrder = function(params) {
-                    console.log('placeOrder called with:', params);
-                    handlePlaceOrder(params);
-                };
-
                 // Product details tool
                 event.detail.config.clientTools.displayProductDetails = function(params) {
                     console.log('displayProductDetails called with:', params);
@@ -1085,84 +1053,6 @@
         });
     }
     
-    function handleCartCheckout() {
-        console.log('Initiating cart checkout...');
-        
-        // Show loading indicator
-        var loadingModal = document.createElement('div');
-        loadingModal.className = 'elevenlabs-checkout-loading';
-        loadingModal.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 999999;';
-        loadingModal.innerHTML = '<div style="text-align: center;"><i class="fa fa-spinner fa-spin" style="font-size: 24px; color: #667eea;"></i><p style="margin-top: 10px;">Proceeding to checkout...</p></div>';
-        document.body.appendChild(loadingModal);
-        
-        // Call the checkout API
-        fetch('/api/elevenlabs/cart/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                jsonrpc: '2.0',
-                method: 'call',
-                params: {},
-                id: Math.floor(Math.random() * 1000000)
-            })
-        })
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data) {
-            // Remove loading modal
-            if (loadingModal && loadingModal.parentNode) {
-                loadingModal.parentNode.removeChild(loadingModal);
-            }
-            
-            if (data.result && data.result.success && data.result.checkout_url) {
-                console.log('Redirecting to checkout:', data.result.checkout_url);
-                // Redirect to checkout page
-                window.location.href = data.result.checkout_url;
-            } else {
-                // Show error message
-                var errorMsg = data.result ? data.result.error : 'Failed to initiate checkout';
-                console.error('Checkout failed:', errorMsg);
-                
-                // Show error modal
-                var errorModal = document.createElement('div');
-                errorModal.className = 'elevenlabs-checkout-error';
-                errorModal.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #ef4444; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 999999;';
-                errorModal.innerHTML = '<div style="display: flex; align-items: center; gap: 10px;"><i class="fa fa-exclamation-circle"></i><span>' + errorMsg + '</span></div>';
-                document.body.appendChild(errorModal);
-                
-                // Auto-remove error after 5 seconds
-                setTimeout(function() {
-                    if (errorModal && errorModal.parentNode) {
-                        errorModal.parentNode.removeChild(errorModal);
-                    }
-                }, 5000);
-            }
-        })
-        .catch(function(error) {
-            // Remove loading modal
-            if (loadingModal && loadingModal.parentNode) {
-                loadingModal.parentNode.removeChild(loadingModal);
-            }
-            
-            console.error('Checkout error:', error);
-            // Show error notification
-            var errorModal = document.createElement('div');
-            errorModal.className = 'elevenlabs-checkout-error';
-            errorModal.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #ef4444; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 999999;';
-            errorModal.innerHTML = '<div style="display: flex; align-items: center; gap: 10px;"><i class="fa fa-exclamation-circle"></i><span>Failed to connect to checkout</span></div>';
-            document.body.appendChild(errorModal);
-            
-            setTimeout(function() {
-                if (errorModal && errorModal.parentNode) {
-                    errorModal.parentNode.removeChild(errorModal);
-                }
-            }, 5000);
-        });
-    }
-    
     function showDebugPanel() {
         console.log('Creating debug panel...');
         
@@ -1182,17 +1072,6 @@
         html += '<button id="debug-add-cart" class="btn btn-sm btn-primary" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Cart</button>';
         html += '<button id="debug-search" class="btn btn-sm btn-info" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #06b6d4; color: white; border: none; border-radius: 4px; cursor: pointer;">Search</button>';
         html += '<button id="debug-product-details" class="btn btn-sm" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">Product Details</button>';
-        html += '</div>';
-        
-        // Checkout tools
-        html += '<div style="margin-bottom: 10px;">';
-        html += '<h5 style="margin: 0 0 5px 0; font-size: 11px; color: #6b7280;">Checkout</h5>';
-        html += '<button id="debug-shipping" class="btn btn-sm" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer;">Shipping Info</button>';
-        html += '<button id="debug-billing" class="btn btn-sm" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #ec4899; color: white; border: none; border-radius: 4px; cursor: pointer;">Billing Info</button>';
-        html += '<button id="debug-shipping-method" class="btn btn-sm" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #14b8a6; color: white; border: none; border-radius: 4px; cursor: pointer;">Ship Method</button>';
-        html += '<button id="debug-review" class="btn btn-sm" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #84cc16; color: white; border: none; border-radius: 4px; cursor: pointer;">Review Order</button>';
-        html += '<button id="debug-place-order" class="btn btn-sm" style="display: block; width: 100%; margin-bottom: 4px; padding: 5px 10px; font-size: 11px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Place Order</button>';
-        html += '<button id="debug-checkout" class="btn btn-sm btn-success" style="display: block; width: 100%; padding: 5px 10px; font-size: 11px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">Quick Checkout</button>';
         html += '</div>';
         
         html += '</div>';
@@ -1251,48 +1130,6 @@
                 if (query) {
                     handleSearchProducts({query: query});
                 }
-            });
-        });
-        
-        document.getElementById('debug-checkout').addEventListener('click', function() {
-            console.log('Test Checkout clicked');
-            handleCartCheckout();
-        });
-        
-        // New debug buttons
-        document.getElementById('debug-shipping').addEventListener('click', function() {
-            console.log('Test Shipping Info clicked');
-            handleCollectShippingInfo({
-                name: 'John Doe',
-                street: '123 Main Street',
-                street2: 'Apt 4B',
-                city: 'New York',
-                state: 'NY',
-                zip: '10001',
-                country: 'United States',
-                phone: '555-1234'
-            });
-        });
-        
-        document.getElementById('debug-billing').addEventListener('click', function() {
-            console.log('Test Billing Info clicked');
-            handleCollectBillingInfo({same_as_shipping: true});
-        });
-        
-        document.getElementById('debug-shipping-method').addEventListener('click', function() {
-            console.log('Test Shipping Method clicked');
-            handleSelectShippingMethod({method: 'express'});
-        });
-        
-        document.getElementById('debug-review').addEventListener('click', function() {
-            console.log('Test Review Order clicked');
-            handleReviewOrder();
-        });
-        
-        document.getElementById('debug-place-order').addEventListener('click', function() {
-            console.log('Test Place Order clicked');
-            showConfirmDialog('Place Order', 'Are you sure you want to place this test order?', function() {
-                handlePlaceOrder({confirm: true, notes: 'Test order from debug panel'});
             });
         });
         
