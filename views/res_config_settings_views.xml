@@ -79,23 +79,13 @@
                             <field name="elevenlabs_enable_show_product_card"/>
                         </setting>
 
-                        <setting help="Enable the addToCart tool in the agent">
-                            <field name="elevenlabs_enable_add_to_cart"/>
-                        </setting>
-
                         <setting help="Enable the searchProducts tool in the agent">
                             <field name="elevenlabs_enable_search_products"/>
                         </setting>
 
-                        <setting help="How the agent adds items to cart">
-                            <field name="elevenlabs_cart_integration_method"/>
-                        </setting>
                     </block>
 
                     <block title="Targeting Controls" name="elevenlabs_targeting_settings" invisible="not elevenlabs_enabled">
-                        <setting help="Comma-separated list of country codes to restrict the widget (e.g., US,CA,UK)">
-                            <field name="elevenlabs_geographic_restrictions" placeholder="e.g., US,CA,UK"/>
-                        </setting>
 
                         <setting help="Which devices to show the widget on">
                             <field name="elevenlabs_device_filtering"/>
