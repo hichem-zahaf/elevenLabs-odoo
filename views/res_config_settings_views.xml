@@ -105,28 +105,8 @@
                             <field name="elevenlabs_max_messages_per_session"/>
                         </setting>
 
-                        <setting help="How long to retain conversation history in hours">
-                            <field name="elevenlabs_conversation_history_retention"/>
-                        </setting>
-
-                        <setting help="Automatically end conversations after period of inactivity">
-                            <field name="elevenlabs_auto_end_inactive_conversations"/>
-                        </setting>
-
-                        <setting help="Save user information from conversations">
-                            <field name="elevenlabs_save_user_info"/>
-                        </setting>
-
-                        <setting help="Log all conversations for analytics">
-                            <field name="elevenlabs_enable_conversation_logging"/>
-                        </setting>
-
                         <setting help="Daily usage limit for the widget (0 for unlimited)">
                             <field name="elevenlabs_daily_usage_limit"/>
-                        </setting>
-
-                        <setting help="Link to the performance metrics dashboard">
-                            <field name="elevenlabs_performance_metrics_dashboard" placeholder="https://your-analytics.com"/>
                         </setting>
                     </block>
 
