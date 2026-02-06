@@ -679,10 +679,16 @@
         // Bind events
         bindProductCardEvents(products);
         
-        // Auto-hide after 45 seconds
-        setTimeout(function() {
+        // Auto-hide after 30 seconds
+        var autoHideTimer = setTimeout(function() {
             closeProductModal();
-        }, 45000);
+        }, 30000);
+
+        // Store timer on modal for cleanup if needed
+        var modal = document.querySelector('.elevenlabs-product-modal');
+        if (modal) {
+            modal._autoHideTimer = autoHideTimer;
+        }
     }
     
     function createProductCardsHTML(products) {
@@ -729,7 +735,9 @@
             // Product image
             html += '<div class="product-image" style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; overflow: hidden; flex-shrink: 0;">';
             if (productImage) {
-                html += '<img src="' + productImage + '" alt="' + productName + '" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />';
+                // Add unique ID for each image to prevent mixing
+                var imageId = 'el-prod-img-' + index + '-' + Date.now();
+                html += '<img id="' + imageId + '" src="' + productImage + '" alt="' + productName + '" loading="eager" data-src="' + productImage + '" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.parentElement.innerHTML=\'<i class=\\\'fa fa-cube\\\' style=\\\'font-size: 24px; color: #cbd5e0;\\\'></i>\';" />';
             } else {
                 html += '<div class="no-image-placeholder" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #cbd5e0;">';
                 html += '<i class="fa fa-cube" style="font-size: 24px;"></i>';
@@ -766,6 +774,14 @@
     function closeProductModal() {
         var modal = document.querySelector('.elevenlabs-product-modal');
         if (modal) {
+            // Clear auto-hide timer if it exists
+            if (modal._autoHideTimer) {
+                clearTimeout(modal._autoHideTimer);
+            }
+            // Clean up escape handler if it exists
+            if (modal._escapeHandler) {
+                document.removeEventListener('keydown', modal._escapeHandler);
+            }
             modal.classList.remove('show');
             setTimeout(function() {
                 modal.remove();
@@ -774,10 +790,36 @@
     }
     
     function bindProductCardEvents(products) {
+        var modal = document.querySelector('.elevenlabs-product-modal');
+
         // Close button
         var closeBtn = document.querySelector('.elevenlabs-product-modal .close-modal-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', closeProductModal);
+        }
+
+        // Click outside to close
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                // Close if clicking on the modal background (not the container)
+                if (e.target === modal) {
+                    closeProductModal();
+                }
+            });
+        }
+
+        // Close on Escape key
+        var escapeHandler = function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                closeProductModal();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+
+        // Store escape handler reference for cleanup
+        if (modal) {
+            modal._escapeHandler = escapeHandler;
         }
 
         // Initialize Swiper
