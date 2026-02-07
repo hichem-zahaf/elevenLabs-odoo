@@ -414,11 +414,69 @@ class ElevenLabsController(http.Controller):
                 'total_count': 0
             }
 
+        # Get category include/exclude settings
+        categories_include = request.env['ir.config_parameter'].sudo().get_param(
+            'elevenlabs_agent.product_categories_include', '')
+        categories_exclude = request.env['ir.config_parameter'].sudo().get_param(
+            'elevenlabs_agent.product_categories_exclude', '')
+
+        # Parse comma-separated category IDs/names
+        include_list = [c.strip() for c in categories_include.split(',') if c.strip()] if categories_include else []
+        exclude_list = [c.strip() for c in categories_exclude.split(',') if c.strip()] if categories_exclude else []
+
         # Import expression module for proper domain building
         from odoo.osv import expression
 
         # Base domain - only saleable and published products
         domain = [('sale_ok', '=', True), ('website_published', '=', True)]
+
+        # Apply category include filter (if set, only products in these categories will be shown)
+        if include_list:
+            # Try to find category IDs by name or use directly as IDs
+            category_ids = []
+            category_names = []
+            for cat in include_list:
+                # Try to find as ID first
+                try:
+                    cat_id = int(cat)
+                    category_ids.append(cat_id)
+                except ValueError:
+                    # Not an ID, treat as name
+                    category_names.append(cat)
+
+            # Build domain for included categories
+            include_domain_parts = []
+            if category_ids:
+                include_domain_parts.append([('public_categ_ids', 'in', category_ids)])
+            if category_names:
+                for cat_name in category_names:
+                    include_domain_parts.append([('public_categ_ids.name', 'ilike', cat_name)])
+
+            if include_domain_parts:
+                # OR logic between all include conditions
+                include_domain = expression.OR(include_domain_parts) if len(include_domain_parts) > 1 else include_domain_parts[0]
+                domain = expression.AND([domain, include_domain])
+
+        # Apply category exclude filter (products in these categories will be hidden)
+        if exclude_list:
+            # Try to find category IDs by name or use directly as IDs
+            category_ids = []
+            category_names = []
+            for cat in exclude_list:
+                # Try to find as ID first
+                try:
+                    cat_id = int(cat)
+                    category_ids.append(cat_id)
+                except ValueError:
+                    # Not an ID, treat as name
+                    category_names.append(cat)
+
+            # Build domain for excluded categories
+            if category_ids:
+                domain = expression.AND([domain, [('public_categ_ids', 'not in', category_ids)]])
+            if category_names:
+                for cat_name in category_names:
+                    domain = expression.AND([domain, [('public_categ_ids.name', 'not ilike', cat_name)]])
 
         # Split query into words for better matching
         # This allows "wireless mouse" to find products with both words anywhere
@@ -501,7 +559,7 @@ class ElevenLabsController(http.Controller):
 
         # If no products found in database, search static catalog
         if not result:
-            result = self._search_static_catalog(query, category, min_price, max_price, in_stock_only, limit)
+            result = self._search_static_catalog(query, category, min_price, max_price, in_stock_only, limit, include_list, exclude_list)
 
         return {
             'success': True,
@@ -512,7 +570,9 @@ class ElevenLabsController(http.Controller):
                 'category': category,
                 'min_price': min_price,
                 'max_price': max_price,
-                'in_stock_only': in_stock_only
+                'in_stock_only': in_stock_only,
+                'categories_include': include_list if include_list else None,
+                'categories_exclude': exclude_list if exclude_list else None
             }
         }
 
@@ -528,7 +588,7 @@ class ElevenLabsController(http.Controller):
         return variants
 
     def _search_static_catalog(self, query, category=None, min_price=None, max_price=None,
-                                in_stock_only=False, limit=6):
+                                in_stock_only=False, limit=6, include_list=None, exclude_list=None):
         """Search the static fallback catalog"""
         static_catalog = self._get_static_catalog()
 
@@ -550,8 +610,31 @@ class ElevenLabsController(http.Controller):
             if not text_match:
                 continue
 
-            # Apply category filter if specified
-            if category and category.lower() not in product_data.get('category', '').lower():
+            # Get product category
+            product_category = product_data.get('category', '').lower()
+
+            # Apply category include filter (if set, only products in these categories will be shown)
+            if include_list:
+                # Check if product category matches any of the included categories
+                include_match = any(
+                    inc.lower() in product_category or product_category in inc.lower()
+                    for inc in include_list
+                )
+                if not include_match:
+                    continue
+
+            # Apply category exclude filter (products in these categories will be hidden)
+            if exclude_list:
+                # Check if product category matches any of the excluded categories
+                exclude_match = any(
+                    exc.lower() in product_category or product_category in exc.lower()
+                    for exc in exclude_list
+                )
+                if exclude_match:
+                    continue
+
+            # Apply category filter if specified (from search parameter)
+            if category and category.lower() not in product_category:
                 continue
 
             # Apply price filters
