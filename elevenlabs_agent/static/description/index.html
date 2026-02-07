@@ -1,1 +1,824 @@
-<img src="./main.jpg" alt="main" width="100%">
+<div class="container pt96 pb96">
+    <style>
+        /* Scoped styles to work within Odoo */
+        .ela-hero {
+            background: linear-gradient(135deg, #e1a533 0%, #c9932d 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .ela-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .ela-hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .ela-badge-odoo {
+            background: #714B67;
+        }
+
+        .ela-badge-license {
+            background: #0d6efd;
+        }
+
+        .ela-badge-elevenlabs {
+            background: #9D4EDD;
+        }
+
+        .ela-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .ela-section-white {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+        }
+
+        .ela-feature-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 30px;
+            height: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .ela-feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(225, 165, 51, 0.2);
+        }
+
+        .ela-feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .ela-screenshot-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .ela-screenshot-card img {
+            width: 100%;
+            height: auto;
+        }
+
+        .ela-screenshot-caption {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .ela-table-custom thead {
+            background: linear-gradient(135deg, #e1a533, #c9932d);
+            color: white;
+        }
+
+        .ela-table-custom th {
+            font-weight: 600;
+            border: none;
+        }
+
+        .ela-code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .ela-timeline {
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .ela-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #e1a533, #f0c975);
+        }
+
+        .ela-timeline-item {
+            position: relative;
+            padding-bottom: 30px;
+        }
+
+        .ela-timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -29px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            background: #e1a533;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(225, 165, 51, 0.3);
+        }
+
+        .ela-alert {
+            background: linear-gradient(135deg, rgba(225, 165, 51, 0.15), rgba(225, 165, 51, 0.05));
+            border-left: 4px solid #e1a533;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .ela-info-card {
+            background: white;
+            border-left: 4px solid #e1a533;
+            border-radius: 8px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .ela-roadmap-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .ela-footer {
+            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+        }
+
+        .ela-footer a {
+            color: #e1a533;
+        }
+
+        .ela-footer h5,
+        .ela-footer h6 {
+            color: white;
+        }
+
+        .ela-model-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .ela-model-starter {
+            background: rgba(13, 110, 253, 0.15);
+            color: #0d6efd;
+        }
+
+        .ela-model-growth {
+            background: rgba(25, 135, 84, 0.15);
+            color: #198754;
+        }
+
+        .ela-model-enterprise {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <div class="ela-hero">
+        <img src="./image1.png" class="img-fluid" alt="ElevenLabs AI Shopping Assistant">
+
+        <!-- Features Section -->
+        <section class="container pt32 pb32">
+            <h2 class="text-center mb-4">Powerful Features</h2>
+            <p class="text-muted text-center mb-4">Everything you need to create an intelligent voice-enabled shopping experience
+            </p>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="p16">
+                        <h5>Voice-Enabled Shopping</h5>
+                        <p class="text-warning mb-0">Natural voice conversations with your customers using ElevenLabs
+                            advanced speech technology.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Smart Recommendations</h5>
+                        <p class="text-warning mb-0">AI-powered product suggestions based on user context, preferences,
+                            and browsing history.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Cart Management</h5>
+                        <p class="text-warning mb-0">Add items to cart directly through voice commands with real-time
+                            inventory updates.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Advanced Search</h5>
+                        <p class="text-warning mb-0">Search products using natural language queries and filters.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Multi-Trigger System</h5>
+                        <p class="text-warning mb-0">Activate widget on delay, scroll percentage, time on page, or exit
+                            intent.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <h5>Geographic Targeting</h5>
+                    <p class="text-warning mb-0">Show widget based on user location with country code filtering.</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Customer Segmentation</h5>
+                        <p class="text-warning mb-0">Target first-time visitors, returning customers, or VIP users
+                            specifically.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Rate Limiting</h5>
+                        <p class="text-warning mb-0">Comprehensive usage tracking and limits to prevent abuse and manage
+                            costs.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Theme Customization</h5>
+                        <p class="text-warning mb-0">Match the widget perfectly to your brand colors and style.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Installation Section -->
+        <section class="ela-section-white">
+            <h2 class="text-center mb-4">Installation</h2>
+            <p class="text-muted text-center mb-4">Get up and running in minutes</p>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h5 class="mb-3">🏪 Method 1: Odoo App Store</h5>
+                        <ol class="mb-0">
+                            <li>Go to <strong>Apps</strong> in your Odoo backend</li>
+                            <li>Click <strong>Update Apps List</strong></li>
+                            <li>Search for <strong>"ElevenLabs AI Shopping Assistant"</strong></li>
+                            <li>Click <strong>Install</strong></li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h5 class="mb-3">📁 Method 2: Manual Installation</h5>
+                        <ol class="mb-0">
+                            <li>Copy the <code>elevenlabs_agent</code> folder to your Odoo addons directory</li>
+                            <li>Go to <strong>Apps</strong> → <strong>Update Apps List</strong></li>
+                            <li>Search for <strong>"ElevenLabs AI Shopping Assistant"</strong></li>
+                            <li>Click <strong>Install</strong></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ela-alert">
+                <h6 class="mb-3">⚠️ Requirements</h6>
+                <ul class="mb-0">
+                    <li>Odoo 18.0 or higher</li>
+                    <li><code>website</code> module</li>
+                    <li><code>website_sale</code> module</li>
+                    <li><code>product</code> module</li>
+                    <li>An ElevenLabs account with API access</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section class="container pt96 pb96">
+            <h2 class="text-center mb-4">Configuration</h2>
+            <p class="text-muted text-center mb-4">Comprehensive settings to tailor your AI assistant</p>
+
+            <h4 class="mb-3">Access Settings</h4>
+            <p class="text-muted mb-3">Navigate to <strong>Website</strong> → <strong>Configuration</strong> →
+                <strong>Settings</strong> and scroll to the "ElevenLabs AI Assistant" section.
+            </p>
+
+            <div class="ela-screenshot-card  mb-4">
+                <img src="/elevenlabs_agent/static/description/settings.png" alt="Settings Preview">
+                <div class="ela-screenshot-caption pt96">
+                    <h5 class="mb-1 text-center">Settings Panel in Odoo</h5>
+                    <p class="text-muted text-center mb-0">All configuration options in one place</p>
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3">Basic Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Agent ID</strong></td>
+                            <td><code>agent_id</code></td>
+                            <td>Your ElevenLabs Agent ID from the dashboard</td>
+                            <td><span class="text-danger">Required</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Enabled</strong></td>
+                            <td><code>enabled</code></td>
+                            <td>Enable or disable the assistant globally</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Widget Position</strong></td>
+                            <td><code>widget_position</code></td>
+                            <td>Position of widget on screen</td>
+                            <td><code>bottom-right</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Trigger Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Trigger Delay</strong></td>
+                            <td><code>trigger_delay</code></td>
+                            <td>Seconds to wait before showing widget</td>
+                            <td><code>0</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trigger on Scroll</strong></td>
+                            <td><code>trigger_on_scroll</code></td>
+                            <td>Scroll percentage (0-100) to trigger</td>
+                            <td><code>0.0</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trigger on Time</strong></td>
+                            <td><code>trigger_on_time</code></td>
+                            <td>Seconds on page before triggering</td>
+                            <td><code>0</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Exit Intent</strong></td>
+                            <td><code>trigger_on_exit_intent</code></td>
+                            <td>Show when user shows exit intent</td>
+                            <td><code>false</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Tool Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Show Product Card</strong></td>
+                            <td><code>enable_show_product_card</code></td>
+                            <td>Enable product recommendation display</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Add to Cart</strong></td>
+                            <td><code>enable_add_to_cart</code></td>
+                            <td>Enable addToCart tool</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Search Products</strong></td>
+                            <td><code>enable_search_products</code></td>
+                            <td>Enable product search tool</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cart Integration</strong></td>
+                            <td><code>cart_integration_method</code></td>
+                            <td><code>direct_add</code> or <code>redirect</code></td>
+                            <td><code>direct_add</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Geographic & Device Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Geographic Restrictions</strong></td>
+                            <td><code>geographic_restrictions</code></td>
+                            <td>Comma-separated country codes (e.g., US,CA,UK)</td>
+                            <td>Empty</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Device Filtering</strong></td>
+                            <td><code>device_filtering</code></td>
+                            <td><code>all</code>, <code>desktop</code>, or <code>mobile</code></td>
+                            <td><code>all</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Customer Segment</strong></td>
+                            <td><code>customer_segment_targeting</code></td>
+                            <td><code>all</code>, <code>first_time</code>, <code>returning</code>, <code>vip</code></td>
+                            <td><code>all</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Session Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Max Messages Per Session</strong></td>
+                            <td><code>max_messages_per_session</code></td>
+                            <td><code>0</code> (unlimited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Conversation History Retention</strong></td>
+                            <td><code>conversation_history_retention</code></td>
+                            <td><code>24</code> hours</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Daily Usage Limit (Per User)</strong></td>
+                            <td><code>daily_usage_limit</code></td>
+                            <td><code>0</code> (unlimited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Global Usage Limit</strong></td>
+                            <td><code>global_usage_limit</code></td>
+                            <td><code>0</code> (unlimited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Enable Conversation Logging</strong></td>
+                            <td><code>enable_conversation_logging</code></td>
+                            <td><code>false</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Theme Settings</h4>
+            <div class="table-responsive">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Theme Type</strong></td>
+                            <td><code>theme_type</code></td>
+                            <td><code>light</code> or <code>dark</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Primary Color</strong></td>
+                            <td><code>primary_color</code></td>
+                            <td>Hex color (default: <code>#667eea</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Secondary Color</strong></td>
+                            <td><code>secondary_color</code></td>
+                            <td>Hex color (default: <code>#764ba2</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ElevenLabs Setup Section -->
+        <section class="ela-section-white pt96">
+            <h2 class="mb-4">ElevenLabs Dashboard Setup</h2>
+            <p class="text-muted mb-4">Configure your AI agent in the ElevenLabs console</p>
+
+            <div class="ela-timeline">
+                <div class="ela-timeline-item">
+                    <h5>Create an ElevenLabs Account</h5>
+                    <p class="text-muted">Visit <a href="https://elevenlabs.io" target="_blank">elevenlabs.io</a> and
+                        sign
+                        up for an account. Choose a pricing plan that fits your needs.</p>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Create Your Conversational AI Agent</h5>
+                    <p class="text-muted">Go to <strong>Conversational AI</strong> → <strong>Agents</strong> →
+                        <strong>Create New Agent</strong>. Save and copy your <strong>Agent ID</strong>.
+                    </p>
+                    <div class="ela-screenshot-card mt-3">
+                        <img src="/elevenlabs_agent/static/description/create_agent.png" alt="Agent Setup Screenshot">
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Configure System Prompt</h5>
+                    <p class="text-muted">Define your AI assistant's personality and behavior in the System Prompt
+                        section.
+                    </p>
+                    <div class="ela-code-block mt-3">
+                        You are a friendly and helpful shopping assistant for an e-commerce store. Your role is to:
+
+                        1. Help customers find products that match their needs
+                        2. Provide detailed product information including prices, descriptions, and availability
+                        3. Make personalized recommendations based on customer preferences
+                        4. Assist with adding items to cart
+                        5. Answer questions about shipping, returns, and policies
+                        6. Maintain a conversational, natural tone
+
+                        When showing products, use the showProductCard tool.
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Choose an AI Model</h5>
+                    <p class="text-muted">Select the model that best fits your needs:</p>
+                    <div class="table-responsive mt-3">
+                        <table class="table ela-table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Description</th>
+                                    <th>Best For</th>
+                                    <th>Tier</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Eleven Turbo v2.5</strong></td>
+                                    <td>Fast, low-latency responses</td>
+                                    <td>Real-time conversations</td>
+                                    <td><span class="ela-model-badge ela-model-starter">Starter+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GPT-4 Turbo</strong></td>
+                                    <td>Advanced reasoning</td>
+                                    <td>Complex product queries</td>
+                                    <td><span class="ela-model-badge ela-model-growth">Growth+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Claude 3.5 Sonnet</strong></td>
+                                    <td>Balanced performance</td>
+                                    <td>General shopping assistant</td>
+                                    <td><span class="ela-model-badge ela-model-growth">Growth+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GPT-4o</strong></td>
+                                    <td>Multimodal capabilities</td>
+                                    <td>Image-based products</td>
+                                    <td><span class="ela-model-badge ela-model-enterprise">Enterprise</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Configure Voice Settings</h5>
+                    <p class="text-muted">Choose from pre-built voices (Rachel, Drew, Clyde) or create a custom voice
+                        clone
+                        using Voice Lab.</p>
+                    <div class="ela-screenshot-card mt-3">
+                        <img src="/elevenlabs_agent/static/description/voice_setting.png"
+                            alt="Voice Settings Screenshot">
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Define Client Tools</h5>
+                    <p class="text-muted mb-3">Add the following tools to your agent in the <strong>Client
+                            Tools</strong>
+                        section:</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>showProductCard</code></h6>
+                                <p class="text-muted small mb-0">Display product recommendations in a visual card
+                                    format.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>addToCart</code></h6>
+                                <p class="text-muted small mb-0">Add products to the shopping cart.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>searchProducts</code></h6>
+                                <p class="text-muted small mb-0">Search for products matching criteria.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>initializeSession</code></h6>
+                                <p class="text-muted small mb-0">Initialize a new conversation session.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screenshots Section -->
+        <section class="ela-section ">
+            <h2 class="mb-4">Screenshots</h2>
+            <p class="text-muted mb-4">See the AI Assistant in action</p>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="ela-screenshot-card">
+                        <img src="/elevenlabs_agent/static/description/demo1.png" alt="Widget Preview">
+                        <div class="ela-screenshot-caption pt96">
+                            <h5 class="mb-1">Widget Integration</h5>
+                            <p class="text-muted mb-0">The AI assistant widget seamlessly integrated into your Odoo
+                                storefront.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="ela-screenshot-card">
+                        <img src="/elevenlabs_agent/static/description/demo2.png" alt="Product Recommendation Preview">
+                        <div class="ela-screenshot-caption">
+                            <h5 class="mb-1">Product Recommendations</h5>
+                            <p class="text-muted mb-0">AI-powered product suggestions displayed in beautiful cards.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ela-screenshot-card">
+                <img src="/elevenlabs_agent/static/description/demo3.png" alt="Settings Preview">
+                <div class="ela-screenshot-caption">
+                    <h5 class="mb-1">Easy Configuration</h5>
+                    <p class="text-muted mb-0">Comprehensive settings panel in Odoo backend.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Best Practices Section -->
+        <section class="ela-section-white pt96">
+            <h2 class="mb-4">Rate Limiting & Best Practices</h2>
+            <p class="text-muted mb-4">Optimize your AI assistant for performance and cost efficiency</p>
+
+            <div class="ela-alert mb-4">
+                <h6 class="mb-3">📊 Recommended Rate Limits</h6>
+                <div class="table-responsive">
+                    <table class="table ela-table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Store Size</th>
+                                <th>Daily Limit Per User</th>
+                                <th>Global Daily Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Small (&lt;1,000 visitors/day)</td>
+                                <td>50 messages</td>
+                                <td>5,000 messages</td>
+                            </tr>
+                            <tr>
+                                <td>Medium (1,000-10,000)</td>
+                                <td>30 messages</td>
+                                <td>25,000 messages</td>
+                            </tr>
+                            <tr>
+                                <td>Large (&gt;10,000)</td>
+                                <td>20 messages</td>
+                                <td>100,000 messages</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>🚀 Start Conservative</h6>
+                        <p class="text-muted small mb-0">Begin with lower limits, monitor usage patterns, and adjust
+                            based
+                            on analytics.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>📈 Track Metrics</h6>
+                        <p class="text-muted small mb-0">Enable conversation logging and use external analytics
+                            dashboard.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>🌎 Geographic Segmentation</h6>
+                        <p class="text-muted small mb-0">Target specific countries with high conversion and exclude low
+                            ROI
+                            regions.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>📱 Device Optimization</h6>
+                        <p class="text-muted small mb-0">Prioritize mobile for voice shopping and test on all device
+                            types.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support Section -->
+        <section class="ela-section-white pt96">
+            <div class="text-center" style="max-width: 700px; margin: 0 auto;">
+                <h2 class="mb-4">Support This Project</h2>
+                <p class="text-muted mb-4">Your support helps us develop new features and keep this module free for the
+                    community</p>
+
+                <div class="mb-5">
+                    <a href="https://www.llmarifa.co" target="_blank" class="btn btn-outline-warning btn-lg px-4">Visit
+                        LLMarifa.co</a>
+                </div>
+
+                <div class="ela-info-card text-start">
+                    <h6 class="text-center mb-3">ℹ️ About the Developer</h6>
+                    <p class="text-center mb-0">
+                        <strong>Hichem - LLMarifa Co</strong><br>
+                        <span class="text-muted">We specialize in AI-powered solutions for e-commerce and enterprise
+                            systems.</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
