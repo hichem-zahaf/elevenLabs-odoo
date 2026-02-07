@@ -60,6 +60,7 @@ Previous Fixes:
         'security/ir.model.access.csv',
         'security/elevenlabs_agent_security.xml',
         'views/res_config_settings_views.xml',
+        # 'views/elevenlabs_agent_usage_views.xml',  # Temporarily disabled to test
         'views/assets.xml',
         'views/website_templates.xml',
         'views/website_layout.xml',

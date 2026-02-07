@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ElevenLabs Agent Usage Tree View -->
+    <record id="elevenlabs_agent_usage_tree_view" model="ir.ui.view">
+        <field name="name">elevenlabs.agent.usage.tree</field>
+        <field name="model">elevenlabs.agent.usage</field>
+        <field name="arch" type="xml">
+            <tree string="Usage Records">
+                <field name="session_id"/>
+                <field name="user_id"/>
+                <field name="public_user_id"/>
+                <field name="message_count"/>
+                <field name="is_active"/>
+                <field name="create_date"/>
+                <field name="session_start_date"/>
+                <field name="ip_address"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ElevenLabs Agent Usage Form View -->
+    <record id="elevenlabs_agent_usage_form_view" model="ir.ui.view">
+        <field name="name">elevenlabs.agent.usage.form</field>
+        <field name="model">elevenlabs.agent.usage</field>
+        <field name="arch" type="xml">
+            <form string="Usage Record">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="session_id"/>
+                            <field name="user_id"/>
+                            <field name="public_user_id"/>
+                            <field name="ip_address"/>
+                        </group>
+                        <group>
+                            <field name="message_count"/>
+                            <field name="is_active"/>
+                            <field name="session_start_date"/>
+                            <field name="session_end_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Session Information" name="session_info">
+                            <group>
+                                <field name="user_agent"/>
+                                <field name="referrer"/>
+                            </group>
+                        </page>
+                        <page string="Technical Information" name="technical_info">
+                            <group>
+                                <field name="create_date"/>
+                                <field name="write_date"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ElevenLabs Agent Usage Search View -->
+    <record id="elevenlabs_agent_usage_search_view" model="ir.ui.view">
+        <field name="name">elevenlabs.agent.usage.search</field>
+        <field name="model">elevenlabs.agent.usage</field>
+        <field name="arch" type="xml">
+            <search string="Search Usage">
+                <field name="session_id"/>
+                <field name="user_id"/>
+                <field name="public_user_id"/>
+                <field name="ip_address"/>
+                <field name="message_count"/>
+                <field name="create_date"/>
+
+                <filter string="Active Sessions" name="active_sessions" domain="[('is_active', '=', True)]"/>
+                <filter string="Ended Sessions" name="ended_sessions" domain="[('is_active', '=', False)]"/>
+                <separator/>
+                <filter string="Logged Users" name="logged_users" domain="[('user_id', '!=', False)]"/>
+                <filter string="Public Users" name="public_users" domain="[('public_user_id', '!=', False)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="User" name="group_user" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Date" name="group_date" domain="[]" context="{'group_by': 'create_date:day'}"/>
+                    <filter string="Session Status" name="group_status" domain="[]" context="{'group_by': 'is_active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ElevenLabs Agent Usage Action -->
+    <record id="action_elevenlabs_agent_usage" model="ir.actions.act_window">
+        <field name="name">Usage Statistics</field>
+        <field name="res_model">elevenlabs.agent.usage</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="elevenlabs_agent_usage_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No usage data yet.
+            </p>
+            <p>
+                Usage records will be created automatically when users interact with the ElevenLabs AI Assistant.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item in Settings -->
+    <menuitem id="menu_elevenlabs_usage"
+              name="Usage Statistics"
+              parent="website.menu_website_configuration"
+              action="action_elevenlabs_agent_usage"
+              sequence="55"/>
+
+</odoo>

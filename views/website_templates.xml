@@ -76,13 +76,13 @@
 
                                 <!-- Session Controls -->
                                 <t t-set="max_messages_per_session" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.max_messages_per_session', '0'))"/>
+                                <t t-set="max_messages_per_conversation" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.max_messages_per_conversation', '0'))"/>
                                 <t t-set="conversation_history_retention" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.conversation_history_retention', '24'))"/>
                                 <t t-set="auto_end_inactive_conversations" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.auto_end_inactive_conversations', 'True') == 'True'"/>
                                 <t t-set="save_user_info" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.save_user_info', 'False') == 'True'"/>
                                 <t t-set="enable_conversation_logging" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.enable_conversation_logging', 'False') == 'True'"/>
-                                <t t-set="daily_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.daily_usage_limit', '50'))"/>
-                                <t t-set="global_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.global_usage_limit', '1000'))"/>
-                                <t t-set="session_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.session_usage_limit', '20'))"/>
+                                <t t-set="daily_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.daily_usage_limit', '0'))"/>
+                                <t t-set="global_usage_limit" t-value="int(request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.global_usage_limit', '0'))"/>
 
                                 <!-- Product Integration -->
                                 <t t-set="product_categories_include" t-value="request.env['ir.config_parameter'].sudo().get_param('elevenlabs_agent.product_categories_include', '')"/>
@@ -127,13 +127,13 @@
                                      t-att-data-customer-segment-targeting="customer_segment_targeting"
                                      t-att-data-exclude-public-users="str(exclude_public_users).lower()"
                                      t-att-data-max-messages-per-session="str(max_messages_per_session)"
+                                     t-att-data-max-messages-per-conversation="str(max_messages_per_conversation)"
                                      t-att-data-conversation-history-retention="str(conversation_history_retention)"
                                      t-att-data-auto-end-inactive-conversations="str(auto_end_inactive_conversations).lower()"
                                      t-att-data-save-user-info="str(save_user_info).lower()"
                                      t-att-data-enable-conversation-logging="str(enable_conversation_logging).lower()"
                                      t-att-data-daily-usage-limit="str(daily_usage_limit)"
                                      t-att-data-global-usage-limit="str(global_usage_limit)"
-                                     t-att-data-session-usage-limit="str(session_usage_limit)"
                                      t-att-data-product-categories-include="product_categories_include"
                                      t-att-data-product-categories-exclude="product_categories_exclude"
                                      t-att-data-featured-products-priority="featured_products_priority"

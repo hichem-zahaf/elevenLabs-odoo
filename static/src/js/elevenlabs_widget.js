@@ -1,6 +1,32 @@
 (function() {
     'use strict';
-    
+
+    // ============================================================
+    // DEBUG LOGGER - Only logs when ?debug=1 is in URL
+    // ============================================================
+    var isDebugMode = (function() {
+        var params = new URLSearchParams(window.location.search);
+        return params.get('debug') === '1';
+    })();
+
+    function debugLog() {
+        if (isDebugMode) {
+            console.log.apply(console, arguments);
+        }
+    }
+
+    function debugError() {
+        if (isDebugMode) {
+            console.error.apply(console, arguments);
+        }
+    }
+
+    function debugWarn() {
+        if (isDebugMode) {
+            console.warn.apply(console, arguments);
+        }
+    }
+
     // Wait for DOM to be ready
     document.addEventListener('DOMContentLoaded', function() {
         initializeElevenLabsWidget();
@@ -76,12 +102,83 @@
         triggerOnExitIntent,
         enableShowProductCard,
         enableSearchProducts,
-        usageDailyLimit,
-        usageGlobalLimit,
-        usageMaxPerSession
+        userId,
+        publicUserId,
+        maxMessagesPerConversation,
+        dailyUsageLimit,
+        globalUsageLimit,
+        userIsPublic
     ) {
         var widgetCreated = false;
-        var sessionData = null;  // Store session data for usage tracking
+        var usageCheckInProgress = false;
+
+        // Function to check usage limits before creating widget
+        function checkUsageAndCreateWidget() {
+            if (widgetCreated || usageCheckInProgress) {
+                return;
+            }
+
+            usageCheckInProgress = true;
+
+            // Check if limits are configured
+            var hasDailyLimit = dailyUsageLimit > 0;
+            var hasGlobalLimit = globalUsageLimit > 0;
+
+            // If no limits are set, create widget immediately
+            if (!hasDailyLimit && !hasGlobalLimit) {
+                debugLog('No usage limits configured, creating widget');
+                createWidgetOnce();
+                usageCheckInProgress = false;
+                return;
+            }
+
+            debugLog('Checking usage limits... daily:', dailyUsageLimit, 'global:', globalUsageLimit);
+
+            // Check usage limits
+            checkUsageLimits(userId, publicUserId)
+                .then(function(result) {
+                    usageCheckInProgress = false;
+
+                    if (!result.success) {
+                        debugError('Usage check failed:', result.error);
+                        // If check fails, show error and don't create widget
+                        showToast(
+                            'Unable to Start Session',
+                            'We couldn\'t verify your usage limits. Please try again later.',
+                            'error'
+                        );
+                        return;
+                    }
+
+                    if (!result.allowed) {
+                        debugWarn('Usage limits exceeded:', result.reason);
+                        showToast(
+                            'Usage Limit Reached',
+                            result.reason || 'You have reached the maximum number of messages allowed.',
+                            'warning'
+                        );
+                        return;
+                    }
+
+                    // Update publicUserId if it was returned by the backend
+                    if (result.public_user_id && !publicUserId) {
+                        publicUserId = result.public_user_id;
+                        debugLog('Public user ID from backend:', publicUserId);
+                    }
+
+                    debugLog('Usage limits check passed. Daily remaining:', result.daily_limit.remaining, 'Global remaining:', result.global_limit.remaining);
+                    createWidgetOnce();
+                })
+                .catch(function(error) {
+                    usageCheckInProgress = false;
+                    debugError('Usage check error:', error);
+                    showToast(
+                        'Connection Error',
+                        'Unable to connect to the server. Please check your internet connection.',
+                        'error'
+                    );
+                });
+        }
 
         // Function to create the widget and prevent further triggers
         function createWidgetOnce() {
@@ -98,7 +195,9 @@
                     agentId,
                     enableShowProductCard,
                     enableSearchProducts,
-                    usageMaxPerSession
+                    userId,
+                    publicUserId,
+                    maxMessagesPerConversation
                 );
 
                 // Clean up all event listeners after widget is created
@@ -116,8 +215,8 @@
 
         // Trigger on delay
         if (triggerDelay > 0) {
-            console.log('Starting ElevenLabs agent with delay of ' + triggerDelay + ' seconds');
-            setTimeout(createWidgetOnce, triggerDelay * 1000);
+            debugLog('Starting ElevenLabs agent with delay of ' + triggerDelay + ' seconds');
+            setTimeout(checkUsageAndCreateWidget, triggerDelay * 1000);
         }
 
         // Trigger on scroll
@@ -128,8 +227,8 @@
                 var scrollPercent = (scrollTop / docHeight) * 100;
 
                 if (scrollPercent >= triggerOnScroll) {
-                    console.log('Triggering widget on scroll: ' + scrollPercent.toFixed(2) + '%');
-                    createWidgetOnce();
+                    debugLog('Triggering widget on scroll: ' + scrollPercent.toFixed(2) + '%');
+                    checkUsageAndCreateWidget();
                 }
             };
 
@@ -142,9 +241,9 @@
             var timerInterval = setInterval(function() {
                 timeSpent += 1;
                 if (timeSpent >= triggerOnTime) {
-                    console.log('Triggering widget after ' + triggerOnTime + ' seconds on page');
+                    debugLog('Triggering widget after ' + triggerOnTime + ' seconds on page');
                     clearInterval(timerInterval);
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             }, 1000);
 
@@ -161,9 +260,9 @@
 
                 // Check if mouse is leaving the browser window
                 if (!from || from.nodeName === "HTML") {
-                    console.log('Exit intent detected - mouse leaving window');
+                    debugLog('Exit intent detected - mouse leaving window');
                     exitIntentTriggered = true;
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             };
 
@@ -172,9 +271,9 @@
                 if (exitIntentTriggered || widgetCreated) return;
 
                 if (e.clientY < 50) {  // Within top 50 pixels
-                    console.log('Exit intent detected - mouse near top of screen');
+                    debugLog('Exit intent detected - mouse near top of screen');
                     exitIntentTriggered = true;
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             };
 
@@ -185,8 +284,8 @@
 
         // If no triggers are configured, create widget immediately
         if (triggerDelay === 0 && triggerOnScroll === 0 && triggerOnTime === 0 && !triggerOnExitIntent) {
-            console.log('No triggers configured, creating widget immediately');
-            createWidgetOnce();
+            debugLog('No triggers configured, checking usage and creating widget');
+            checkUsageAndCreateWidget();
         }
     }
 
@@ -195,10 +294,10 @@
         primaryColor = primaryColor || '#667eea';
         secondaryColor = secondaryColor || '#764ba2';
 
-        console.log('=== ElevenLabs Theme Application ===');
-        console.log('Theme Type:', themeType);
-        console.log('Primary Color:', primaryColor);
-        console.log('Secondary Color:', secondaryColor);
+        debugLog('=== ElevenLabs Theme Application ===');
+        debugLog('Theme Type:', themeType);
+        debugLog('Primary Color:', primaryColor);
+        debugLog('Secondary Color:', secondaryColor);
 
         // Create or update style element for theme variables
         var themeStyleId = 'elevenlabs-theme-vars';
@@ -236,37 +335,491 @@
 
         themeStyle.textContent = cssVars;
 
-        console.log('CSS Variables set:', cssVars);
+        debugLog('CSS Variables set:', cssVars);
 
         // Apply theme class to body for dark mode
         if (themeType === 'dark') {
             document.body.classList.add('elevenlabs-dark-theme');
-            console.log('Dark theme class added to body');
+            debugLog('Dark theme class added to body');
         } else {
             document.body.classList.remove('elevenlabs-dark-theme');
-            console.log('Dark theme class removed from body');
+            debugLog('Dark theme class removed from body');
         }
 
         // Wait a tick for CSS to apply, then verify
         setTimeout(function() {
-            console.log('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
-            console.log('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
-            console.log('====================================');
+            debugLog('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
+            debugLog('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
+            debugLog('====================================');
         }, 10);
     }
+
+    // ============================================================
+    // USAGE TRACKING AND RATE LIMITING FUNCTIONS
+    // ============================================================
+
+    // Global variables for usage tracking
+    var elevenlabsSessionId = null;
+    var elevenlabsUserId = null;
+    var elevenlabsPublicUserId = null;
+    var elevenlabsMaxMessagesPerConversation = 0;
+    var elevenlabsSessionMessageCount = 0;
+
+    /**
+     * Check usage limits before creating the widget
+     * Returns a promise that resolves with the check result
+     */
+    function checkUsageLimits(userId, publicUserId) {
+        return fetch('/api/elevenlabs/usage/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {
+                    user_id: userId,
+                    public_user_id: publicUserId
+                },
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result) {
+                return data.result;
+            }
+            return { success: false, allowed: false, error: 'Invalid response' };
+        })
+        .catch(function(error) {
+            debugError('Usage check failed:', error);
+            // Fail closed - if check fails, don't allow widget
+            return { success: false, allowed: false, error: error.message };
+        });
+    }
+
+    /**
+     * Start a new usage session when conversation is initiated
+     */
+    function startUsageSession(sessionId, userId, publicUserId) {
+        elevenlabsSessionId = sessionId;
+        elevenlabsUserId = userId;
+        elevenlabsPublicUserId = publicUserId;
+        elevenlabsSessionMessageCount = 0;
+
+        return fetch('/api/elevenlabs/usage/session/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {
+                    session_id: sessionId,
+                    user_id: userId,
+                    public_user_id: publicUserId,
+                    user_agent: navigator.userAgent,
+                    referrer: document.referrer
+                },
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result && data.result.success) {
+                debugLog('Usage session started:', data.result);
+                return data.result;
+            }
+            debugError('Failed to start usage session:', data);
+            return null;
+        })
+        .catch(function(error) {
+            debugError('Session start failed:', error);
+            return null;
+        });
+    }
+
+    /**
+     * Record a message in the current session
+     */
+    function recordMessage(sessionId) {
+        return fetch('/api/elevenlabs/usage/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {
+                    session_id: sessionId
+                },
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result && data.result.success) {
+                elevenlabsSessionMessageCount = data.result.message_count;
+
+                // Log full response for debugging
+                debugLog('Message recorded. Count:', data.result.message_count, 'Limit exceeded:', data.result.limit_exceeded, 'Remaining:', data.result.remaining);
+
+                // Check if limit exceeded
+                if (data.result.limit_exceeded) {
+                    handleSessionLimitExceeded(data.result);
+                }
+
+                return data.result;
+            }
+            return null;
+        })
+        .catch(function(error) {
+            debugError('Message recording failed:', error);
+            return null;
+        });
+    }
+
+    /**
+     * Handle session limit exceeded - remove widget and show toast
+     */
+    function handleSessionLimitExceeded(result) {
+        debugWarn('Session message limit exceeded:', result);
+
+        // Remove the widget element
+        var widget = document.querySelector('elevenlabs-convai');
+        if (widget) {
+            widget.remove();
+            debugLog('Widget removed due to session limit exceeded');
+        }
+
+        // Show toast notification
+        showToast(
+            'Message Limit Reached',
+            'You have reached the maximum number of messages for this session. Please start a new conversation.',
+            'warning'
+        );
+    }
+
+    /**
+     * Get client IP and generate public user ID
+     */
+    function getClientInfo() {
+        return fetch('/api/elevenlabs/usage/client-ip', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {},
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result && data.result.success) {
+                return data.result;
+            }
+            return null;
+        })
+        .catch(function(error) {
+            debugError('Failed to get client info:', error);
+            return null;
+        });
+    }
+
+    /**
+     * Show a toast notification
+     */
+    function showToast(title, message, type) {
+        type = type || 'info';
+
+        // Remove existing toast if any
+        var existingToast = document.querySelector('.elevenlabs-toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        var toast = document.createElement('div');
+        toast.className = 'elevenlabs-toast-notification';
+
+        var iconClass = 'fa-info-circle';
+        if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+        if (type === 'error') iconClass = 'fa-times-circle';
+        if (type === 'success') iconClass = 'fa-check-circle';
+
+        toast.innerHTML = '' +
+            '<div class="toast-content">' +
+                '<i class="fa ' + iconClass + ' toast-icon"></i>' +
+                '<div class="toast-message">' +
+                    '<div class="toast-title">' + title + '</div>' +
+                    '<div class="toast-text">' + message + '</div>' +
+                '</div>' +
+                '<button class="toast-close">&times;</button>' +
+            '</div>';
+
+        // Add styles if not already present
+        if (!document.getElementById('elevenlabs-toast-styles')) {
+            var styles = document.createElement('style');
+            styles.id = 'elevenlabs-toast-styles';
+            styles.textContent = '' +
+                '.elevenlabs-toast-notification {' +
+                    'position: fixed !important;' +
+                    'bottom: 20px !important;' +
+                    'right: 20px !important;' +
+                    'z-index: 999999 !important;' +
+                    'background: white !important;' +
+                    'border-radius: 8px !important;' +
+                    'box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;' +
+                    'padding: 16px !important;' +
+                    'min-width: 300px !important;' +
+                    'max-width: 400px !important;' +
+                    'animation: slideIn 0.3s ease-out !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-content {' +
+                    'display: flex !important;' +
+                    'align-items: flex-start !important;' +
+                    'gap: 12px !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-icon {' +
+                    'font-size: 20px !important;' +
+                    'color: #667eea !important;' +
+                    'flex-shrink: 0 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-message {' +
+                    'flex: 1 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-title {' +
+                    'font-weight: 600 !important;' +
+                    'margin-bottom: 4px !important;' +
+                    'color: #2c3e50 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-text {' +
+                    'font-size: 14px !important;' +
+                    'color: #7f8c8d !important;' +
+                    'line-height: 1.4 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-close {' +
+                    'background: none !important;' +
+                    'border: none !important;' +
+                    'font-size: 20px !important;' +
+                    'color: #95a5a6 !important;' +
+                    'cursor: pointer !important;' +
+                    'padding: 0 !important;' +
+                    'line-height: 1 !important;' +
+                    'flex-shrink: 0 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-close:hover {' +
+                    'color: #2c3e50 !important;' +
+                '}' +
+                '@keyframes slideIn {' +
+                    'from {' +
+                        'transform: translateX(100%);' +
+                        'opacity: 0;' +
+                    '}' +
+                    'to {' +
+                        'transform: translateX(0);' +
+                        'opacity: 1;' +
+                    '}' +
+                '}';
+            document.head.appendChild(styles);
+        }
+
+        // Add to page
+        document.body.appendChild(toast);
+
+        // Add close button handler
+        var closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                toast.remove();
+            });
+        }
+
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    /**
+     * Setup ElevenLabs event listeners for usage tracking
+     * Uses WebSocket interception to capture events
+     */
+    function setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation) {
+        elevenlabsMaxMessagesPerConversation = maxMessagesPerConversation;
+
+        // Get the widget element
+        var widget = document.querySelector('elevenlabs-convai');
+        if (!widget) {
+            // Set up a MutationObserver to wait for widget to appear
+            setupWidgetObserver(userId, publicUserId, maxMessagesPerConversation);
+            return;
+        }
+
+        // WebSocket Interception - capture all ElevenLabs events
+        setupWebSocketInterception(userId, publicUserId);
+
+        // DOM Events fallback - try various event name formats
+        var eventNames = [
+            'conversation_initiation_metadata',
+            'user_transcript',
+            'elevenlabs-convai:conversation_initiation_metadata',
+            'elevenlabs-convai:user_transcript',
+            'elevenlabs:conversation_initiation_metadata',
+            'elevenlabs:user_transcript'
+        ];
+
+        eventNames.forEach(function(eventName) {
+            widget.addEventListener(eventName, function(event) {
+                handleWebSocketEvent(eventName, event, userId, publicUserId);
+            });
+        });
+    }
+
+    /**
+     * Intercept WebSocket communication to capture ElevenLabs events
+     * This is the most reliable method as it captures all WebSocket traffic
+     */
+    function setupWebSocketInterception(userId, publicUserId) {
+        // Store original WebSocket
+        var OriginalWebSocket = window.WebSocket;
+
+        // Override WebSocket constructor
+        window.WebSocket = function(url, protocols) {
+            // Create the actual WebSocket
+            var ws = new OriginalWebSocket(url, protocols);
+
+            // Intercept onmessage to capture incoming events
+            var originalOnMessage = ws.onmessage;
+            ws.onmessage = function(event) {
+                // Call original handler first
+                if (originalOnMessage) {
+                    originalOnMessage.call(ws, event);
+                }
+
+                // Try to parse the message
+                try {
+                    var data = JSON.parse(event.data);
+                    // Handle ElevenLabs events silently
+                    handleWebSocketEvent(data.type, data, userId, publicUserId);
+                } catch (e) {
+                    // Not JSON, ignore
+                }
+            };
+
+            return ws;
+        };
+
+        // Copy all WebSocket properties
+        window.WebSocket.prototype = OriginalWebSocket.prototype;
+        window.WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
+        window.WebSocket.OPEN = OriginalWebSocket.OPEN;
+        window.WebSocket.CLOSING = OriginalWebSocket.CLOSING;
+        window.WebSocket.CLOSED = OriginalWebSocket.CLOSED;
+    }
+
+    /**
+     * Handle an ElevenLabs event (from WebSocket or DOM)
+     * Unified handler for all event sources
+     * Only records usage on user_transcript events
+     */
+    function handleWebSocketEvent(eventType, eventData, userId, publicUserId) {
+        // Handle conversation_initiation_metadata - start session
+        if (eventType === 'conversation_initiation_metadata') {
+            var conversationId = null;
+
+            // Try to extract conversation_id from various locations
+            if (eventData.conversation_initiation_metadata_event && eventData.conversation_initiation_metadata_event.conversation_id) {
+                conversationId = eventData.conversation_initiation_metadata_event.conversation_id;
+            } else if (eventData.detail && eventData.detail.conversation_initiation_metadata_event && eventData.detail.conversation_initiation_metadata_event.conversation_id) {
+                conversationId = eventData.detail.conversation_initiation_metadata_event.conversation_id;
+            } else if (eventData.conversation_id) {
+                conversationId = eventData.conversation_id;
+            }
+
+            if (conversationId && conversationId !== elevenlabsSessionId) {
+                debugLog('[ElevenLabs] Starting session. Max messages per conversation:', elevenlabsMaxMessagesPerConversation);
+                startUsageSession(conversationId, userId, publicUserId);
+            }
+        }
+
+        // Handle user_transcript - user spoke (record usage)
+        if (eventType === 'user_transcript' || eventType === 'elevenlabs-convai:user_transcript') {
+            if (!elevenlabsSessionId) {
+                return;
+            }
+            recordMessage(elevenlabsSessionId);
+        }
+    }
+
+
+    /**
+     * Set up a MutationObserver to watch for widget appearance
+     */
+    function setupWidgetObserver(userId, publicUserId, maxMessagesPerConversation) {
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeName === 'ELEVENLABS-CONVAI' ||
+                        (node.querySelector && node.querySelector('elevenlabs-convai'))) {
+                        // Stop observing once widget is found
+                        observer.disconnect();
+                        setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Stop observing after 30 seconds (fallback)
+        setTimeout(function() {
+            observer.disconnect();
+        }, 30000);
+    }
+
+
+    // ============================================================
+    // END USAGE TRACKING AND RATE LIMITING FUNCTIONS
+    // ============================================================
 
     function initializeElevenLabsWidget() {
         // Find the container element
         var container = document.querySelector('.elevenlabs-agent-container');
         if (!container) {
-            console.log('ElevenLabs container not found');
+            debugLog('ElevenLabs container not found');
             return;
         }
 
         // Check for debug mode first (always show debug panel if debug=1)
         var urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('debug') === '1') {
-            console.log('Debug mode enabled');
+            debugLog('Debug mode enabled');
             logAllSettings(container);  // Log all settings when debug=1
             showDebugPanel();
         }
@@ -294,11 +847,17 @@
 
         // Session controls
         var maxMessagesPerSession = parseInt(container.dataset.maxMessagesPerSession) || 0;
+        var maxMessagesPerConversation = parseInt(container.dataset.maxMessagesPerConversation) || 0;
+
+        // Debug: log the raw value from dataset
+        debugLog('[ElevenLabs] maxMessagesPerConversation raw value:', container.dataset.maxMessagesPerConversation, 'parsed:', maxMessagesPerConversation);
+
         var conversationHistoryRetention = parseInt(container.dataset.conversationHistoryRetention) || 24;
         var autoEndInactiveConversations = container.dataset.autoEndInactiveConversations === 'true';
         var saveUserInfo = container.dataset.saveUserInfo === 'true';
         var enableConversationLogging = container.dataset.enableConversationLogging === 'true';
         var dailyUsageLimit = parseInt(container.dataset.dailyUsageLimit) || 0;
+        var globalUsageLimit = parseInt(container.dataset.globalUsageLimit) || 0;
 
         // Usage tracking limits
         var globalUsageLimit = parseInt(container.dataset.globalUsageLimit) || 0;
@@ -315,18 +874,18 @@
         var pagesToHide = container.dataset.pagesToHide || null;
 
         // Theme settings - Debug dataset
-        console.log('=== Container Dataset Debug ===');
-        console.log('Raw dataset.themeType:', container.dataset.themeType);
-        console.log('Raw dataset.primaryColor:', container.dataset.primaryColor);
-        console.log('Raw dataset.secondaryColor:', container.dataset.secondaryColor);
-        console.log('Full dataset:', JSON.parse(JSON.stringify(container.dataset)));
+        debugLog('=== Container Dataset Debug ===');
+        debugLog('Raw dataset.themeType:', container.dataset.themeType);
+        debugLog('Raw dataset.primaryColor:', container.dataset.primaryColor);
+        debugLog('Raw dataset.secondaryColor:', container.dataset.secondaryColor);
+        debugLog('Full dataset:', JSON.parse(JSON.stringify(container.dataset)));
 
         // Theme settings
         var themeType = container.dataset.themeType || 'light';
         var primaryColor = container.dataset.primaryColor || '#667eea';
         var secondaryColor = container.dataset.secondaryColor || '#764ba2';
 
-        console.log('Final theme values:', { themeType, primaryColor, secondaryColor });
+        debugLog('Final theme values:', { themeType, primaryColor, secondaryColor });
 
         // Apply theme settings
         applyTheme(themeType, primaryColor, secondaryColor);
@@ -372,69 +931,77 @@
 
         // Log user details separately if user is logged in (not public)
         if (!userIsPublic && userId && userId !== '0' && userId !== 'undefined' && userId != null) {
-            console.log('=== Logged User Details ===');
-            console.log('User ID:', userId);
-            console.log('User Name:', userName);
-            console.log('User Login:', userLogin);
-            console.log('User Email:', userEmail);
-            console.log('Is Admin:', userIsAdmin);
-            console.log('Is VIP:', userIsVip);
-            console.log('=========================');
+            debugLog('=== Logged User Details ===');
+            debugLog('User ID:', userId);
+            debugLog('User Name:', userName);
+            debugLog('User Login:', userLogin);
+            debugLog('User Email:', userEmail);
+            debugLog('Is Admin:', userIsAdmin);
+            debugLog('Is VIP:', userIsVip);
+            debugLog('=========================');
         } else {
-            console.log('User is a public visitor');
-            console.log('Raw userIsPublic value:', userIsPublicStr);
-            console.log('Raw userId value:', userId);
-            console.log('Odoo session info available:', typeof odoo !== 'undefined' && odoo.session_info);
+            debugLog('User is a public visitor');
+            debugLog('Raw userIsPublic value:', userIsPublicStr);
+            debugLog('Raw userId value:', userId);
+            debugLog('Odoo session info available:', typeof odoo !== 'undefined' && odoo.session_info);
         }
 
         // Check if widget should be shown based on page visibility
         if (!_shouldShowOnCurrentPage(pagesToShow, pagesToHide)) {
-            console.log('ElevenLabs agent is not configured for this page');
+            debugLog('ElevenLabs agent is not configured for this page');
             return;
         }
 
         // Check geographic restrictions
         if (!_passesGeographicRestrictions(geographicRestrictions)) {
-            console.log('ElevenLabs agent is restricted by geographic settings');
+            debugLog('ElevenLabs agent is restricted by geographic settings');
             return;
         }
 
         // Check device filtering
         if (!_passesDeviceFiltering(deviceFiltering)) {
-            console.log('ElevenLabs agent is restricted by device filtering');
+            debugLog('ElevenLabs agent is restricted by device filtering');
             return;
         }
 
         // Check customer segment targeting - VIP only
         if (customerSegmentTargeting === 'vip') {
-            console.log('VIP-only targeting enabled');
+            debugLog('VIP-only targeting enabled');
             // User must be logged in AND have VIP status
             if (userIsPublic || !userIsVip) {
-                console.log('ElevenLabs agent is restricted to VIP users only. User is VIP:', userIsVip, ', User is public:', userIsPublic);
+                debugLog('ElevenLabs agent is restricted to VIP users only. User is VIP:', userIsVip, ', User is public:', userIsPublic);
                 return;
             }
-            console.log('User is VIP, allowing widget display');
+            debugLog('User is VIP, allowing widget display');
         }
 
         // Check if public/non-logged-in users should be excluded
         if (excludePublicUsers && userIsPublic) {
-            console.log('ElevenLabs agent is excluded for public/non-logged-in users');
+            debugLog('ElevenLabs agent is excluded for public/non-logged-in users');
             return;
         }
 
         if (!enabled) {
-            console.log('ElevenLabs agent is disabled');
+            debugLog('ElevenLabs agent is disabled');
             return;
         }
 
         if (!agentId) {
-            console.error('ElevenLabs Agent ID not configured');
+            debugError('ElevenLabs Agent ID not configured');
             container.innerHTML = '<div class="alert alert-warning">ElevenLabs Agent ID not configured. Please configure it in Website Settings.</div>';
             // Still allow debug panel even without agent ID
             return;
         }
 
-        // Initialize trigger system
+        // Get public user ID if user is public
+        var publicUserId = null;
+        if (userIsPublic) {
+            // Store in a global variable for later use
+            // Will be populated by getClientInfo when needed
+            publicUserId = null;  // Will be generated from IP on the backend
+        }
+
+        // Initialize trigger system with rate limiting parameters
         initializeTriggerSystem(
             agentId,
             triggerDelay,
@@ -443,9 +1010,12 @@
             triggerOnExitIntent,
             enableShowProductCard,
             enableSearchProducts,
+            userId,
+            publicUserId,
+            maxMessagesPerConversation,
             dailyUsageLimit,
             globalUsageLimit,
-            sessionUsageLimit
+            userIsPublic
         );
     }
 
@@ -473,7 +1043,7 @@
             enableConversationLogging: container.dataset.enableConversationLogging === 'true',
             dailyUsageLimit: parseInt(container.dataset.dailyUsageLimit) || 0,
             globalUsageLimit: parseInt(container.dataset.globalUsageLimit) || 0,
-            sessionUsageLimit: parseInt(container.dataset.sessionUsageLimit) || 0,
+            maxMessagesPerConversation: parseInt(container.dataset.maxMessagesPerConversation) || 0,
             productCategoriesInclude: container.dataset.productCategoriesInclude || null,
             productCategoriesExclude: container.dataset.productCategoriesExclude || null,
             featuredProductsPriority: container.dataset.featuredProductsPriority || null,
@@ -507,16 +1077,18 @@
             rawUserIsVipType: typeof container.dataset.userIsVip         // For debugging
         };
 
-        console.log('=== ElevenLabs Module Settings ===');
+        debugLog('=== ElevenLabs Module Settings ===');
         console.table(settings);
-        console.log('==================================');
+        debugLog('==================================');
     }
 
     function createWidget(
         agentId,
         enableShowProductCard,
         enableSearchProducts,
-        usageMaxPerSession
+        userId,
+        publicUserId,
+        maxMessagesPerConversation
     ) {
         // Create the elevenlabs-convai element
         var widgetElement = document.createElement('elevenlabs-convai');
@@ -533,17 +1105,21 @@
             script.type = 'text/javascript';
 
             script.onload = function() {
-                console.log('ElevenLabs script loaded');
+                debugLog('ElevenLabs script loaded');
                 // Register client tools after script loads
                 setTimeout(function() {
-                    registerClientTools(enableShowProductCard, enableSearchProducts, usageMaxPerSession);
+                    registerClientTools(enableShowProductCard, enableSearchProducts);
+                    // Setup usage tracking event listeners
+                    setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation);
                 }, 500);
             };
 
             document.head.appendChild(script);
         } else {
             // Script already loaded, register tools
-            registerClientTools(enableShowProductCard, enableSearchProducts, usageMaxPerSession);
+            registerClientTools(enableShowProductCard, enableSearchProducts);
+            // Setup usage tracking event listeners
+            setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation);
         }
     }
 
@@ -551,7 +1127,7 @@
         var widget = document.querySelector('elevenlabs-convai');
 
         if (!widget) {
-            console.error('ElevenLabs widget element not found');
+            debugError('ElevenLabs widget element not found');
             return;
         }
 
@@ -559,7 +1135,8 @@
 
         // Register the event listener for client tools
         widget.addEventListener('elevenlabs-convai:call', function(event) {
-            console.log('ElevenLabs tool call received:', event);
+            debugLog('=== ElevenLabs Tool Call ===');
+            debugLog('Event detail:', event.detail);
 
             // Register client tools in the event handler
             if (event.detail && event.detail.config) {
@@ -666,24 +1243,22 @@
                 // Conditionally register tools based on settings
                 if (enableShowProductCard) {
                     event.detail.config.clientTools.showProductCard = function(params) {
-                        console.log('showProductCard called with:', params);
+                        debugLog('showProductCard called with:', params);
                         handleShowProductCard(params);
                     };
                 }
 
                 if (enableSearchProducts) {
                     event.detail.config.clientTools.searchProducts = function(params) {
-                        console.log('searchProducts called with:', params);
+                        debugLog('searchProducts called with:', params);
                         handleSearchProducts(params);
                     };
                 }
             }
         });
 
-        console.log('xx ElevenLabs client tools registered xx');
-        console.log('All registered tools:', {
-            initializeSession: true,
-            recordUsage: true,
+        debugLog('xx ElevenLabs client tools registered xx');
+        debugLog('Enabled tools:', {
             showProductCard: enableShowProductCard,
             searchProducts: enableSearchProducts
         });
@@ -760,7 +1335,7 @@
     }
     
     function handleShowProductCard(params) {
-        console.log('handleShowProductCard received:', params);
+        debugLog('handleShowProductCard received:', params);
         
         // Parse parameters - handle both array and object formats
         var products = [];
@@ -778,10 +1353,10 @@
         }
         
         // Log for debugging
-        console.log('Parsed products:', products);
+        debugLog('Parsed products:', products);
         
         if (products.length === 0) {
-            console.error('No products to display');
+            debugError('No products to display');
             return;
         }
         
@@ -798,7 +1373,7 @@
             var primaryColor = container.dataset.primaryColor || '#667eea';
             var secondaryColor = container.dataset.secondaryColor || '#764ba2';
             applyTheme(themeType, primaryColor, secondaryColor);
-            console.log('Theme re-applied BEFORE modal creation:', { themeType, primaryColor, secondaryColor });
+            debugLog('Theme re-applied BEFORE modal creation:', { themeType, primaryColor, secondaryColor });
         }
 
         // Create product cards HTML with swiper (AFTER theme is applied)
@@ -815,7 +1390,7 @@
             var textMuted = getComputedStyle(document.documentElement).getPropertyValue('--el-text-muted').trim();
             var cardBg = getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg').trim();
 
-            console.log('Directly applying colors to modal:', { primaryColor, textColor, textMuted, cardBg });
+            debugLog('Directly applying colors to modal:', { primaryColor, textColor, textMuted, cardBg });
 
             // Apply to header icon
             var headerIcon = modal.querySelector('.product-modal-header i');
@@ -841,7 +1416,7 @@
                 name.style.color = textColor;
             });
 
-            console.log('Colors applied directly to modal elements');
+            debugLog('Colors applied directly to modal elements');
         }
 
         // Force positioning and visibility
@@ -875,9 +1450,9 @@
     }
     
     function createProductCardsHTML(products) {
-        console.log('=== createProductCardsHTML called ===');
-        console.log('Body has dark theme class:', document.body.classList.contains('elevenlabs-dark-theme'));
-        console.log('Current CSS vars:', {
+        debugLog('=== createProductCardsHTML called ===');
+        debugLog('Body has dark theme class:', document.body.classList.contains('elevenlabs-dark-theme'));
+        debugLog('Current CSS vars:', {
             primary: getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color').trim(),
             cardBg: getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg').trim(),
             textColor: getComputedStyle(document.documentElement).getPropertyValue('--el-text-color').trim(),
@@ -1047,13 +1622,13 @@
         var limit = params.limit || 6;
 
         if (!query) {
-            console.error('No search query provided');
+            debugError('No search query provided');
             return;
         }
 
-        console.log('=== Search Products ===');
-        console.log('Query:', query);
-        console.log('Filters:', {
+        debugLog('=== Search Products ===');
+        debugLog('Query:', query);
+        debugLog('Filters:', {
             category: category,
             minPrice: minPrice,
             maxPrice: maxPrice,
@@ -1089,17 +1664,17 @@
             return response.json();
         })
         .then(function(data) {
-            console.log('Search response:', data);
+            debugLog('Search response:', data);
 
             if (data.result && data.result.success) {
                 var products = data.result.products;
                 var totalCount = data.result.total_count || products.length;
                 var filtersApplied = data.result.filters_applied || {};
 
-                console.log('Found ' + totalCount + ' products');
+                debugLog('Found ' + totalCount + ' products');
 
                 if (products.length === 0) {
-                    console.log('No products found for query:', query);
+                    debugLog('No products found for query:', query);
                     // Could trigger "did you mean?" suggestions here
                     return;
                 }
@@ -1110,20 +1685,20 @@
                     summary: 'Found ' + totalCount + ' product' + (totalCount !== 1 ? 's' : '') + ' for "' + query + '"'
                 });
             } else {
-                console.error('Search failed:', data.result?.error || 'Unknown error');
+                debugError('Search failed:', data.result?.error || 'Unknown error');
             }
         })
         .catch(function(error) {
-            console.error('Search request failed:', error);
+            debugError('Search request failed:', error);
         });
     }
     
     function showDebugPanel() {
-        console.log('Creating debug panel...');
+        debugLog('Creating debug panel...');
 
         // Check if panel already exists
         if (document.querySelector('.elevenlabs-debug-panel')) {
-            console.log('Debug panel already exists');
+            debugLog('Debug panel already exists');
             return;
         }
 
@@ -1139,7 +1714,7 @@
         html += '</div>';
 
         document.body.insertAdjacentHTML('beforeend', html);
-        console.log('Debug panel created');
+        debugLog('Debug panel created');
 
         // Force positioning
         var debugPanel = document.querySelector('.elevenlabs-debug-panel');
@@ -1154,7 +1729,7 @@
         var showProductsBtn = document.getElementById('debug-show-products');
         if (showProductsBtn) {
             showProductsBtn.addEventListener('click', function() {
-                console.log('Test Product Cards clicked');
+                debugLog('Test Product Cards clicked');
                 handleShowProductCard([
                     {
                         Name: 'Conference Chair',

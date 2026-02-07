@@ -10,56 +10,101 @@
             <field name="comment">Users can manage VIP status for ElevenLabs AI Assistant targeting.</field>
         </record>
 
-        <!-- Record Rules for VIP Field -->
-        <record id="elevenlabs_vip_field_access_rule" model="ir.rule">
-            <field name="name">ElevenLabs VIP Field: Read for All, Write for Managers</field>
-            <field name="model_id" ref="base.model_res_users"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('base.group_public')), (4, ref('base.group_portal'))]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="False"/>
-            <field name="perm_create" eval="False"/>
-            <field name="perm_unlink" eval="False"/>
+        <!-- ElevenLabs Usage Manager Group -->
+        <record id="group_elevenlabs_usage_manager" model="res.groups">
+            <field name="name">ElevenLabs Usage Manager</field>
+            <field name="category_id" ref="base.module_category_website"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Users can view and manage ElevenLabs AI Assistant usage statistics.</field>
         </record>
 
-        <!-- Full access for VIP managers -->
-        <record id="elevenlabs_vip_manager_rule" model="ir.rule">
-            <field name="name">ElevenLabs VIP: Full Access for Managers</field>
-            <field name="model_id" ref="base.model_res_users"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_elevenlabs_vip_manager'))]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
+        <!-- Model reference for ElevenLabs Agent Usage -->
+        <record id="model_elevenlabs_agent_usage" model="ir.model">
+            <field name="name">elevenlabs.agent.usage</field>
+            <field name="info">ElevenLabs Agent Usage Tracking</field>
+        </record>
+
+        <!-- Default ACL for usage model -->
+        <record id="elevenlabs_usage_access_public" model="ir.model.access">
+            <field name="name">elevenlabs.agent.usage public</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="group_id" ref="base.group_public"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- ElevenLabs Usage Model Access Rights -->
-        <record id="group_elevenlabs_usage_user" model="res.groups">
-            <field name="name">ElevenLabs Usage User</field>
-            <field name="category_id" ref="base.module_category_website"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_public'))]"/>
-            <field name="comment">Users can view their own ElevenLabs usage statistics.</field>
-        </record>
-
-        <!-- Usage: Public access (read-only for own records via API) -->
-        <record id="elevenlabs_usage_public_rule" model="ir.rule">
-            <field name="name">ElevenLabs Usage: Public API Access</field>
-            <field name="model_id" ref="model_elevenlabs_usage"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('base.group_public')), (4, ref('base.group_portal'))]"/>
+        <record id="elevenlabs_usage_access_portal" model="ir.model.access">
+            <field name="name">elevenlabs.agent.usage portal</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="group_id" ref="base.group_portal"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
-            <field name="perm_create" eval="False"/>
+            <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Usage: Manager full access -->
+        <record id="elevenlabs_usage_access_user" model="ir.model.access">
+            <field name="name">elevenlabs.agent.usage user</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="group_id" ref="base.group_user"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="elevenlabs_usage_access_manager" model="ir.model.access">
+            <field name="name">elevenlabs.agent.usage manager</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="group_id" ref="group_elevenlabs_usage_manager"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="elevenlabs_usage_access_system" model="ir.model.access">
+            <field name="name">elevenlabs.agent.usage system</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="group_id" ref="base.group_system"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- Portal users can see their own usage -->
+        <record id="elevenlabs_usage_portal_rule" model="ir.rule">
+            <field name="name">ElevenLabs Usage: Portal users see their own</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Usage managers can see all usage -->
         <record id="elevenlabs_usage_manager_rule" model="ir.rule">
-            <field name="name">ElevenLabs Usage: Full Access for Managers</field>
-            <field name="model_id" ref="model_elevenlabs_usage"/>
+            <field name="name">ElevenLabs Usage: Managers see all</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_elevenlabs_vip_manager'))]"/>
+            <field name="groups" eval="[(4, ref('group_elevenlabs_usage_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- System administrators can see all usage -->
+        <record id="elevenlabs_usage_system_rule" model="ir.rule">
+            <field name="name">ElevenLabs Usage: System administrators see all</field>
+            <field name="model_id" ref="model_elevenlabs_agent_usage"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
