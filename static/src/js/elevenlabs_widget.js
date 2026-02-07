@@ -1,6 +1,32 @@
 (function() {
     'use strict';
-    
+
+    // ============================================================
+    // DEBUG LOGGER - Only logs when ?debug=1 is in URL
+    // ============================================================
+    var isDebugMode = (function() {
+        var params = new URLSearchParams(window.location.search);
+        return params.get('debug') === '1';
+    })();
+
+    function debugLog() {
+        if (isDebugMode) {
+            console.log.apply(console, arguments);
+        }
+    }
+
+    function debugError() {
+        if (isDebugMode) {
+            console.error.apply(console, arguments);
+        }
+    }
+
+    function debugWarn() {
+        if (isDebugMode) {
+            console.warn.apply(console, arguments);
+        }
+    }
+
     // Wait for DOM to be ready
     document.addEventListener('DOMContentLoaded', function() {
         initializeElevenLabsWidget();
@@ -59,13 +85,13 @@
 
             // If no limits are set, create widget immediately
             if (!hasDailyLimit && !hasGlobalLimit) {
-                console.log('No usage limits configured, creating widget');
+                debugLog('No usage limits configured, creating widget');
                 createWidgetOnce();
                 usageCheckInProgress = false;
                 return;
             }
 
-            console.log('Checking usage limits... daily:', dailyUsageLimit, 'global:', globalUsageLimit);
+            debugLog('Checking usage limits... daily:', dailyUsageLimit, 'global:', globalUsageLimit);
 
             // Check usage limits
             checkUsageLimits(userId, publicUserId)
@@ -73,7 +99,7 @@
                     usageCheckInProgress = false;
 
                     if (!result.success) {
-                        console.error('Usage check failed:', result.error);
+                        debugError('Usage check failed:', result.error);
                         // If check fails, show error and don't create widget
                         showToast(
                             'Unable to Start Session',
@@ -84,7 +110,7 @@
                     }
 
                     if (!result.allowed) {
-                        console.warn('Usage limits exceeded:', result.reason);
+                        debugWarn('Usage limits exceeded:', result.reason);
                         showToast(
                             'Usage Limit Reached',
                             result.reason || 'You have reached the maximum number of messages allowed.',
@@ -96,15 +122,15 @@
                     // Update publicUserId if it was returned by the backend
                     if (result.public_user_id && !publicUserId) {
                         publicUserId = result.public_user_id;
-                        console.log('Public user ID from backend:', publicUserId);
+                        debugLog('Public user ID from backend:', publicUserId);
                     }
 
-                    console.log('Usage limits check passed. Daily remaining:', result.daily_limit.remaining, 'Global remaining:', result.global_limit.remaining);
+                    debugLog('Usage limits check passed. Daily remaining:', result.daily_limit.remaining, 'Global remaining:', result.global_limit.remaining);
                     createWidgetOnce();
                 })
                 .catch(function(error) {
                     usageCheckInProgress = false;
-                    console.error('Usage check error:', error);
+                    debugError('Usage check error:', error);
                     showToast(
                         'Connection Error',
                         'Unable to connect to the server. Please check your internet connection.',
@@ -141,7 +167,7 @@
 
         // Trigger on delay
         if (triggerDelay > 0) {
-            console.log('Starting ElevenLabs agent with delay of ' + triggerDelay + ' seconds');
+            debugLog('Starting ElevenLabs agent with delay of ' + triggerDelay + ' seconds');
             setTimeout(checkUsageAndCreateWidget, triggerDelay * 1000);
         }
 
@@ -153,7 +179,7 @@
                 var scrollPercent = (scrollTop / docHeight) * 100;
 
                 if (scrollPercent >= triggerOnScroll) {
-                    console.log('Triggering widget on scroll: ' + scrollPercent.toFixed(2) + '%');
+                    debugLog('Triggering widget on scroll: ' + scrollPercent.toFixed(2) + '%');
                     checkUsageAndCreateWidget();
                 }
             };
@@ -167,7 +193,7 @@
             var timerInterval = setInterval(function() {
                 timeSpent += 1;
                 if (timeSpent >= triggerOnTime) {
-                    console.log('Triggering widget after ' + triggerOnTime + ' seconds on page');
+                    debugLog('Triggering widget after ' + triggerOnTime + ' seconds on page');
                     clearInterval(timerInterval);
                     checkUsageAndCreateWidget();
                 }
@@ -186,7 +212,7 @@
 
                 // Check if mouse is leaving the browser window
                 if (!from || from.nodeName === "HTML") {
-                    console.log('Exit intent detected - mouse leaving window');
+                    debugLog('Exit intent detected - mouse leaving window');
                     exitIntentTriggered = true;
                     checkUsageAndCreateWidget();
                 }
@@ -197,7 +223,7 @@
                 if (exitIntentTriggered || widgetCreated) return;
 
                 if (e.clientY < 50) {  // Within top 50 pixels
-                    console.log('Exit intent detected - mouse near top of screen');
+                    debugLog('Exit intent detected - mouse near top of screen');
                     exitIntentTriggered = true;
                     checkUsageAndCreateWidget();
                 }
@@ -210,7 +236,7 @@
 
         // If no triggers are configured, create widget immediately
         if (triggerDelay === 0 && triggerOnScroll === 0 && triggerOnTime === 0 && !triggerOnExitIntent) {
-            console.log('No triggers configured, checking usage and creating widget');
+            debugLog('No triggers configured, checking usage and creating widget');
             checkUsageAndCreateWidget();
         }
     }
@@ -220,10 +246,10 @@
         primaryColor = primaryColor || '#667eea';
         secondaryColor = secondaryColor || '#764ba2';
 
-        console.log('=== ElevenLabs Theme Application ===');
-        console.log('Theme Type:', themeType);
-        console.log('Primary Color:', primaryColor);
-        console.log('Secondary Color:', secondaryColor);
+        debugLog('=== ElevenLabs Theme Application ===');
+        debugLog('Theme Type:', themeType);
+        debugLog('Primary Color:', primaryColor);
+        debugLog('Secondary Color:', secondaryColor);
 
         // Create or update style element for theme variables
         var themeStyleId = 'elevenlabs-theme-vars';
@@ -261,22 +287,22 @@
 
         themeStyle.textContent = cssVars;
 
-        console.log('CSS Variables set:', cssVars);
+        debugLog('CSS Variables set:', cssVars);
 
         // Apply theme class to body for dark mode
         if (themeType === 'dark') {
             document.body.classList.add('elevenlabs-dark-theme');
-            console.log('Dark theme class added to body');
+            debugLog('Dark theme class added to body');
         } else {
             document.body.classList.remove('elevenlabs-dark-theme');
-            console.log('Dark theme class removed from body');
+            debugLog('Dark theme class removed from body');
         }
 
         // Wait a tick for CSS to apply, then verify
         setTimeout(function() {
-            console.log('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
-            console.log('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
-            console.log('====================================');
+            debugLog('Computed --el-primary-color:', getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color'));
+            debugLog('Computed --el-card-bg:', getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg'));
+            debugLog('====================================');
         }, 10);
     }
 
@@ -321,7 +347,7 @@
             return { success: false, allowed: false, error: 'Invalid response' };
         })
         .catch(function(error) {
-            console.error('Usage check failed:', error);
+            debugError('Usage check failed:', error);
             // Fail closed - if check fails, don't allow widget
             return { success: false, allowed: false, error: error.message };
         });
@@ -359,14 +385,14 @@
         })
         .then(function(data) {
             if (data.result && data.result.success) {
-                console.log('Usage session started:', data.result);
+                debugLog('Usage session started:', data.result);
                 return data.result;
             }
-            console.error('Failed to start usage session:', data);
+            debugError('Failed to start usage session:', data);
             return null;
         })
         .catch(function(error) {
-            console.error('Session start failed:', error);
+            debugError('Session start failed:', error);
             return null;
         });
     }
@@ -397,7 +423,7 @@
                 elevenlabsSessionMessageCount = data.result.message_count;
 
                 // Log full response for debugging
-                console.log('Message recorded. Count:', data.result.message_count, 'Limit exceeded:', data.result.limit_exceeded, 'Remaining:', data.result.remaining);
+                debugLog('Message recorded. Count:', data.result.message_count, 'Limit exceeded:', data.result.limit_exceeded, 'Remaining:', data.result.remaining);
 
                 // Check if limit exceeded
                 if (data.result.limit_exceeded) {
@@ -409,7 +435,7 @@
             return null;
         })
         .catch(function(error) {
-            console.error('Message recording failed:', error);
+            debugError('Message recording failed:', error);
             return null;
         });
     }
@@ -418,13 +444,13 @@
      * Handle session limit exceeded - remove widget and show toast
      */
     function handleSessionLimitExceeded(result) {
-        console.warn('Session message limit exceeded:', result);
+        debugWarn('Session message limit exceeded:', result);
 
         // Remove the widget element
         var widget = document.querySelector('elevenlabs-convai');
         if (widget) {
             widget.remove();
-            console.log('Widget removed due to session limit exceeded');
+            debugLog('Widget removed due to session limit exceeded');
         }
 
         // Show toast notification
@@ -461,7 +487,7 @@
             return null;
         })
         .catch(function(error) {
-            console.error('Failed to get client info:', error);
+            debugError('Failed to get client info:', error);
             return null;
         });
     }
@@ -686,7 +712,7 @@
             }
 
             if (conversationId && conversationId !== elevenlabsSessionId) {
-                console.log('[ElevenLabs] Starting session. Max messages per conversation:', elevenlabsMaxMessagesPerConversation);
+                debugLog('[ElevenLabs] Starting session. Max messages per conversation:', elevenlabsMaxMessagesPerConversation);
                 startUsageSession(conversationId, userId, publicUserId);
             }
         }
@@ -738,14 +764,14 @@
         // Find the container element
         var container = document.querySelector('.elevenlabs-agent-container');
         if (!container) {
-            console.log('ElevenLabs container not found');
+            debugLog('ElevenLabs container not found');
             return;
         }
 
         // Check for debug mode first (always show debug panel if debug=1)
         var urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('debug') === '1') {
-            console.log('Debug mode enabled');
+            debugLog('Debug mode enabled');
             logAllSettings(container);  // Log all settings when debug=1
             showDebugPanel();
         }
@@ -776,7 +802,7 @@
         var maxMessagesPerConversation = parseInt(container.dataset.maxMessagesPerConversation) || 0;
 
         // Debug: log the raw value from dataset
-        console.log('[ElevenLabs] maxMessagesPerConversation raw value:', container.dataset.maxMessagesPerConversation, 'parsed:', maxMessagesPerConversation);
+        debugLog('[ElevenLabs] maxMessagesPerConversation raw value:', container.dataset.maxMessagesPerConversation, 'parsed:', maxMessagesPerConversation);
 
         var conversationHistoryRetention = parseInt(container.dataset.conversationHistoryRetention) || 24;
         var autoEndInactiveConversations = container.dataset.autoEndInactiveConversations === 'true';
@@ -796,18 +822,18 @@
         var pagesToHide = container.dataset.pagesToHide || null;
 
         // Theme settings - Debug dataset
-        console.log('=== Container Dataset Debug ===');
-        console.log('Raw dataset.themeType:', container.dataset.themeType);
-        console.log('Raw dataset.primaryColor:', container.dataset.primaryColor);
-        console.log('Raw dataset.secondaryColor:', container.dataset.secondaryColor);
-        console.log('Full dataset:', JSON.parse(JSON.stringify(container.dataset)));
+        debugLog('=== Container Dataset Debug ===');
+        debugLog('Raw dataset.themeType:', container.dataset.themeType);
+        debugLog('Raw dataset.primaryColor:', container.dataset.primaryColor);
+        debugLog('Raw dataset.secondaryColor:', container.dataset.secondaryColor);
+        debugLog('Full dataset:', JSON.parse(JSON.stringify(container.dataset)));
 
         // Theme settings
         var themeType = container.dataset.themeType || 'light';
         var primaryColor = container.dataset.primaryColor || '#667eea';
         var secondaryColor = container.dataset.secondaryColor || '#764ba2';
 
-        console.log('Final theme values:', { themeType, primaryColor, secondaryColor });
+        debugLog('Final theme values:', { themeType, primaryColor, secondaryColor });
 
         // Apply theme settings
         applyTheme(themeType, primaryColor, secondaryColor);
@@ -853,63 +879,63 @@
 
         // Log user details separately if user is logged in (not public)
         if (!userIsPublic && userId && userId !== '0' && userId !== 'undefined' && userId != null) {
-            console.log('=== Logged User Details ===');
-            console.log('User ID:', userId);
-            console.log('User Name:', userName);
-            console.log('User Login:', userLogin);
-            console.log('User Email:', userEmail);
-            console.log('Is Admin:', userIsAdmin);
-            console.log('Is VIP:', userIsVip);
-            console.log('=========================');
+            debugLog('=== Logged User Details ===');
+            debugLog('User ID:', userId);
+            debugLog('User Name:', userName);
+            debugLog('User Login:', userLogin);
+            debugLog('User Email:', userEmail);
+            debugLog('Is Admin:', userIsAdmin);
+            debugLog('Is VIP:', userIsVip);
+            debugLog('=========================');
         } else {
-            console.log('User is a public visitor');
-            console.log('Raw userIsPublic value:', userIsPublicStr);
-            console.log('Raw userId value:', userId);
-            console.log('Odoo session info available:', typeof odoo !== 'undefined' && odoo.session_info);
+            debugLog('User is a public visitor');
+            debugLog('Raw userIsPublic value:', userIsPublicStr);
+            debugLog('Raw userId value:', userId);
+            debugLog('Odoo session info available:', typeof odoo !== 'undefined' && odoo.session_info);
         }
 
         // Check if widget should be shown based on page visibility
         if (!_shouldShowOnCurrentPage(pagesToShow, pagesToHide)) {
-            console.log('ElevenLabs agent is not configured for this page');
+            debugLog('ElevenLabs agent is not configured for this page');
             return;
         }
 
         // Check geographic restrictions
         if (!_passesGeographicRestrictions(geographicRestrictions)) {
-            console.log('ElevenLabs agent is restricted by geographic settings');
+            debugLog('ElevenLabs agent is restricted by geographic settings');
             return;
         }
 
         // Check device filtering
         if (!_passesDeviceFiltering(deviceFiltering)) {
-            console.log('ElevenLabs agent is restricted by device filtering');
+            debugLog('ElevenLabs agent is restricted by device filtering');
             return;
         }
 
         // Check customer segment targeting - VIP only
         if (customerSegmentTargeting === 'vip') {
-            console.log('VIP-only targeting enabled');
+            debugLog('VIP-only targeting enabled');
             // User must be logged in AND have VIP status
             if (userIsPublic || !userIsVip) {
-                console.log('ElevenLabs agent is restricted to VIP users only. User is VIP:', userIsVip, ', User is public:', userIsPublic);
+                debugLog('ElevenLabs agent is restricted to VIP users only. User is VIP:', userIsVip, ', User is public:', userIsPublic);
                 return;
             }
-            console.log('User is VIP, allowing widget display');
+            debugLog('User is VIP, allowing widget display');
         }
 
         // Check if public/non-logged-in users should be excluded
         if (excludePublicUsers && userIsPublic) {
-            console.log('ElevenLabs agent is excluded for public/non-logged-in users');
+            debugLog('ElevenLabs agent is excluded for public/non-logged-in users');
             return;
         }
 
         if (!enabled) {
-            console.log('ElevenLabs agent is disabled');
+            debugLog('ElevenLabs agent is disabled');
             return;
         }
 
         if (!agentId) {
-            console.error('ElevenLabs Agent ID not configured');
+            debugError('ElevenLabs Agent ID not configured');
             container.innerHTML = '<div class="alert alert-warning">ElevenLabs Agent ID not configured. Please configure it in Website Settings.</div>';
             // Still allow debug panel even without agent ID
             return;
@@ -999,9 +1025,9 @@
             rawUserIsVipType: typeof container.dataset.userIsVip         // For debugging
         };
 
-        console.log('=== ElevenLabs Module Settings ===');
+        debugLog('=== ElevenLabs Module Settings ===');
         console.table(settings);
-        console.log('==================================');
+        debugLog('==================================');
     }
 
     function createWidget(
@@ -1027,7 +1053,7 @@
             script.type = 'text/javascript';
 
             script.onload = function() {
-                console.log('ElevenLabs script loaded');
+                debugLog('ElevenLabs script loaded');
                 // Register client tools after script loads
                 setTimeout(function() {
                     registerClientTools(enableShowProductCard, enableSearchProducts);
@@ -1049,14 +1075,14 @@
         var widget = document.querySelector('elevenlabs-convai');
 
         if (!widget) {
-            console.error('ElevenLabs widget element not found');
+            debugError('ElevenLabs widget element not found');
             return;
         }
 
         // Register the event listener for client tools
         widget.addEventListener('elevenlabs-convai:call', function(event) {
-            console.log('=== ElevenLabs Tool Call ===');
-            console.log('Event detail:', event.detail);
+            debugLog('=== ElevenLabs Tool Call ===');
+            debugLog('Event detail:', event.detail);
 
             // Register client tools in the event handler
             if (event.detail && event.detail.config) {
@@ -1065,22 +1091,22 @@
                 // Conditionally register tools based on settings
                 if (enableShowProductCard) {
                     event.detail.config.clientTools.showProductCard = function(params) {
-                        console.log('showProductCard called with:', params);
+                        debugLog('showProductCard called with:', params);
                         handleShowProductCard(params);
                     };
                 }
 
                 if (enableSearchProducts) {
                     event.detail.config.clientTools.searchProducts = function(params) {
-                        console.log('searchProducts called with:', params);
+                        debugLog('searchProducts called with:', params);
                         handleSearchProducts(params);
                     };
                 }
             }
         });
 
-        console.log('xx ElevenLabs client tools registered xx');
-        console.log('Enabled tools:', {
+        debugLog('xx ElevenLabs client tools registered xx');
+        debugLog('Enabled tools:', {
             showProductCard: enableShowProductCard,
             searchProducts: enableSearchProducts
         });
@@ -1156,7 +1182,7 @@
     }
     
     function handleShowProductCard(params) {
-        console.log('handleShowProductCard received:', params);
+        debugLog('handleShowProductCard received:', params);
         
         // Parse parameters - handle both array and object formats
         var products = [];
@@ -1174,10 +1200,10 @@
         }
         
         // Log for debugging
-        console.log('Parsed products:', products);
+        debugLog('Parsed products:', products);
         
         if (products.length === 0) {
-            console.error('No products to display');
+            debugError('No products to display');
             return;
         }
         
@@ -1194,7 +1220,7 @@
             var primaryColor = container.dataset.primaryColor || '#667eea';
             var secondaryColor = container.dataset.secondaryColor || '#764ba2';
             applyTheme(themeType, primaryColor, secondaryColor);
-            console.log('Theme re-applied BEFORE modal creation:', { themeType, primaryColor, secondaryColor });
+            debugLog('Theme re-applied BEFORE modal creation:', { themeType, primaryColor, secondaryColor });
         }
 
         // Create product cards HTML with swiper (AFTER theme is applied)
@@ -1211,7 +1237,7 @@
             var textMuted = getComputedStyle(document.documentElement).getPropertyValue('--el-text-muted').trim();
             var cardBg = getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg').trim();
 
-            console.log('Directly applying colors to modal:', { primaryColor, textColor, textMuted, cardBg });
+            debugLog('Directly applying colors to modal:', { primaryColor, textColor, textMuted, cardBg });
 
             // Apply to header icon
             var headerIcon = modal.querySelector('.product-modal-header i');
@@ -1237,7 +1263,7 @@
                 name.style.color = textColor;
             });
 
-            console.log('Colors applied directly to modal elements');
+            debugLog('Colors applied directly to modal elements');
         }
 
         // Force positioning and visibility
@@ -1271,9 +1297,9 @@
     }
     
     function createProductCardsHTML(products) {
-        console.log('=== createProductCardsHTML called ===');
-        console.log('Body has dark theme class:', document.body.classList.contains('elevenlabs-dark-theme'));
-        console.log('Current CSS vars:', {
+        debugLog('=== createProductCardsHTML called ===');
+        debugLog('Body has dark theme class:', document.body.classList.contains('elevenlabs-dark-theme'));
+        debugLog('Current CSS vars:', {
             primary: getComputedStyle(document.documentElement).getPropertyValue('--el-primary-color').trim(),
             cardBg: getComputedStyle(document.documentElement).getPropertyValue('--el-card-bg').trim(),
             textColor: getComputedStyle(document.documentElement).getPropertyValue('--el-text-color').trim(),
@@ -1443,13 +1469,13 @@
         var limit = params.limit || 6;
 
         if (!query) {
-            console.error('No search query provided');
+            debugError('No search query provided');
             return;
         }
 
-        console.log('=== Search Products ===');
-        console.log('Query:', query);
-        console.log('Filters:', {
+        debugLog('=== Search Products ===');
+        debugLog('Query:', query);
+        debugLog('Filters:', {
             category: category,
             minPrice: minPrice,
             maxPrice: maxPrice,
@@ -1485,17 +1511,17 @@
             return response.json();
         })
         .then(function(data) {
-            console.log('Search response:', data);
+            debugLog('Search response:', data);
 
             if (data.result && data.result.success) {
                 var products = data.result.products;
                 var totalCount = data.result.total_count || products.length;
                 var filtersApplied = data.result.filters_applied || {};
 
-                console.log('Found ' + totalCount + ' products');
+                debugLog('Found ' + totalCount + ' products');
 
                 if (products.length === 0) {
-                    console.log('No products found for query:', query);
+                    debugLog('No products found for query:', query);
                     // Could trigger "did you mean?" suggestions here
                     return;
                 }
@@ -1506,20 +1532,20 @@
                     summary: 'Found ' + totalCount + ' product' + (totalCount !== 1 ? 's' : '') + ' for "' + query + '"'
                 });
             } else {
-                console.error('Search failed:', data.result?.error || 'Unknown error');
+                debugError('Search failed:', data.result?.error || 'Unknown error');
             }
         })
         .catch(function(error) {
-            console.error('Search request failed:', error);
+            debugError('Search request failed:', error);
         });
     }
     
     function showDebugPanel() {
-        console.log('Creating debug panel...');
+        debugLog('Creating debug panel...');
 
         // Check if panel already exists
         if (document.querySelector('.elevenlabs-debug-panel')) {
-            console.log('Debug panel already exists');
+            debugLog('Debug panel already exists');
             return;
         }
 
@@ -1535,7 +1561,7 @@
         html += '</div>';
 
         document.body.insertAdjacentHTML('beforeend', html);
-        console.log('Debug panel created');
+        debugLog('Debug panel created');
 
         // Force positioning
         var debugPanel = document.querySelector('.elevenlabs-debug-panel');
@@ -1550,7 +1576,7 @@
         var showProductsBtn = document.getElementById('debug-show-products');
         if (showProductsBtn) {
             showProductsBtn.addEventListener('click', function() {
-                console.log('Test Product Cards clicked');
+                debugLog('Test Product Cards clicked');
                 handleShowProductCard([
                     {
                         Name: 'Conference Chair',
