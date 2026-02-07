@@ -395,7 +395,9 @@
         .then(function(data) {
             if (data.result && data.result.success) {
                 elevenlabsSessionMessageCount = data.result.message_count;
-                console.log('Message recorded. Count:', data.result.message_count);
+
+                // Log full response for debugging
+                console.log('Message recorded. Count:', data.result.message_count, 'Limit exceeded:', data.result.limit_exceeded, 'Remaining:', data.result.remaining);
 
                 // Check if limit exceeded
                 if (data.result.limit_exceeded) {
@@ -684,6 +686,7 @@
             }
 
             if (conversationId && conversationId !== elevenlabsSessionId) {
+                console.log('[ElevenLabs] Starting session. Max messages per conversation:', elevenlabsMaxMessagesPerConversation);
                 startUsageSession(conversationId, userId, publicUserId);
             }
         }
@@ -693,7 +696,6 @@
             if (!elevenlabsSessionId) {
                 return;
             }
-            console.log('[ElevenLabs] Recording usage');
             recordMessage(elevenlabsSessionId);
         }
     }
@@ -772,6 +774,10 @@
         // Session controls
         var maxMessagesPerSession = parseInt(container.dataset.maxMessagesPerSession) || 0;
         var maxMessagesPerConversation = parseInt(container.dataset.maxMessagesPerConversation) || 0;
+
+        // Debug: log the raw value from dataset
+        console.log('[ElevenLabs] maxMessagesPerConversation raw value:', container.dataset.maxMessagesPerConversation, 'parsed:', maxMessagesPerConversation);
+
         var conversationHistoryRetention = parseInt(container.dataset.conversationHistoryRetention) || 24;
         var autoEndInactiveConversations = container.dataset.autoEndInactiveConversations === 'true';
         var saveUserInfo = container.dataset.saveUserInfo === 'true';
