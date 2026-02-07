@@ -105,8 +105,16 @@
                             <field name="elevenlabs_max_messages_per_session"/>
                         </setting>
 
-                        <setting help="Daily usage limit for the widget (0 for unlimited)">
+                        <setting help="Maximum number of messages allowed per conversation/session (0 for unlimited)">
+                            <field name="elevenlabs_max_messages_per_conversation"/>
+                        </setting>
+
+                        <setting help="Daily usage limit per user for the widget (0 for unlimited)">
                             <field name="elevenlabs_daily_usage_limit"/>
+                        </setting>
+
+                        <setting help="Global daily usage limit across all users (0 for unlimited)">
+                            <field name="elevenlabs_global_usage_limit"/>
                         </setting>
                     </block>
 

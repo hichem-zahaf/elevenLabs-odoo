@@ -34,9 +34,84 @@
         triggerOnTime,
         triggerOnExitIntent,
         enableShowProductCard,
-        enableSearchProducts
+        enableSearchProducts,
+        userId,
+        publicUserId,
+        maxMessagesPerConversation,
+        dailyUsageLimit,
+        globalUsageLimit,
+        userIsPublic
     ) {
         var widgetCreated = false;
+        var usageCheckInProgress = false;
+
+        // Function to check usage limits before creating widget
+        function checkUsageAndCreateWidget() {
+            if (widgetCreated || usageCheckInProgress) {
+                return;
+            }
+
+            usageCheckInProgress = true;
+
+            // Check if limits are configured
+            var hasDailyLimit = dailyUsageLimit > 0;
+            var hasGlobalLimit = globalUsageLimit > 0;
+
+            // If no limits are set, create widget immediately
+            if (!hasDailyLimit && !hasGlobalLimit) {
+                console.log('No usage limits configured, creating widget');
+                createWidgetOnce();
+                usageCheckInProgress = false;
+                return;
+            }
+
+            console.log('Checking usage limits... daily:', dailyUsageLimit, 'global:', globalUsageLimit);
+
+            // Check usage limits
+            checkUsageLimits(userId, publicUserId)
+                .then(function(result) {
+                    usageCheckInProgress = false;
+
+                    if (!result.success) {
+                        console.error('Usage check failed:', result.error);
+                        // If check fails, show error and don't create widget
+                        showToast(
+                            'Unable to Start Session',
+                            'We couldn\'t verify your usage limits. Please try again later.',
+                            'error'
+                        );
+                        return;
+                    }
+
+                    if (!result.allowed) {
+                        console.warn('Usage limits exceeded:', result.reason);
+                        showToast(
+                            'Usage Limit Reached',
+                            result.reason || 'You have reached the maximum number of messages allowed.',
+                            'warning'
+                        );
+                        return;
+                    }
+
+                    // Update publicUserId if it was returned by the backend
+                    if (result.public_user_id && !publicUserId) {
+                        publicUserId = result.public_user_id;
+                        console.log('Public user ID from backend:', publicUserId);
+                    }
+
+                    console.log('Usage limits check passed. Daily remaining:', result.daily_limit.remaining, 'Global remaining:', result.global_limit.remaining);
+                    createWidgetOnce();
+                })
+                .catch(function(error) {
+                    usageCheckInProgress = false;
+                    console.error('Usage check error:', error);
+                    showToast(
+                        'Connection Error',
+                        'Unable to connect to the server. Please check your internet connection.',
+                        'error'
+                    );
+                });
+        }
 
         // Function to create the widget and prevent further triggers
         function createWidgetOnce() {
@@ -45,7 +120,10 @@
                 createWidget(
                     agentId,
                     enableShowProductCard,
-                    enableSearchProducts
+                    enableSearchProducts,
+                    userId,
+                    publicUserId,
+                    maxMessagesPerConversation
                 );
 
                 // Clean up all event listeners after widget is created
@@ -64,7 +142,7 @@
         // Trigger on delay
         if (triggerDelay > 0) {
             console.log('Starting ElevenLabs agent with delay of ' + triggerDelay + ' seconds');
-            setTimeout(createWidgetOnce, triggerDelay * 1000);
+            setTimeout(checkUsageAndCreateWidget, triggerDelay * 1000);
         }
 
         // Trigger on scroll
@@ -76,7 +154,7 @@
 
                 if (scrollPercent >= triggerOnScroll) {
                     console.log('Triggering widget on scroll: ' + scrollPercent.toFixed(2) + '%');
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             };
 
@@ -91,7 +169,7 @@
                 if (timeSpent >= triggerOnTime) {
                     console.log('Triggering widget after ' + triggerOnTime + ' seconds on page');
                     clearInterval(timerInterval);
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             }, 1000);
 
@@ -110,7 +188,7 @@
                 if (!from || from.nodeName === "HTML") {
                     console.log('Exit intent detected - mouse leaving window');
                     exitIntentTriggered = true;
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             };
 
@@ -121,7 +199,7 @@
                 if (e.clientY < 50) {  // Within top 50 pixels
                     console.log('Exit intent detected - mouse near top of screen');
                     exitIntentTriggered = true;
-                    createWidgetOnce();
+                    checkUsageAndCreateWidget();
                 }
             };
 
@@ -132,8 +210,8 @@
 
         // If no triggers are configured, create widget immediately
         if (triggerDelay === 0 && triggerOnScroll === 0 && triggerOnTime === 0 && !triggerOnExitIntent) {
-            console.log('No triggers configured, creating widget immediately');
-            createWidgetOnce();
+            console.log('No triggers configured, checking usage and creating widget');
+            checkUsageAndCreateWidget();
         }
     }
 
@@ -202,6 +280,458 @@
         }, 10);
     }
 
+    // ============================================================
+    // USAGE TRACKING AND RATE LIMITING FUNCTIONS
+    // ============================================================
+
+    // Global variables for usage tracking
+    var elevenlabsSessionId = null;
+    var elevenlabsUserId = null;
+    var elevenlabsPublicUserId = null;
+    var elevenlabsMaxMessagesPerConversation = 0;
+    var elevenlabsSessionMessageCount = 0;
+
+    /**
+     * Check usage limits before creating the widget
+     * Returns a promise that resolves with the check result
+     */
+    function checkUsageLimits(userId, publicUserId) {
+        return fetch('/api/elevenlabs/usage/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {
+                    user_id: userId,
+                    public_user_id: publicUserId
+                },
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result) {
+                return data.result;
+            }
+            return { success: false, allowed: false, error: 'Invalid response' };
+        })
+        .catch(function(error) {
+            console.error('Usage check failed:', error);
+            // Fail closed - if check fails, don't allow widget
+            return { success: false, allowed: false, error: error.message };
+        });
+    }
+
+    /**
+     * Start a new usage session when conversation is initiated
+     */
+    function startUsageSession(sessionId, userId, publicUserId) {
+        elevenlabsSessionId = sessionId;
+        elevenlabsUserId = userId;
+        elevenlabsPublicUserId = publicUserId;
+        elevenlabsSessionMessageCount = 0;
+
+        return fetch('/api/elevenlabs/usage/session/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {
+                    session_id: sessionId,
+                    user_id: userId,
+                    public_user_id: publicUserId,
+                    user_agent: navigator.userAgent,
+                    referrer: document.referrer
+                },
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result && data.result.success) {
+                console.log('Usage session started:', data.result);
+                return data.result;
+            }
+            console.error('Failed to start usage session:', data);
+            return null;
+        })
+        .catch(function(error) {
+            console.error('Session start failed:', error);
+            return null;
+        });
+    }
+
+    /**
+     * Record a message in the current session
+     */
+    function recordMessage(sessionId) {
+        return fetch('/api/elevenlabs/usage/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {
+                    session_id: sessionId
+                },
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result && data.result.success) {
+                elevenlabsSessionMessageCount = data.result.message_count;
+                console.log('Message recorded. Count:', data.result.message_count);
+
+                // Check if limit exceeded
+                if (data.result.limit_exceeded) {
+                    handleSessionLimitExceeded(data.result);
+                }
+
+                return data.result;
+            }
+            return null;
+        })
+        .catch(function(error) {
+            console.error('Message recording failed:', error);
+            return null;
+        });
+    }
+
+    /**
+     * Handle session limit exceeded - remove widget and show toast
+     */
+    function handleSessionLimitExceeded(result) {
+        console.warn('Session message limit exceeded:', result);
+
+        // Remove the widget element
+        var widget = document.querySelector('elevenlabs-convai');
+        if (widget) {
+            widget.remove();
+            console.log('Widget removed due to session limit exceeded');
+        }
+
+        // Show toast notification
+        showToast(
+            'Message Limit Reached',
+            'You have reached the maximum number of messages for this session. Please start a new conversation.',
+            'warning'
+        );
+    }
+
+    /**
+     * Get client IP and generate public user ID
+     */
+    function getClientInfo() {
+        return fetch('/api/elevenlabs/usage/client-ip', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'call',
+                params: {},
+                id: Math.floor(Math.random() * 1000000)
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.result && data.result.success) {
+                return data.result;
+            }
+            return null;
+        })
+        .catch(function(error) {
+            console.error('Failed to get client info:', error);
+            return null;
+        });
+    }
+
+    /**
+     * Show a toast notification
+     */
+    function showToast(title, message, type) {
+        type = type || 'info';
+
+        // Remove existing toast if any
+        var existingToast = document.querySelector('.elevenlabs-toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast element
+        var toast = document.createElement('div');
+        toast.className = 'elevenlabs-toast-notification';
+
+        var iconClass = 'fa-info-circle';
+        if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+        if (type === 'error') iconClass = 'fa-times-circle';
+        if (type === 'success') iconClass = 'fa-check-circle';
+
+        toast.innerHTML = '' +
+            '<div class="toast-content">' +
+                '<i class="fa ' + iconClass + ' toast-icon"></i>' +
+                '<div class="toast-message">' +
+                    '<div class="toast-title">' + title + '</div>' +
+                    '<div class="toast-text">' + message + '</div>' +
+                '</div>' +
+                '<button class="toast-close">&times;</button>' +
+            '</div>';
+
+        // Add styles if not already present
+        if (!document.getElementById('elevenlabs-toast-styles')) {
+            var styles = document.createElement('style');
+            styles.id = 'elevenlabs-toast-styles';
+            styles.textContent = '' +
+                '.elevenlabs-toast-notification {' +
+                    'position: fixed !important;' +
+                    'bottom: 20px !important;' +
+                    'right: 20px !important;' +
+                    'z-index: 999999 !important;' +
+                    'background: white !important;' +
+                    'border-radius: 8px !important;' +
+                    'box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;' +
+                    'padding: 16px !important;' +
+                    'min-width: 300px !important;' +
+                    'max-width: 400px !important;' +
+                    'animation: slideIn 0.3s ease-out !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-content {' +
+                    'display: flex !important;' +
+                    'align-items: flex-start !important;' +
+                    'gap: 12px !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-icon {' +
+                    'font-size: 20px !important;' +
+                    'color: #667eea !important;' +
+                    'flex-shrink: 0 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-message {' +
+                    'flex: 1 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-title {' +
+                    'font-weight: 600 !important;' +
+                    'margin-bottom: 4px !important;' +
+                    'color: #2c3e50 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-text {' +
+                    'font-size: 14px !important;' +
+                    'color: #7f8c8d !important;' +
+                    'line-height: 1.4 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-close {' +
+                    'background: none !important;' +
+                    'border: none !important;' +
+                    'font-size: 20px !important;' +
+                    'color: #95a5a6 !important;' +
+                    'cursor: pointer !important;' +
+                    'padding: 0 !important;' +
+                    'line-height: 1 !important;' +
+                    'flex-shrink: 0 !important;' +
+                '}' +
+                '.elevenlabs-toast-notification .toast-close:hover {' +
+                    'color: #2c3e50 !important;' +
+                '}' +
+                '@keyframes slideIn {' +
+                    'from {' +
+                        'transform: translateX(100%);' +
+                        'opacity: 0;' +
+                    '}' +
+                    'to {' +
+                        'transform: translateX(0);' +
+                        'opacity: 1;' +
+                    '}' +
+                '}';
+            document.head.appendChild(styles);
+        }
+
+        // Add to page
+        document.body.appendChild(toast);
+
+        // Add close button handler
+        var closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                toast.remove();
+            });
+        }
+
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function() {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    /**
+     * Setup ElevenLabs event listeners for usage tracking
+     * Uses WebSocket interception to capture events
+     */
+    function setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation) {
+        elevenlabsMaxMessagesPerConversation = maxMessagesPerConversation;
+
+        // Get the widget element
+        var widget = document.querySelector('elevenlabs-convai');
+        if (!widget) {
+            // Set up a MutationObserver to wait for widget to appear
+            setupWidgetObserver(userId, publicUserId, maxMessagesPerConversation);
+            return;
+        }
+
+        // WebSocket Interception - capture all ElevenLabs events
+        setupWebSocketInterception(userId, publicUserId);
+
+        // DOM Events fallback - try various event name formats
+        var eventNames = [
+            'conversation_initiation_metadata',
+            'user_transcript',
+            'elevenlabs-convai:conversation_initiation_metadata',
+            'elevenlabs-convai:user_transcript',
+            'elevenlabs:conversation_initiation_metadata',
+            'elevenlabs:user_transcript'
+        ];
+
+        eventNames.forEach(function(eventName) {
+            widget.addEventListener(eventName, function(event) {
+                handleWebSocketEvent(eventName, event, userId, publicUserId);
+            });
+        });
+    }
+
+    /**
+     * Intercept WebSocket communication to capture ElevenLabs events
+     * This is the most reliable method as it captures all WebSocket traffic
+     */
+    function setupWebSocketInterception(userId, publicUserId) {
+        // Store original WebSocket
+        var OriginalWebSocket = window.WebSocket;
+
+        // Override WebSocket constructor
+        window.WebSocket = function(url, protocols) {
+            // Create the actual WebSocket
+            var ws = new OriginalWebSocket(url, protocols);
+
+            // Intercept onmessage to capture incoming events
+            var originalOnMessage = ws.onmessage;
+            ws.onmessage = function(event) {
+                // Call original handler first
+                if (originalOnMessage) {
+                    originalOnMessage.call(ws, event);
+                }
+
+                // Try to parse the message
+                try {
+                    var data = JSON.parse(event.data);
+                    // Handle ElevenLabs events silently
+                    handleWebSocketEvent(data.type, data, userId, publicUserId);
+                } catch (e) {
+                    // Not JSON, ignore
+                }
+            };
+
+            return ws;
+        };
+
+        // Copy all WebSocket properties
+        window.WebSocket.prototype = OriginalWebSocket.prototype;
+        window.WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
+        window.WebSocket.OPEN = OriginalWebSocket.OPEN;
+        window.WebSocket.CLOSING = OriginalWebSocket.CLOSING;
+        window.WebSocket.CLOSED = OriginalWebSocket.CLOSED;
+    }
+
+    /**
+     * Handle an ElevenLabs event (from WebSocket or DOM)
+     * Unified handler for all event sources
+     * Only records usage on user_transcript events
+     */
+    function handleWebSocketEvent(eventType, eventData, userId, publicUserId) {
+        // Handle conversation_initiation_metadata - start session
+        if (eventType === 'conversation_initiation_metadata') {
+            var conversationId = null;
+
+            // Try to extract conversation_id from various locations
+            if (eventData.conversation_initiation_metadata_event && eventData.conversation_initiation_metadata_event.conversation_id) {
+                conversationId = eventData.conversation_initiation_metadata_event.conversation_id;
+            } else if (eventData.detail && eventData.detail.conversation_initiation_metadata_event && eventData.detail.conversation_initiation_metadata_event.conversation_id) {
+                conversationId = eventData.detail.conversation_initiation_metadata_event.conversation_id;
+            } else if (eventData.conversation_id) {
+                conversationId = eventData.conversation_id;
+            }
+
+            if (conversationId && conversationId !== elevenlabsSessionId) {
+                startUsageSession(conversationId, userId, publicUserId);
+            }
+        }
+
+        // Handle user_transcript - user spoke (record usage)
+        if (eventType === 'user_transcript' || eventType === 'elevenlabs-convai:user_transcript') {
+            if (!elevenlabsSessionId) {
+                return;
+            }
+            console.log('[ElevenLabs] Recording usage');
+            recordMessage(elevenlabsSessionId);
+        }
+    }
+
+
+    /**
+     * Set up a MutationObserver to watch for widget appearance
+     */
+    function setupWidgetObserver(userId, publicUserId, maxMessagesPerConversation) {
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeName === 'ELEVENLABS-CONVAI' ||
+                        (node.querySelector && node.querySelector('elevenlabs-convai'))) {
+                        // Stop observing once widget is found
+                        observer.disconnect();
+                        setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Stop observing after 30 seconds (fallback)
+        setTimeout(function() {
+            observer.disconnect();
+        }, 30000);
+    }
+
+
+    // ============================================================
+    // END USAGE TRACKING AND RATE LIMITING FUNCTIONS
+    // ============================================================
+
     function initializeElevenLabsWidget() {
         // Find the container element
         var container = document.querySelector('.elevenlabs-agent-container');
@@ -241,11 +771,13 @@
 
         // Session controls
         var maxMessagesPerSession = parseInt(container.dataset.maxMessagesPerSession) || 0;
+        var maxMessagesPerConversation = parseInt(container.dataset.maxMessagesPerConversation) || 0;
         var conversationHistoryRetention = parseInt(container.dataset.conversationHistoryRetention) || 24;
         var autoEndInactiveConversations = container.dataset.autoEndInactiveConversations === 'true';
         var saveUserInfo = container.dataset.saveUserInfo === 'true';
         var enableConversationLogging = container.dataset.enableConversationLogging === 'true';
         var dailyUsageLimit = parseInt(container.dataset.dailyUsageLimit) || 0;
+        var globalUsageLimit = parseInt(container.dataset.globalUsageLimit) || 0;
 
         // Product integration
         var productCategoriesInclude = container.dataset.productCategoriesInclude || null;
@@ -377,7 +909,15 @@
             return;
         }
 
-        // Initialize trigger system
+        // Get public user ID if user is public
+        var publicUserId = null;
+        if (userIsPublic) {
+            // Store in a global variable for later use
+            // Will be populated by getClientInfo when needed
+            publicUserId = null;  // Will be generated from IP on the backend
+        }
+
+        // Initialize trigger system with rate limiting parameters
         initializeTriggerSystem(
             agentId,
             triggerDelay,
@@ -385,7 +925,13 @@
             triggerOnTime,
             triggerOnExitIntent,
             enableShowProductCard,
-            enableSearchProducts
+            enableSearchProducts,
+            userId,
+            publicUserId,
+            maxMessagesPerConversation,
+            dailyUsageLimit,
+            globalUsageLimit,
+            userIsPublic
         );
     }
 
@@ -412,6 +958,8 @@
             saveUserInfo: container.dataset.saveUserInfo === 'true',
             enableConversationLogging: container.dataset.enableConversationLogging === 'true',
             dailyUsageLimit: parseInt(container.dataset.dailyUsageLimit) || 0,
+            globalUsageLimit: parseInt(container.dataset.globalUsageLimit) || 0,
+            maxMessagesPerConversation: parseInt(container.dataset.maxMessagesPerConversation) || 0,
             productCategoriesInclude: container.dataset.productCategoriesInclude || null,
             productCategoriesExclude: container.dataset.productCategoriesExclude || null,
             featuredProductsPriority: container.dataset.featuredProductsPriority || null,
@@ -453,7 +1001,10 @@
     function createWidget(
         agentId,
         enableShowProductCard,
-        enableSearchProducts
+        enableSearchProducts,
+        userId,
+        publicUserId,
+        maxMessagesPerConversation
     ) {
         // Create the elevenlabs-convai element
         var widgetElement = document.createElement('elevenlabs-convai');
@@ -474,6 +1025,8 @@
                 // Register client tools after script loads
                 setTimeout(function() {
                     registerClientTools(enableShowProductCard, enableSearchProducts);
+                    // Setup usage tracking event listeners
+                    setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation);
                 }, 500);
             };
 
@@ -481,6 +1034,8 @@
         } else {
             // Script already loaded, register tools
             registerClientTools(enableShowProductCard, enableSearchProducts);
+            // Setup usage tracking event listeners
+            setupElevenLabsEventListeners(userId, publicUserId, maxMessagesPerConversation);
         }
     }
 
@@ -494,7 +1049,8 @@
 
         // Register the event listener for client tools
         widget.addEventListener('elevenlabs-convai:call', function(event) {
-            console.log('ElevenLabs tool call received:', event);
+            console.log('=== ElevenLabs Tool Call ===');
+            console.log('Event detail:', event.detail);
 
             // Register client tools in the event handler
             if (event.detail && event.detail.config) {

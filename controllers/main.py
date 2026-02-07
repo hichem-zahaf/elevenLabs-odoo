@@ -5,6 +5,254 @@ from odoo.http import request
 import json
 
 class ElevenLabsController(http.Controller):
+
+    # ============================================================
+    # USAGE TRACKING AND RATE LIMITING ENDPOINTS
+    # ============================================================
+
+    @http.route('/api/elevenlabs/usage/check', type='json', auth='public', methods=['POST'], csrf=False)
+    def check_usage_limits(self, **kwargs):
+        """
+        Check if user can start the widget based on usage limits.
+        Checks both daily user limit and global limit.
+
+        Returns: dict with {
+            'allowed': bool,
+            'reason': str if not allowed,
+            'daily_limit': dict,
+            'global_limit': dict
+        }
+        """
+        try:
+            # Get settings
+            daily_limit = int(request.env['ir.config_parameter'].sudo().get_param(
+                'elevenlabs_agent.daily_usage_limit', '0'))
+            global_limit = int(request.env['ir.config_parameter'].sudo().get_param(
+                'elevenlabs_agent.global_usage_limit', '0'))
+
+            # Get current user info
+            user = request.env.user
+            is_public = user._is_public()
+
+            # Get user identifiers
+            if is_public:
+                user_id = None
+                # Generate public user ID from IP
+                ip_address = self._get_client_ip()
+                public_user_id = request.env['elevenlabs.agent.usage'].get_or_create_public_user_id(ip_address)
+            else:
+                user_id = user.id
+                public_user_id = None
+
+            # Check daily limit
+            daily_check = request.env['elevenlabs.agent.usage'].check_daily_limit(
+                user_id=user_id,
+                public_user_id=public_user_id,
+                daily_limit=daily_limit
+            )
+
+            # Check global limit
+            global_check = request.env['elevenlabs.agent.usage'].check_global_limit(
+                global_limit=global_limit
+            )
+
+            # Determine if allowed
+            allowed = daily_check['allowed'] and global_check['allowed']
+
+            # Build reason if not allowed
+            reason = None
+            if not allowed:
+                reasons = []
+                if not daily_check['allowed']:
+                    reasons.append(f"Daily limit of {daily_limit} messages reached.")
+                if not global_check['allowed']:
+                    reasons.append(f"Global limit of {global_limit} messages reached.")
+                reason = " ".join(reasons)
+
+            return {
+                'success': True,
+                'allowed': allowed,
+                'reason': reason,
+                'daily_limit': daily_check,
+                'global_limit': global_check,
+                'is_public': is_public,
+                'user_id': user_id,
+                'public_user_id': public_user_id
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e),
+                'allowed': False  # Fail closed for safety
+            }
+
+    @http.route('/api/elevenlabs/usage/session/start', type='json', auth='public', methods=['POST'], csrf=False)
+    def start_session(self, session_id, user_id=None, public_user_id=None, user_agent=None, referrer=None, **kwargs):
+        """
+        Record the start of a new conversation session.
+
+        Args:
+            session_id: The conversation_id from ElevenLabs
+            user_id: The user ID if logged in
+            public_user_id: The public user ID if not logged in
+            user_agent: Browser user agent string
+            referrer: Page referrer
+
+        Returns: dict with session info
+        """
+        try:
+            # Get IP address
+            ip_address = self._get_client_ip()
+
+            # Create usage record
+            usage_vals = {
+                'session_id': session_id,
+                'ip_address': ip_address,
+                'user_agent': user_agent,
+                'referrer': referrer,
+            }
+
+            if user_id and user_id != '0' and user_id != 0:
+                usage_vals['user_id'] = int(user_id)
+            else:
+                usage_vals['public_user_id'] = public_user_id
+
+            usage = request.env['elevenlabs.agent.usage'].sudo().create(usage_vals)
+
+            return {
+                'success': True,
+                'session_id': session_id,
+                'message_count': 1,
+                'usage_id': usage.id
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @http.route('/api/elevenlabs/usage/message', type='json', auth='public', methods=['POST'], csrf=False)
+    def record_message(self, session_id, **kwargs):
+        """
+        Record a message in a session (triggered by agent_response event).
+        Also checks if session has exceeded message limit.
+
+        Args:
+            session_id: The conversation_id from ElevenLabs
+
+        Returns: dict with {
+            'success': bool,
+            'message_count': int,
+            'limit_exceeded': bool,
+            'limit': int
+        }
+        """
+        try:
+            # Get session limit
+            session_limit = int(request.env['ir.config_parameter'].sudo().get_param(
+                'elevenlabs_agent.max_messages_per_conversation', '0'))
+
+            # Increment message count
+            new_count = request.env['elevenlabs.agent.usage'].increment_session_messages(session_id)
+
+            if new_count is False:
+                return {
+                    'success': False,
+                    'error': 'Session not found'
+                }
+
+            # Check if limit exceeded
+            limit_exceeded = session_limit > 0 and new_count > session_limit
+
+            return {
+                'success': True,
+                'message_count': new_count,
+                'limit_exceeded': limit_exceeded,
+                'limit': session_limit,
+                'remaining': max(0, session_limit - new_count) if session_limit > 0 else -1
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @http.route('/api/elevenlabs/usage/session/end', type='json', auth='public', methods=['POST'], csrf=False)
+    def end_session(self, session_id, **kwargs):
+        """
+        Mark a session as ended.
+
+        Args:
+            session_id: The conversation_id from ElevenLabs
+
+        Returns: dict with success status
+        """
+        try:
+            success = request.env['elevenlabs.agent.usage'].sudo().end_session(session_id)
+            return {
+                'success': success
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @http.route('/api/elevenlabs/usage/client-ip', type='json', auth='public', methods=['POST'], csrf=False)
+    def get_client_info(self, **kwargs):
+        """
+        Get client IP and generate public user ID.
+
+        Returns: dict with {
+            'success': bool,
+            'ip_address': str,
+            'public_user_id': str
+        }
+        """
+        try:
+            ip_address = self._get_client_ip()
+            public_user_id = request.env['elevenlabs.agent.usage'].get_or_create_public_user_id(ip_address)
+
+            return {
+                'success': True,
+                'ip_address': ip_address,
+                'public_user_id': public_user_id
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def _get_client_ip(self):
+        """
+        Get the client's IP address, checking various headers.
+        """
+        # Check various headers for the real IP (accounting for proxies)
+        headers_to_check = [
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_REAL_IP',
+            'HTTP_CF_CONNECTING_IP',  # Cloudflare
+            'HTTP_X_CLIENT_IP',
+            'REMOTE_ADDR'
+        ]
+
+        for header in headers_to_check:
+            ip = request.httprequest.environ.get(header)
+            if ip:
+                # X_FORWARDED_FOR can contain multiple IPs, get the first one
+                if header == 'HTTP_X_FORWARDED_FOR' and ',' in ip:
+                    ip = ip.split(',')[0].strip()
+                # Validate IP format (basic check)
+                if ip and not ip.startswith('192.168.') and not ip.startswith('10.') and not ip.startswith('127.'):
+                    return ip
+
+        # Fallback to REMOTE_ADDR
+        return request.httprequest.environ.get('REMOTE_ADDR', 'unknown')
+
+    # ============================================================
+    # EXISTING PRODUCT AND CART ENDPOINTS
+    # ============================================================
     
     @http.route('/ai-assistant', type='http', auth='public', website=True, sitemap=True)
     def ai_assistant_page(self, **kwargs):
