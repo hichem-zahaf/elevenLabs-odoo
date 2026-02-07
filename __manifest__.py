@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ElevenLabs AI Shopping Assistant',
-    'version': '18.0.2.4.0',
+    'version': '18.0',
     'category': 'Website/eCommerce',
     'summary': 'AI-powered shopping assistant with voice interaction - Complete rebuild with proper client tools',
     'description': """
@@ -19,9 +19,9 @@ Features:
 ---------
 * Voice interaction with customers using ElevenLabs Conversational AI
 * Product recommendation cards with dynamic display
-* Animated cart addition with visual feedback
 * SKU-based product catalog integration
 * Product search functionality
+* User rate limiting
 * Configurable agent ID and widget position via Settings
 * Debug mode for testing (add ?debug=1 to URL)
 * Responsive design for mobile and desktop
@@ -31,10 +31,8 @@ Configuration:
 1. Go to Website → Configuration → Settings
 2. Find "ElevenLabs AI Assistant" section
 3. Enable the assistant and enter your Agent ID
-4. Choose widget position (bottom-right, bottom-left, top-right, top-left)
-5. Configure these tools in your ElevenLabs agent:
+4. Configure these tools in your ElevenLabs agent:
    - showProductCard: Display product recommendations
-   - addToCart: Add items to shopping cart
    - searchProducts: Search for products
 
 v2.0.0 - Complete Rebuild:
@@ -60,14 +58,14 @@ Previous Fixes:
         'security/ir.model.access.csv',
         'security/elevenlabs_agent_security.xml',
         'views/res_config_settings_views.xml',
-        # 'views/elevenlabs_agent_usage_views.xml',  # Temporarily disabled to test
         'views/assets.xml',
         'views/website_templates.xml',
         'views/website_layout.xml',
     ],
     'images': [
         'static/description/icon.png',
-        'static/description/banner.png',
+        'static/description/banner.jpg',
+        'static/description/theme_screenshot.jpg',
     ],
     'installable': True,
     'application': True,
