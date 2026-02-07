@@ -51,6 +51,8 @@ Previous Fixes:
 * Fixed debug mode to properly check for debug=1 parameter
 * Test buttons now only show when ?debug=1 is in URL
     """,
+    "currency": 'USD',
+    "price": '180.00',
     'author': 'Hichem Zahaf - LLMarifa Co',
     'website': 'https://www.llmarifa.co',
     'depends': ['website', 'website_sale', 'product'],
