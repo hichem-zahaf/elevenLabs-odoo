@@ -61,3 +61,4 @@ desktop.ini
 .Python
 *.db
 *.sql
+__pycache__

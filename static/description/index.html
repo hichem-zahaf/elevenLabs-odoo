@@ -1,665 +1,824 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ElevenLabs AI Shopping Assistant for Odoo</title>
-
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+<div class="container pt96 pb96">
     <style>
-        :root {
-            --primary-gradient-start: #667eea;
-            --primary-gradient-end: #764ba2;
-            --secondary-gradient-start: #f093fb;
-            --secondary-gradient-end: #f5576c;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        .hero-section {
-            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+        /* Scoped styles to work within Odoo */
+        .ela-hero {
+            background: linear-gradient(135deg, #e1a533 0%, #c9932d 100%);
             color: white;
-            padding: 5rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .hero-section::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .feature-card {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            height: 100%;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
-            color: white;
-            font-size: 2rem;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .benefit-item {
-            padding: 1.5rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-        }
-
-        .benefit-item:last-child {
-            border-bottom: none;
-        }
-
-        .tech-spec-card {
-            transition: all 0.3s ease;
-            border-left: 4px solid var(--primary-gradient-start);
-        }
-
-        .tech-spec-card:hover {
-            transform: translateX(5px);
-        }
-
-        .process-step {
-            position: relative;
-            padding: 2rem;
+            padding: 60px 40px;
             border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
-        .process-step:hover {
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            transform: translateY(-5px);
-        }
-
-        .process-step::before {
-            content: attr(data-step);
-            position: absolute;
-            top: -15px;
-            left: -15px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
-            color: white;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .cta-section {
-            background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
-            color: white;
-            padding: 5rem 0;
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            color: var(--primary-gradient-start);
-            font-weight: 600;
-            padding: 12px 30px;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-gradient:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            color: var(--primary-gradient-end);
-        }
-
-        .section-padding {
-            padding: 5rem 0;
-        }
-
-        .counter {
-            font-size: 3rem;
+        .ela-hero h1 {
+            font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 20px;
         }
 
-        @media (max-width: 768px) {
-            .hero-section {
-                padding: 3rem 0;
-            }
+        .ela-hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-            .section-padding {
-                padding: 3rem 0;
-            }
+        .ela-badge-odoo {
+            background: #714B67;
+        }
 
-            .process-step::before {
-                top: -10px;
-                left: -10px;
-                width: 30px;
-                height: 30px;
-                font-size: 1rem;
-            }
+        .ela-badge-license {
+            background: #0d6efd;
+        }
+
+        .ela-badge-elevenlabs {
+            background: #9D4EDD;
+        }
+
+        .ela-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .ela-section-white {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+        }
+
+        .ela-feature-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 30px;
+            height: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .ela-feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(225, 165, 51, 0.2);
+        }
+
+        .ela-feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .ela-screenshot-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .ela-screenshot-card img {
+            width: 100%;
+            height: auto;
+        }
+
+        .ela-screenshot-caption {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .ela-table-custom thead {
+            background: linear-gradient(135deg, #e1a533, #c9932d);
+            color: white;
+        }
+
+        .ela-table-custom th {
+            font-weight: 600;
+            border: none;
+        }
+
+        .ela-code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .ela-timeline {
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .ela-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #e1a533, #f0c975);
+        }
+
+        .ela-timeline-item {
+            position: relative;
+            padding-bottom: 30px;
+        }
+
+        .ela-timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -29px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            background: #e1a533;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(225, 165, 51, 0.3);
+        }
+
+        .ela-alert {
+            background: linear-gradient(135deg, rgba(225, 165, 51, 0.15), rgba(225, 165, 51, 0.05));
+            border-left: 4px solid #e1a533;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .ela-info-card {
+            background: white;
+            border-left: 4px solid #e1a533;
+            border-radius: 8px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .ela-roadmap-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .ela-footer {
+            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+        }
+
+        .ela-footer a {
+            color: #e1a533;
+        }
+
+        .ela-footer h5,
+        .ela-footer h6 {
+            color: white;
+        }
+
+        .ela-model-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .ela-model-starter {
+            background: rgba(13, 110, 253, 0.15);
+            color: #0d6efd;
+        }
+
+        .ela-model-growth {
+            background: rgba(25, 135, 84, 0.15);
+            color: #198754;
+        }
+
+        .ela-model-enterprise {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
         }
     </style>
-</head>
-<body>
+
     <!-- Hero Section -->
-    <section class="hero-section pt-5 pb-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8 mx-auto text-center">
-                    <div class="mb-4">
-                        <i class="fa fa-robot fa-3x mb-4 d-inline-block"></i>
-                    </div>
-                    <h1 class="display-3 fw-bold mb-4">
-                        <span class="gradient-text">ElevenLabs AI Shopping Assistant</span>
-                    </h1>
-                    <p class="lead fs-4 mb-4 opacity-90">
-                        Transform your Odoo e-commerce experience with cutting-edge voice-enabled AI technology
-                    </p>
-                    <p class="mb-5 opacity-75">
-                        Seamlessly integrate conversational AI into your online store for enhanced customer engagement and sales
-                    </p>
-                    <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
-                        <a href="#features" class="btn btn-gradient btn-lg px-5 py-3">
-                            <i class="fa fa-rocket me-2"></i>Explore Features
-                        </a>
-                        <a href="#installation" class="btn btn-secondary-light btn-lg px-5 py-3">
-                            <i class="fa fa-download me-2"></i>Get Started
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="ela-hero">
+        <img src="./image1.png" class="img-fluid" alt="ElevenLabs AI Shopping Assistant">
 
-    <!-- Features Section -->
-    <section id="features" class="section-padding bg-light pt-5 pb-5">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-3 gradient-text">Powerful Features</h2>
-                    <p class="lead text-muted">
-                        Everything you need to revolutionize your e-commerce experience
-                    </p>
-                </div>
-            </div>
+        <!-- Features Section -->
+        <section class="container pt32 pb32">
+            <h2 class="text-center mb-4">Powerful Features</h2>
+            <p class="text-muted text-center mb-4">Everything you need to create an intelligent voice-enabled shopping experience
+            </p>
 
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
-                        <div class="feature-icon">
-                            <i class="fa fa-play"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Voice Interaction</h3>
-                        <p class="text-muted mb-0">
-                            Engage customers with natural conversation through advanced voice AI technology.
-                            Customers can speak naturally to find products and get recommendations.
-                        </p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="p16">
+                        <h5>Voice-Enabled Shopping</h5>
+                        <p class="text-warning mb-0">Natural voice conversations with your customers using ElevenLabs
+                            advanced speech technology.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
-                        <div class="feature-icon">
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Smart Recommendations</h3>
-                        <p class="text-muted mb-0">
-                            AI-powered product suggestions tailored to customer preferences and browsing behavior.
-                            Increase conversion rates with personalized recommendations.
-                        </p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Smart Recommendations</h5>
+                        <p class="text-warning mb-0">AI-powered product suggestions based on user context, preferences,
+                            and browsing history.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
-                        <div class="feature-icon">
-                            <i class="fa fa-shopping-cart"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Instant Cart Management</h3>
-                        <p class="text-muted mb-0">
-                            Add products to cart with simple voice commands. Beautiful animations provide
-                            instant feedback for seamless shopping experiences.
-                        </p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Cart Management</h5>
+                        <p class="text-warning mb-0">Add items to cart directly through voice commands with real-time
+                            inventory updates.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
-                        <div class="feature-icon">
-                            <i class="fa fa-mobile"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Fully Responsive</h3>
-                        <p class="text-muted mb-0">
-                            Works flawlessly on desktop, tablet, and mobile devices. Consistent experience
-                            across all platforms and screen sizes.
-                        </p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Advanced Search</h5>
+                        <p class="text-warning mb-0">Search products using natural language queries and filters.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
-                        <div class="feature-icon">
-                            <i class="fa fa-plug"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Easy Integration</h3>
-                        <p class="text-muted mb-0">
-                            Simple setup with Odoo's module system. No complex configuration required.
-                            Just install and start enhancing your customer experience.
-                        </p>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Multi-Trigger System</h5>
+                        <p class="text-warning mb-0">Activate widget on delay, scroll percentage, time on page, or exit
+                            intent.</p>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card bg-white rounded-4 p-5 shadow-sm">
-                        <div class="feature-icon">
-                            <i class="fa fa-paint-brush"></i>
-                        </div>
-                        <h3 class="h4 mb-3">Beautiful UI</h3>
-                        <p class="text-muted mb-0">
-                            Modern, animated interface with gradient designs and smooth transitions.
-                            Create stunning visual experiences for your customers.
-                        </p>
+                <div class="col-md-6 col-lg-4">
+                    <h5>Geographic Targeting</h5>
+                    <p class="text-warning mb-0">Show widget based on user location with country code filtering.</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Customer Segmentation</h5>
+                        <p class="text-warning mb-0">Target first-time visitors, returning customers, or VIP users
+                            specifically.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Rate Limiting</h5>
+                        <p class="text-warning mb-0">Comprehensive usage tracking and limits to prevent abuse and manage
+                            costs.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="ela-feature-card">
+                        <h5>Theme Customization</h5>
+                        <p class="text-warning mb-0">Match the widget perfectly to your brand colors and style.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Benefits Section -->
-    <section class="section-padding pt-5 pb-5">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-3 gradient-text">Key Benefits</h2>
-                    <p class="lead text-muted">
-                        Transform your business with these powerful advantages
+        <!-- Installation Section -->
+        <section class="ela-section-white">
+            <h2 class="text-center mb-4">Installation</h2>
+            <p class="text-muted text-center mb-4">Get up and running in minutes</p>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h5 class="mb-3">🏪 Method 1: Odoo App Store</h5>
+                        <ol class="mb-0">
+                            <li>Go to <strong>Apps</strong> in your Odoo backend</li>
+                            <li>Click <strong>Update Apps List</strong></li>
+                            <li>Search for <strong>"ElevenLabs AI Shopping Assistant"</strong></li>
+                            <li>Click <strong>Install</strong></li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h5 class="mb-3">📁 Method 2: Manual Installation</h5>
+                        <ol class="mb-0">
+                            <li>Copy the <code>elevenlabs_agent</code> folder to your Odoo addons directory</li>
+                            <li>Go to <strong>Apps</strong> → <strong>Update Apps List</strong></li>
+                            <li>Search for <strong>"ElevenLabs AI Shopping Assistant"</strong></li>
+                            <li>Click <strong>Install</strong></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ela-alert">
+                <h6 class="mb-3">⚠️ Requirements</h6>
+                <ul class="mb-0">
+                    <li>Odoo 18.0 or higher</li>
+                    <li><code>website</code> module</li>
+                    <li><code>website_sale</code> module</li>
+                    <li><code>product</code> module</li>
+                    <li>An ElevenLabs account with API access</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section class="container pt96 pb96">
+            <h2 class="text-center mb-4">Configuration</h2>
+            <p class="text-muted text-center mb-4">Comprehensive settings to tailor your AI assistant</p>
+
+            <h4 class="mb-3">Access Settings</h4>
+            <p class="text-muted mb-3">Navigate to <strong>Website</strong> → <strong>Configuration</strong> →
+                <strong>Settings</strong> and scroll to the "ElevenLabs AI Assistant" section.
+            </p>
+
+            <div class="ela-screenshot-card  mb-4">
+                <img src="/elevenlabs_agent/static/description/settings.png" alt="Settings Preview">
+                <div class="ela-screenshot-caption pt96">
+                    <h5 class="mb-1 text-center">Settings Panel in Odoo</h5>
+                    <p class="text-muted text-center mb-0">All configuration options in one place</p>
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3">Basic Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Agent ID</strong></td>
+                            <td><code>agent_id</code></td>
+                            <td>Your ElevenLabs Agent ID from the dashboard</td>
+                            <td><span class="text-danger">Required</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Enabled</strong></td>
+                            <td><code>enabled</code></td>
+                            <td>Enable or disable the assistant globally</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Widget Position</strong></td>
+                            <td><code>widget_position</code></td>
+                            <td>Position of widget on screen</td>
+                            <td><code>bottom-right</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Trigger Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Trigger Delay</strong></td>
+                            <td><code>trigger_delay</code></td>
+                            <td>Seconds to wait before showing widget</td>
+                            <td><code>0</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trigger on Scroll</strong></td>
+                            <td><code>trigger_on_scroll</code></td>
+                            <td>Scroll percentage (0-100) to trigger</td>
+                            <td><code>0.0</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trigger on Time</strong></td>
+                            <td><code>trigger_on_time</code></td>
+                            <td>Seconds on page before triggering</td>
+                            <td><code>0</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Exit Intent</strong></td>
+                            <td><code>trigger_on_exit_intent</code></td>
+                            <td>Show when user shows exit intent</td>
+                            <td><code>false</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Tool Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Show Product Card</strong></td>
+                            <td><code>enable_show_product_card</code></td>
+                            <td>Enable product recommendation display</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Add to Cart</strong></td>
+                            <td><code>enable_add_to_cart</code></td>
+                            <td>Enable addToCart tool</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Search Products</strong></td>
+                            <td><code>enable_search_products</code></td>
+                            <td>Enable product search tool</td>
+                            <td><code>true</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cart Integration</strong></td>
+                            <td><code>cart_integration_method</code></td>
+                            <td><code>direct_add</code> or <code>redirect</code></td>
+                            <td><code>direct_add</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Geographic & Device Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Geographic Restrictions</strong></td>
+                            <td><code>geographic_restrictions</code></td>
+                            <td>Comma-separated country codes (e.g., US,CA,UK)</td>
+                            <td>Empty</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Device Filtering</strong></td>
+                            <td><code>device_filtering</code></td>
+                            <td><code>all</code>, <code>desktop</code>, or <code>mobile</code></td>
+                            <td><code>all</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Customer Segment</strong></td>
+                            <td><code>customer_segment_targeting</code></td>
+                            <td><code>all</code>, <code>first_time</code>, <code>returning</code>, <code>vip</code></td>
+                            <td><code>all</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Session Settings</h4>
+            <div class="table-responsive mb-4">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Max Messages Per Session</strong></td>
+                            <td><code>max_messages_per_session</code></td>
+                            <td><code>0</code> (unlimited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Conversation History Retention</strong></td>
+                            <td><code>conversation_history_retention</code></td>
+                            <td><code>24</code> hours</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Daily Usage Limit (Per User)</strong></td>
+                            <td><code>daily_usage_limit</code></td>
+                            <td><code>0</code> (unlimited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Global Usage Limit</strong></td>
+                            <td><code>global_usage_limit</code></td>
+                            <td><code>0</code> (unlimited)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Enable Conversation Logging</strong></td>
+                            <td><code>enable_conversation_logging</code></td>
+                            <td><code>false</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-4 mb-3">Theme Settings</h4>
+            <div class="table-responsive">
+                <table class="table ela-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Setting</th>
+                            <th>Parameter</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Theme Type</strong></td>
+                            <td><code>theme_type</code></td>
+                            <td><code>light</code> or <code>dark</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Primary Color</strong></td>
+                            <td><code>primary_color</code></td>
+                            <td>Hex color (default: <code>#667eea</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Secondary Color</strong></td>
+                            <td><code>secondary_color</code></td>
+                            <td>Hex color (default: <code>#764ba2</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ElevenLabs Setup Section -->
+        <section class="ela-section-white pt96">
+            <h2 class="mb-4">ElevenLabs Dashboard Setup</h2>
+            <p class="text-muted mb-4">Configure your AI agent in the ElevenLabs console</p>
+
+            <div class="ela-timeline">
+                <div class="ela-timeline-item">
+                    <h5>Create an ElevenLabs Account</h5>
+                    <p class="text-muted">Visit <a href="https://elevenlabs.io" target="_blank">elevenlabs.io</a> and
+                        sign
+                        up for an account. Choose a pricing plan that fits your needs.</p>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Create Your Conversational AI Agent</h5>
+                    <p class="text-muted">Go to <strong>Conversational AI</strong> → <strong>Agents</strong> →
+                        <strong>Create New Agent</strong>. Save and copy your <strong>Agent ID</strong>.
                     </p>
+                    <div class="ela-screenshot-card mt-3">
+                        <img src="/elevenlabs_agent/static/description/create_agent.png" alt="Agent Setup Screenshot">
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Configure System Prompt</h5>
+                    <p class="text-muted">Define your AI assistant's personality and behavior in the System Prompt
+                        section.
+                    </p>
+                    <div class="ela-code-block mt-3">
+                        You are a friendly and helpful shopping assistant for an e-commerce store. Your role is to:
+
+                        1. Help customers find products that match their needs
+                        2. Provide detailed product information including prices, descriptions, and availability
+                        3. Make personalized recommendations based on customer preferences
+                        4. Assist with adding items to cart
+                        5. Answer questions about shipping, returns, and policies
+                        6. Maintain a conversational, natural tone
+
+                        When showing products, use the showProductCard tool.
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Choose an AI Model</h5>
+                    <p class="text-muted">Select the model that best fits your needs:</p>
+                    <div class="table-responsive mt-3">
+                        <table class="table ela-table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Description</th>
+                                    <th>Best For</th>
+                                    <th>Tier</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Eleven Turbo v2.5</strong></td>
+                                    <td>Fast, low-latency responses</td>
+                                    <td>Real-time conversations</td>
+                                    <td><span class="ela-model-badge ela-model-starter">Starter+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GPT-4 Turbo</strong></td>
+                                    <td>Advanced reasoning</td>
+                                    <td>Complex product queries</td>
+                                    <td><span class="ela-model-badge ela-model-growth">Growth+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Claude 3.5 Sonnet</strong></td>
+                                    <td>Balanced performance</td>
+                                    <td>General shopping assistant</td>
+                                    <td><span class="ela-model-badge ela-model-growth">Growth+</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GPT-4o</strong></td>
+                                    <td>Multimodal capabilities</td>
+                                    <td>Image-based products</td>
+                                    <td><span class="ela-model-badge ela-model-enterprise">Enterprise</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Configure Voice Settings</h5>
+                    <p class="text-muted">Choose from pre-built voices (Rachel, Drew, Clyde) or create a custom voice
+                        clone
+                        using Voice Lab.</p>
+                    <div class="ela-screenshot-card mt-3">
+                        <img src="/elevenlabs_agent/static/description/voice_setting.png"
+                            alt="Voice Settings Screenshot">
+                    </div>
+                </div>
+
+                <div class="ela-timeline-item">
+                    <h5>Define Client Tools</h5>
+                    <p class="text-muted mb-3">Add the following tools to your agent in the <strong>Client
+                            Tools</strong>
+                        section:</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>showProductCard</code></h6>
+                                <p class="text-muted small mb-0">Display product recommendations in a visual card
+                                    format.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>addToCart</code></h6>
+                                <p class="text-muted small mb-0">Add products to the shopping cart.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>searchProducts</code></h6>
+                                <p class="text-muted small mb-0">Search for products matching criteria.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ela-info-card">
+                                <h6><code>initializeSession</code></h6>
+                                <p class="text-muted small mb-0">Initialize a new conversation session.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Screenshots Section -->
+        <section class="ela-section ">
+            <h2 class="mb-4">Screenshots</h2>
+            <p class="text-muted mb-4">See the AI Assistant in action</p>
 
             <div class="row g-4">
                 <div class="col-lg-6">
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-primary bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-chart-area"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Increase Engagement</h4>
-                                <p class="text-muted mb-0">
-                                    Boost customer engagement with conversational shopping experiences that feel natural and intuitive.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-white bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-shopping-bag"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Reduce Abandonment</h4>
-                                <p class="text-muted mb-0">
-                                    Streamline the shopping process with voice commands to significantly reduce cart abandonment rates.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-universal-access"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Enhanced Accessibility</h4>
-                                <p class="text-muted mb-0">
-                                    Improve accessibility for all users, including people with disabilities, by enabling natural, intuitive voice interaction that removes barriers and supports independent, confident use across diverse abilities.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-warning bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-rocket"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Competitive Edge</h4>
-                                <p class="text-muted mb-0">
-                                    Stand out from competitors with cutting-edge AI technology that creates memorable experiences.
-                                </p>
-                            </div>
+                    <div class="ela-screenshot-card">
+                        <img src="/elevenlabs_agent/static/description/demo1.png" alt="Widget Preview">
+                        <div class="ela-screenshot-caption pt96">
+                            <h5 class="mb-1">Widget Integration</h5>
+                            <p class="text-muted mb-0">The AI assistant widget seamlessly integrated into your Odoo
+                                storefront.</p>
                         </div>
                     </div>
                 </div>
-
                 <div class="col-lg-6">
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-danger bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-chart-bar"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Valuable Insights</h4>
-                                <p class="text-muted mb-0">
-                                    Gather valuable data from voice interactions to better understand customer preferences and behavior.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-blue text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-language"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Multi-Language Support</h4>
-                                <p class="text-muted mb-0">
-                                    Support multiple languages and accents to effectively serve a global customer base, ensuring accurate, inclusive, and culturally adaptable communication across regions and speech patterns.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-teal text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-phone"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">24/7 Availability</h4>
-                                <p class="text-muted mb-0">
-                                    Provide round-the-clock assistance without requiring human operators to handle customer inquiries.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="benefit-item">
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-indigo bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="fa fa-gear"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="h5">Seamless Integration</h4>
-                                <p class="text-muted mb-0">
-                                    Perfectly integrates with existing Odoo e-commerce functionality without disrupting operations.
-                                </p>
-                            </div>
+                    <div class="ela-screenshot-card">
+                        <img src="/elevenlabs_agent/static/description/demo2.png" alt="Product Recommendation Preview">
+                        <div class="ela-screenshot-caption">
+                            <h5 class="mb-1">Product Recommendations</h5>
+                            <p class="text-muted mb-0">AI-powered product suggestions displayed in beautiful cards.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+            <div class="ela-screenshot-card">
+                <img src="/elevenlabs_agent/static/description/demo3.png" alt="Settings Preview">
+                <div class="ela-screenshot-caption">
+                    <h5 class="mb-1">Easy Configuration</h5>
+                    <p class="text-muted mb-0">Comprehensive settings panel in Odoo backend.</p>
+                </div>
+            </div>
+        </section>
 
-    <!-- Technical Specs Section -->
-    <section class="section-padding bg-light pt-5 pb-5" id="specs">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-3 gradient-text">Technical Specifications</h2>
-                    <p class="lead text-muted">
-                        Built for performance, scalability, and reliability
+        <!-- Best Practices Section -->
+        <section class="ela-section-white pt96">
+            <h2 class="mb-4">Rate Limiting & Best Practices</h2>
+            <p class="text-muted mb-4">Optimize your AI assistant for performance and cost efficiency</p>
+
+            <div class="ela-alert mb-4">
+                <h6 class="mb-3">📊 Recommended Rate Limits</h6>
+                <div class="table-responsive">
+                    <table class="table ela-table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Store Size</th>
+                                <th>Daily Limit Per User</th>
+                                <th>Global Daily Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Small (&lt;1,000 visitors/day)</td>
+                                <td>50 messages</td>
+                                <td>5,000 messages</td>
+                            </tr>
+                            <tr>
+                                <td>Medium (1,000-10,000)</td>
+                                <td>30 messages</td>
+                                <td>25,000 messages</td>
+                            </tr>
+                            <tr>
+                                <td>Large (&gt;10,000)</td>
+                                <td>20 messages</td>
+                                <td>100,000 messages</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>🚀 Start Conservative</h6>
+                        <p class="text-muted small mb-0">Begin with lower limits, monitor usage patterns, and adjust
+                            based
+                            on analytics.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>📈 Track Metrics</h6>
+                        <p class="text-muted small mb-0">Enable conversation logging and use external analytics
+                            dashboard.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>🌎 Geographic Segmentation</h6>
+                        <p class="text-muted small mb-0">Target specific countries with high conversion and exclude low
+                            ROI
+                            regions.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="ela-info-card">
+                        <h6>📱 Device Optimization</h6>
+                        <p class="text-muted small mb-0">Prioritize mobile for voice shopping and test on all device
+                            types.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support Section -->
+        <section class="ela-section-white pt96">
+            <div class="text-center" style="max-width: 700px; margin: 0 auto;">
+                <h2 class="mb-4">Support This Project</h2>
+                <p class="text-muted mb-4">Your support helps us develop new features and keep this module free for the
+                    community</p>
+
+                <div class="mb-5">
+                    <a href="https://www.llmarifa.co" target="_blank" class="btn btn-outline-warning btn-lg px-4">Visit
+                        LLMarifa.co</a>
+                </div>
+
+                <div class="ela-info-card text-start">
+                    <h6 class="text-center mb-3">ℹ️ About the Developer</h6>
+                    <p class="text-center mb-0">
+                        <strong>Hichem - LLMarifa Co</strong><br>
+                        <span class="text-muted">We specialize in AI-powered solutions for e-commerce and enterprise
+                            systems.</span>
                     </p>
                 </div>
             </div>
+        </section>
 
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-primary bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="fa fa-circle"></i>
-                                </div>
-                            </div>
-                            <h3 class="h5 mb-0">Odoo Compatibility</h3>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Specifically designed for Odoo 18.0 with backward compatibility for previous versions.
-                            Fully integrated with Odoo's architecture and best practices.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-success bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="fa fa-cogs"></i>
-                                </div>
-                            </div>
-                            <h3 class="h5 mb-0">Module Dependencies</h3>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Requires website, website_sale, and product modules. Lightweight footprint with minimal resource usage.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-info bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="fa fa-android"></i>
-                                </div>
-                            </div>
-                            <h3 class="h5 mb-0">AI Provider</h3>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Powered by ElevenLabs Conversational AI with advanced natural language processing capabilities.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-warning bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="fa fa-window-maximize"></i>
-                                </div>
-                            </div>
-                            <h3 class="h5 mb-0">Browser Support</h3>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Compatible with Chrome 90+, Firefox 88+, Safari 14+, and Edge 90+. Full functionality across modern browsers.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-danger bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="fa fa-mobile"></i>
-                                </div>
-                            </div>
-                            <h3 class="h5 mb-0">Mobile Compatibility</h3>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Optimized for iOS Safari and Chrome Mobile with touch-friendly interfaces and responsive design.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="tech-spec-card bg-white rounded-4 p-4 shadow-sm h-100">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-dark bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                    <i class="fa fa-certificate"></i>
-                                </div>
-                            </div>
-                            <h3 class="h5 mb-0">Open Source License</h3>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Released under LGPL-3 license allowing for flexible commercial and open source usage.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="section-padding pt-5 pb-5" id="process">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h2 class="display-5 fw-bold mb-3 gradient-text">How It Works</h2>
-                    <p class="lead text-muted">
-                        A seamless four-step process to enhance your customer experience
-                    </p>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="process-step" data-step="1">
-                        <div class="text-center mb-4">
-                            <i class="fa fa-comments fa-3x text-primary mb-3"></i>
-                            <h3 class="h4 mb-3">Customer Inquiry</h3>
-                        </div>
-                        <p class="text-muted text-center">
-                            Customer speaks naturally to the AI assistant: "Show me wireless headphones under $400"
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="process-step" data-step="2">
-                        <div class="text-center mb-4">
-                            <i class="fa fa-search fa-3x text-success mb-3"></i>
-                            <h3 class="h4 mb-3">AI Processing</h3>
-                        </div>
-                        <p class="text-muted text-center">
-                            AI understands the request and searches your product catalog for matching items
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="process-step" data-step="3">
-                        <div class="text-center mb-4">
-                            <i class="fa fa-th-large fa-3x text-info mb-3"></i>
-                            <h3 class="h4 mb-3">Product Display</h3>
-                        </div>
-                        <p class="text-muted text-center">
-                            Beautiful product cards with images, prices, and descriptions appear instantly
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="process-step" data-step="4">
-                        <div class="text-center mb-4">
-                            <i class="fa fa-shopping-cart fa-3x text-warning mb-3"></i>
-                            <h3 class="h4 mb-3">Action Completion</h3>
-                        </div>
-                        <p class="text-muted text-center">
-                            Customer selects items with voice commands, and cart updates with smooth animations
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section pt-5 pb-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10 text-center">
-                    <h2 class="display-4 fw-bold mb-4">
-                        Ready to Revolutionize Your E-commerce?
-                    </h2>
-                    <p class="lead mb-5 opacity-90">
-                        Install the ElevenLabs AI Shopping Assistant today and give your customers an unforgettable shopping experience
-                    </p>
-                    <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
-                        <a href="#" class="btn btn-gradient btn-lg px-5 py-3">
-                            <i class="fa fa-download me-2"></i>Install Now
-                        </a>
-                        <a href="#" class="btn btn-secondary-light btn-lg px-5 py-3">
-                            <i class="fa fa-book me-2"></i>View Documentation
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</body>
-</html>
+    </div>
